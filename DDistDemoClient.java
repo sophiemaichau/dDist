@@ -84,6 +84,7 @@ public class DDistDemoClient {
     System.out.println("Goodbuy world!");
   }
 
+  //Added in exercise 2
   public void listenOnServer(Socket socket) throws IOException {
     BufferedReader fromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 

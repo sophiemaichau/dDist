@@ -79,6 +79,7 @@ public class DDistDemoServer {
     return res;
   }
 
+  //Added in exercise 2
   public void listenForInputToClient(Socket socket) {
 
     try {
