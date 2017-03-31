@@ -61,15 +61,20 @@ public class DDistDemoClient {
         listenOnServer(socket);
         // For reading from standard input
         BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
-        // For sending text to the server
-        PrintWriter toServer = new PrintWriter(socket.getOutputStream(),true);
+        //For sending objects to the server
+        ObjectOutputStream objStream = new ObjectOutputStream(socket.getOutputStream());
+        // For sending text to the server - exercise 2
+        //PrintWriter toServer = new PrintWriter(socket.getOutputStream(),true);
         String s;
         // Read from standard input and send to server
         // Ctrl-D terminates the connection
-        System.out.print("Type something for the server and then RETURN> ");
-        while ((s = stdin.readLine()) != null && !toServer.checkError()) {
-          System.out.print("Type something for the server and then RETURN> ");
-          toServer.println(s);
+        System.out.print("Type a question and then RETURN> ");
+        while ((s = stdin.readLine()) != null) {
+          System.out.print("Type a question and then RETURN> ");
+          QA qa = new QA();
+          qa.setQuestion(s);
+          objStream.writeObject(qa);
+          objStream.flush();
         }
 
 

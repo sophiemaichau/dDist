@@ -18,6 +18,7 @@ public class DDistDemoServer {
   */
   protected int portNumber = 40404;
   protected ServerSocket serverSocket;
+  private String toClientText = "Enter an answer for the question: ";
 
   /**
   *
@@ -93,9 +94,9 @@ public class DDistDemoServer {
         String s;
         public void run() {
           try {
-            System.out.print("Type something for the client and then RETURN> ");
+            System.out.println(toClientText);
             while ((s = stdin.readLine()) != null && !toClient.checkError()) {
-              System.out.print("Type something for the client and then RETURN> ");
+              System.out.println(toClientText);
               toClient.println(s);
             }
 
@@ -106,7 +107,7 @@ public class DDistDemoServer {
       }).start();
     } catch (IOException e) {
       // We ignore IOExceptions
-      System.err.println("\n" + e);
+      System.err.println(e);
     }
   }
 
@@ -125,18 +126,25 @@ public class DDistDemoServer {
         try {
           listenForInputToClient(socket);
 
-          BufferedReader fromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-          String s;
+          ObjectInputStream objInput = new ObjectInputStream(socket.getInputStream());
+
+          //exercise 2
+          //BufferedReader fromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+          QA qa;
 
           // Read and print what the client is sending
-          while ((s = fromClient.readLine()) != null) { // Ctrl-D terminates the connection
-            System.out.println("From the client: " + s);
+          while ((qa = (QA) objInput.readObject()) != null) { // Ctrl-D terminates the connection
+            System.out.println("Received question from client: " + qa.getQuestion());
+            System.out.print(toClientText);
           }
           socket.close();
         } catch (IOException e) {
           // We report but otherwise ignore IOExceptions
           System.err.println(e);
+        } catch (Exception e) {
+          System.err.println(e);
         }
+
         System.out.println("Connection closed by client.");
       } else {
         // We rather agressively terminate the server on the first connection exception
