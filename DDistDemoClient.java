@@ -63,10 +63,11 @@ public class DDistDemoClient {
         BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
         //For sending objects to the server
         ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
-        objOutStream.flush();
         ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
+        objOutStream.flush();
         listenOnServerAnswer(socket, objInputStream);
         listenOnQuestionInput(socket, stdin, objOutStream);
+
 
         socket.close();
       } catch (IOException e) {

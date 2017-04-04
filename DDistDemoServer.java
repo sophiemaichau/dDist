@@ -90,21 +90,22 @@ public class DDistDemoServer {
 
         while(true){
           Socket socket = waitForConnectionFromClient();
-          
+
           if(socket != null){
         	  System.out.println("Connection from: " + socket);
 	          try{
-	          ObjectInputStream objInput = new ObjectInputStream(socket.getInputStream());
+            ObjectInputStream objInput = new ObjectInputStream(socket.getInputStream());
+            ObjectOutputStream objOutput = new ObjectOutputStream(socket.getOutputStream());
 	          QA qa;
-	          
+
 	          // checks if there is any new questions to be added to the que
 	          while((qa = (QA) objInput.readObject()) != null){
-	            QASocket qaSocket = new QASocket(qa, socket);
+	            QASocket qaSocket = new QASocket(qa, socket, objOutput, objInput);
 	            questionQueue.add(qaSocket);
 	          }
-	          socket.close();
 	        } catch (IOException e){
 	            System.err.println(e);
+              System.out.println("listenForNewQuestion");
 	         } catch(ClassNotFoundException c){
 	        	 System.err.println(c);
 	         }
@@ -138,10 +139,9 @@ public class DDistDemoServer {
       "\nType an answer and press ENTER> ");
       try {
         //wait for stdinput. Closes down thread afterwards.
-    	ObjectOutputStream objOutput = new ObjectOutputStream(socket.getOutputStream());
+    	ObjectOutputStream objOutput = qaSocket.outputStream;
     	s = stdin.readLine();
         qa.setAnswer(s);
-        stdin.close();
         objOutput.writeObject(qa);
         objOutput.flush();
       } catch (IOException e) {
