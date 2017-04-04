@@ -5,7 +5,7 @@ public class QA implements Serializable {
     private String answer;
 
     public void setQuestion(String q) {
-	question = q;
+	     question = q;
     }
 
     public String getQuestion() {
@@ -13,10 +13,15 @@ public class QA implements Serializable {
     }
 
     public void setAnswer(String q) {
-	question = q;
+	     answer = q;
     }
 
     public String getAnswer() {
-	return question;
+	     return answer;
     }
+
+    	public String toString() {
+    		return "question: " + question + ", answer: " + answer;
+    	}
+
 }
