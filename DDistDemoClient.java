@@ -18,7 +18,7 @@ public class DDistDemoClient {
   * use the port number 40103. This will avoid the unfortunate situation that you
   * connect to each others servers.
   */
-  protected int portNumber = 40499;
+  protected int portNumber = 40307;
 
   /**
   *
@@ -26,24 +26,11 @@ public class DDistDemoClient {
   */
   protected void printLocalHostAddress() {
     try {
-
-      for (
-        java.util.Enumeration<NetworkInterface> en =
-        NetworkInterface.getNetworkInterfaces();
-        en.hasMoreElements();
-      ) {
-        NetworkInterface iface = en.nextElement();
-        System.out.println(iface.getInterfaceAddresses());
-      }
-
       InetAddress localhost = java.net.InetAddress.getLocalHost();
       String localhostAddress = localhost.getHostAddress();
       System.out.println("I'm a client running with IP address " + localhostAddress);
     } catch (UnknownHostException e) {
       System.err.println(e);
-    } catch (SocketException e) {
-      System.err.println(e);
-
     }
   }
 

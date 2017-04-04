@@ -1,6 +1,6 @@
 import java.net.*;
 import java.io.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.Queue;
 /**
 *
@@ -17,10 +17,9 @@ public class DDistDemoServer {
   * use the port number 40103. This will avoid the unfortunate situation that you
   * connect to each others servers.
   */
-  protected int portNumber = 40499;
+  protected int portNumber = 40307;
   protected ServerSocket serverSocket;
-  private String toClientText = "Type an answer and then RETURN> ";
-  private Queue<QA> questionQueue = new ConcurrentLinkedQueue<QA>();
+  private LinkedBlockingQueue<QASocket> questionQueue = new LinkedBlockingQueue<QASocket>();
 
 
   /**
@@ -83,110 +82,74 @@ public class DDistDemoServer {
     return res;
   }
 
-  //Added in exercise 2
-  public void listenForInputToClient(Socket socket) {
+// Adding new questions to the que
+  public void listenForNewQuestion(){
+    new Thread(new Runnable() {
 
-    try {
-      // For reading from standard input
-      BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
-      // For sending text to the server - exercise 2
-      PrintWriter toClient = new PrintWriter(socket.getOutputStream(),true);
+      public void run(){
 
-      new Thread(new Runnable() {
-        String s;
-        public void run() {
-          try {
-            while ((s = stdin.readLine()) != null && !toClient.checkError()) {
-              toClient.println(s);
-            }
-
-          } catch (IOException e) {
-            System.err.println(e);
+        while(true){
+          Socket socket = waitForConnectionFromClient();
+          
+          if(socket != null){
+        	  System.out.println("Connection from: " + socket);
+	          try{
+	          ObjectInputStream objInput = new ObjectInputStream(socket.getInputStream());
+	          QA qa;
+	          
+	          // checks if there is any new questions to be added to the que
+	          while((qa = (QA) objInput.readObject()) != null){
+	            QASocket qaSocket = new QASocket(qa, socket);
+	            questionQueue.add(qaSocket);
+	          }
+	          socket.close();
+	        } catch (IOException e){
+	            System.err.println(e);
+	         } catch(ClassNotFoundException c){
+	        	 System.err.println(c);
+	         }
+          } else{
+        	  break;
           }
         }
-      }).start();
-    } catch (IOException e) {
-      // We ignore IOExceptions
-      System.err.println(e);
-    }
-  }
+      }
 
-  //Added in exercise 3
-  public void listenForQuestion(Socket socket, ObjectOutputStream objStream) {
-      // For reading from standard input
-      // For sending text to the server - exercise 2
-
-      new Thread(new Runnable() {
-        String s;
-        public void run() {
-          BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
-          while (true) {
-            if (questionQueue.isEmpty() == false) {
-
-              QA qa = questionQueue.remove();
-              System.out.print("Received question: " + qa.getQuestion() +
-              "\nType an answer and press ENTER> ");
-              try {
-                //wait for stdinput. Closes down thread afterwards.
-                s = stdin.readLine();
-                qa.setAnswer(s);
-                objStream.writeObject(qa);
-                objStream.flush();
-              } catch (IOException e) {
-                System.err.println(e);
-              }
-            }
-          }
-
-        }
-      }).start();
-
+    }).start();
   }
 
   public void run() {
     printLocalHostAddress();
     registerOnPort();
+    listenForNewQuestion();
 
     while (true) {
-      Socket socket = waitForConnectionFromClient();
-
-      if (socket != null) {
-        System.out.println("Connection from " + socket);
-        try {
-          //exercise 2
-          //listenForInputToClient(socket);
-          ObjectOutputStream objStream = new ObjectOutputStream(socket.getOutputStream());
-          objStream.flush();
-          ObjectInputStream objInput = new ObjectInputStream(socket.getInputStream());
-          listenForQuestion(socket, objStream);
-          QA qa;
-          //exercise 2
-          //BufferedReader fromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-          // Read and print the client's question.
-          while ((qa = (QA) objInput.readObject()) != null) { // Ctrl-D terminates the connection
-            System.out.println("question enqueued");
-            questionQueue.add(qa);
-
-          }
-          socket.close();
-        } catch (IOException e) {
-          // We report but otherwise ignore IOExceptions
-          System.err.println(e);
-        } catch (Exception e) {
-          System.err.println(e);
-        }
-
-        System.out.println("Connection closed by client.");
-      } else {
-        // We rather agressively terminate the server on the first connection exception
-        break;
+      QASocket qaSocket = null;
+		try {
+			qaSocket = questionQueue.take();
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+      QA qa = qaSocket.qa;
+      Socket socket = qaSocket.socket;
+      String s;
+      BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+      System.out.print("Received question: " + qa.getQuestion() +
+      "\nType an answer and press ENTER> ");
+      try {
+        //wait for stdinput. Closes down thread afterwards.
+    	ObjectOutputStream objOutput = new ObjectOutputStream(socket.getOutputStream());
+    	s = stdin.readLine();
+        qa.setAnswer(s);
+        stdin.close();
+        objOutput.writeObject(qa);
+        objOutput.flush();
+      } catch (IOException e) {
+        System.err.println(e);
       }
     }
-
-    deregisterOnPort();
-
-    System.out.println("Goodbuy world!");
+//    deregisterOnPort();
+//    System.out.println("Goodbuy world!");
   }
 
   public static void main(String[] args) throws IOException {
