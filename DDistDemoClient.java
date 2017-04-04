@@ -1,5 +1,6 @@
 import java.net.*;
 import java.io.*;
+import java.io.ObjectInputStream;
 
 /**
 *
@@ -58,51 +59,55 @@ public class DDistDemoClient {
     if (socket != null) {
       System.out.println("Connected to " + socket);
       try {
-        listenOnServer(socket);
-        // For reading from standard input
+        // For reading from standard input - exercise 2
         BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
         //For sending objects to the server
-        ObjectOutputStream objStream = new ObjectOutputStream(socket.getOutputStream());
-        // For sending text to the server - exercise 2
-        //PrintWriter toServer = new PrintWriter(socket.getOutputStream(),true);
-        String s;
-        // Read from standard input and send to server
-        // Ctrl-D terminates the connection
-        System.out.print("Type a question and then RETURN> ");
-        while ((s = stdin.readLine()) != null) {
-          System.out.print("Type a question and then RETURN> ");
-          QA qa = new QA();
-          qa.setQuestion(s);
-          objStream.writeObject(qa);
-          objStream.flush();
-        }
-
-
-
+        ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
+        objOutStream.flush();
+        ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
+        listenOnServerAnswer(socket, objInputStream);
+        listenOnQuestionInput(socket, stdin, objOutStream);
 
         socket.close();
       } catch (IOException e) {
-        // We ignore IOExceptions
+        System.err.println(e);
+
       }
+
     }
 
-    System.out.println("Goodbuy world!");
+    System.out.println("Goodbye world!");
   }
 
-  //Added in exercise 2
-  public void listenOnServer(Socket socket) throws IOException {
-    BufferedReader fromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+public void listenOnQuestionInput(Socket socket, BufferedReader stdin, ObjectOutputStream objOutStream) throws IOException {
+  String s;
+  // Read from standard input and send question object to server
+  // Ctrl-D terminates the connection
+  System.out.print("Type a question and then RETURN> ");
+  while ((s = stdin.readLine()) != null) {
+    System.out.print("Type a question and then RETURN> ");
+    QA qa = new QA();
+    qa.setQuestion(s);
+    objOutStream.writeObject(qa);
+    objOutStream.flush();
+  }
+}
 
+  //Added in exercise 2
+  public void listenOnServerAnswer(Socket socket, ObjectInputStream objInputStream) {
     new Thread(new Runnable() {
       public void run() {
-        String a;
+        QA qa;
         try {
           // Read and print what the client is sending
-          while ((a = fromServer.readLine()) != null) { // Ctrl-D terminates the connection
-            System.out.println("From the client: " + a);
+          while ((qa = (QA) objInputStream.readObject()) != null) { // Ctrl-D terminates the connection
+            System.out.println("\nAnswer from server: " + qa.getAnswer());
+            System.out.print("Type a question and then RETURN> ");
           }
 
         } catch (IOException e) {
+          System.err.println(e);
+        } catch (Exception e) {
           System.err.println(e);
         }
       }

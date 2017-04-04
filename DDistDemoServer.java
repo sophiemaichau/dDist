@@ -18,7 +18,7 @@ public class DDistDemoServer {
   */
   protected int portNumber = 40404;
   protected ServerSocket serverSocket;
-  private String toClientText = "Enter an answer for the question: ";
+  private String toClientText = "Enter an answer: ";
 
   /**
   *
@@ -86,17 +86,14 @@ public class DDistDemoServer {
     try {
       // For reading from standard input
       BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
-      // For sending text to the server
+      // For sending text to the server - exercise 2
       PrintWriter toClient = new PrintWriter(socket.getOutputStream(),true);
-      // Read from standard input and send to server
-      // Ctrl-D terminates the connection
+
       new Thread(new Runnable() {
         String s;
         public void run() {
           try {
-            System.out.println(toClientText);
             while ((s = stdin.readLine()) != null && !toClient.checkError()) {
-              System.out.println(toClientText);
               toClient.println(s);
             }
 
@@ -109,6 +106,30 @@ public class DDistDemoServer {
       // We ignore IOExceptions
       System.err.println(e);
     }
+  }
+
+  //Added in exercise 3
+  public void listenForAnswer(Socket socket, QA qa, ObjectOutputStream objStream) {
+
+      // For reading from standard input
+      BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+      // For sending text to the server - exercise 2
+
+      new Thread(new Runnable() {
+        String s;
+        public void run() {
+          try {
+            //wait for stdinput. Closes down thread afterwards.
+            s = stdin.readLine();
+            qa.setAnswer(s);
+            objStream.writeObject(qa);
+            objStream.flush();
+            System.out.println("sent answer!");
+          } catch (IOException e) {
+            System.err.println(e);
+          }
+        }
+      }).start();
   }
 
   public void run() {
@@ -124,18 +145,21 @@ public class DDistDemoServer {
       if (socket != null) {
         System.out.println("Connection from " + socket);
         try {
-          listenForInputToClient(socket);
-
+          //exercise 2
+          //listenForInputToClient(socket);
+          ObjectOutputStream objStream = new ObjectOutputStream(socket.getOutputStream());
+          objStream.flush();
           ObjectInputStream objInput = new ObjectInputStream(socket.getInputStream());
+          QA qa;
 
           //exercise 2
           //BufferedReader fromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-          QA qa;
 
-          // Read and print what the client is sending
+          // Read and print the client's question.
           while ((qa = (QA) objInput.readObject()) != null) { // Ctrl-D terminates the connection
             System.out.println("Received question from client: " + qa.getQuestion());
-            System.out.print(toClientText);
+            System.out.println(toClientText);
+            listenForAnswer(socket, qa, objStream);
           }
           socket.close();
         } catch (IOException e) {
