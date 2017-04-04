@@ -1,6 +1,8 @@
 import java.net.*;
 import java.io.*;
 import java.io.ObjectInputStream;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 
 /**
 *
@@ -16,7 +18,7 @@ public class DDistDemoClient {
   * use the port number 40103. This will avoid the unfortunate situation that you
   * connect to each others servers.
   */
-  protected int portNumber = 40404;
+  protected int portNumber = 40499;
 
   /**
   *
@@ -24,13 +26,24 @@ public class DDistDemoClient {
   */
   protected void printLocalHostAddress() {
     try {
-      InetAddress localhost = InetAddress.getLocalHost();
+
+      for (
+        java.util.Enumeration<NetworkInterface> en =
+        NetworkInterface.getNetworkInterfaces();
+        en.hasMoreElements();
+      ) {
+        NetworkInterface iface = en.nextElement();
+        System.out.println(iface.getInterfaceAddresses());
+      }
+
+      InetAddress localhost = java.net.InetAddress.getLocalHost();
       String localhostAddress = localhost.getHostAddress();
       System.out.println("I'm a client running with IP address " + localhostAddress);
     } catch (UnknownHostException e) {
-      System.err.println("Cannot resolve the Internet address of the local host.");
       System.err.println(e);
-      System.exit(-1);
+    } catch (SocketException e) {
+      System.err.println(e);
+
     }
   }
 
@@ -79,19 +92,19 @@ public class DDistDemoClient {
     System.out.println("Goodbye world!");
   }
 
-public void listenOnQuestionInput(Socket socket, BufferedReader stdin, ObjectOutputStream objOutStream) throws IOException {
-  String s;
-  // Read from standard input and send question object to server
-  // Ctrl-D terminates the connection
-  System.out.print("Type a question and then RETURN> ");
-  while ((s = stdin.readLine()) != null) {
+  public void listenOnQuestionInput(Socket socket, BufferedReader stdin, ObjectOutputStream objOutStream) throws IOException {
+    String s;
+    // Read from standard input and send question object to server
+    // Ctrl-D terminates the connection
     System.out.print("Type a question and then RETURN> ");
-    QA qa = new QA();
-    qa.setQuestion(s);
-    objOutStream.writeObject(qa);
-    objOutStream.flush();
+    while ((s = stdin.readLine()) != null) {
+      System.out.print("Type a question and then RETURN> ");
+      QA qa = new QA();
+      qa.setQuestion(s);
+      objOutStream.writeObject(qa);
+      objOutStream.flush();
+    }
   }
-}
 
   //Added in exercise 2
   public void listenOnServerAnswer(Socket socket, ObjectInputStream objInputStream) {
@@ -101,7 +114,7 @@ public void listenOnQuestionInput(Socket socket, BufferedReader stdin, ObjectOut
         try {
           // Read and print what the client is sending
           while ((qa = (QA) objInputStream.readObject()) != null) { // Ctrl-D terminates the connection
-            System.out.println("\nAnswer from server: " + qa.getAnswer());
+            System.out.println("\nThe answer to the question: " + qa.getQuestion() + " is: " + qa.getAnswer());
             System.out.print("Type a question and then RETURN> ");
           }
 

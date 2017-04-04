@@ -1,6 +1,7 @@
 import java.net.*;
 import java.io.*;
-
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Queue;
 /**
 *
 * A very simple server which will way for a connection from a client and print
@@ -16,9 +17,11 @@ public class DDistDemoServer {
   * use the port number 40103. This will avoid the unfortunate situation that you
   * connect to each others servers.
   */
-  protected int portNumber = 40404;
+  protected int portNumber = 40499;
   protected ServerSocket serverSocket;
-  private String toClientText = "Enter an answer: ";
+  private String toClientText = "Type an answer and then RETURN> ";
+  private Queue<QA> questionQueue = new ConcurrentLinkedQueue<QA>();
+
 
   /**
   *
@@ -75,7 +78,7 @@ public class DDistDemoServer {
     try {
       res = serverSocket.accept();
     } catch (IOException e) {
-      // We return null on IOExceptions
+      System.err.println(e);
     }
     return res;
   }
@@ -109,34 +112,39 @@ public class DDistDemoServer {
   }
 
   //Added in exercise 3
-  public void listenForAnswer(Socket socket, QA qa, ObjectOutputStream objStream) {
-
+  public void listenForQuestion(Socket socket, ObjectOutputStream objStream) {
       // For reading from standard input
-      BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
       // For sending text to the server - exercise 2
 
       new Thread(new Runnable() {
         String s;
         public void run() {
-          try {
-            //wait for stdinput. Closes down thread afterwards.
-            s = stdin.readLine();
-            qa.setAnswer(s);
-            objStream.writeObject(qa);
-            objStream.flush();
-            System.out.println("sent answer!");
-          } catch (IOException e) {
-            System.err.println(e);
+          BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+          while (true) {
+            if (questionQueue.isEmpty() == false) {
+
+              QA qa = questionQueue.remove();
+              System.out.print("Received question: " + qa.getQuestion() +
+              "\nType an answer and press ENTER> ");
+              try {
+                //wait for stdinput. Closes down thread afterwards.
+                s = stdin.readLine();
+                qa.setAnswer(s);
+                objStream.writeObject(qa);
+                objStream.flush();
+              } catch (IOException e) {
+                System.err.println(e);
+              }
+            }
           }
+
         }
       }).start();
+
   }
 
   public void run() {
-    System.out.println("Hello world!");
-
     printLocalHostAddress();
-
     registerOnPort();
 
     while (true) {
@@ -150,16 +158,16 @@ public class DDistDemoServer {
           ObjectOutputStream objStream = new ObjectOutputStream(socket.getOutputStream());
           objStream.flush();
           ObjectInputStream objInput = new ObjectInputStream(socket.getInputStream());
+          listenForQuestion(socket, objStream);
           QA qa;
-
           //exercise 2
           //BufferedReader fromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
           // Read and print the client's question.
           while ((qa = (QA) objInput.readObject()) != null) { // Ctrl-D terminates the connection
-            System.out.println("Received question from client: " + qa.getQuestion());
-            System.out.println(toClientText);
-            listenForAnswer(socket, qa, objStream);
+            System.out.println("question enqueued");
+            questionQueue.add(qa);
+
           }
           socket.close();
         } catch (IOException e) {
