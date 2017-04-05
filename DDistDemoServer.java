@@ -121,9 +121,15 @@ public class DDistDemoServer {
   public void run() {
     printLocalHostAddress();
     registerOnPort();
-    listenForNewQuestion();
+    //listenForNewQuestion();
 
     while (true) {
+      Socket socket = waitForConnectionFromClient();
+      System.out.println("Connection from: " + socket);
+      new Thread(new QuestionHandler(socket, questionQueue)).start();
+
+
+      /*
       QASocket qaSocket = null;
 		try {
 			qaSocket = questionQueue.take();
@@ -146,7 +152,7 @@ public class DDistDemoServer {
         objOutput.flush();
       } catch (IOException e) {
         System.err.println(e);
-      }
+      }*/
     }
 //    deregisterOnPort();
 //    System.out.println("Goodbuy world!");
