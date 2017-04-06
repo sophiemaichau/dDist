@@ -95,7 +95,7 @@ public class dServer {
 
 
   public static void main(String[] args) throws IOException {
-    DDistDemoServer server = new DDistDemoServer();
+    dServer server = new dServer();
     server.run();
   }
 

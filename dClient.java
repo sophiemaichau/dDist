@@ -105,7 +105,7 @@ public class dClient {
   }
 
   public static void main(String[] args) throws IOException {
-    DDistDemoClient client = new DDistDemoClient();
+    dClient client = new dClient();
     client.run(args[0]);
   }
 
