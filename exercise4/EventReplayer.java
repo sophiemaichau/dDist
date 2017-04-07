@@ -23,7 +23,7 @@ public class EventReplayer implements Runnable {
     public void run() {
 	boolean wasInterrupted = false;
 	while (!wasInterrupted) {
-	    waitForOneSecond();
+	    //waitForOneSecond();
 	    try {
 		MyTextEvent mte = dec.take();
 		if (mte instanceof TextInsertEvent) {
@@ -55,7 +55,7 @@ public class EventReplayer implements Runnable {
 			    }
 			});
 		} 
-	    } catch (Exception _) {
+	    } catch (Exception e) {
 		wasInterrupted = true;
 	    }
 	}
@@ -65,7 +65,7 @@ public class EventReplayer implements Runnable {
     public void waitForOneSecond() {
 	try {
 	    Thread.sleep(1000);
-	} catch(InterruptedException _) {
+	} catch(InterruptedException e) {
 	}
     }
 }
