@@ -8,12 +8,13 @@ import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.event.*;
 import java.util.concurrent.*;
+import java.net.ServerSocket;
 
 public class DistributedTextEditor extends JFrame {
 
   private JTextArea area1 = new JTextArea(20,120);
   private JTextArea area2 = new JTextArea(20,120);
-  private JTextField ipaddress = new JTextField("10.192.157.99"); // "IP address here"
+  private JTextField ipaddress = new JTextField("127.0.1.1"); // "IP address here"
   private JTextField portNumber = new JTextField("40307"); // "Port number here"
 
   private EventReplayer er;
@@ -27,7 +28,15 @@ public class DistributedTextEditor extends JFrame {
   private boolean connected = false;
   private DocumentEventCapturer dec = new DocumentEventCapturer();
 
+  private ObjectOutputStream out = null;
+  private ObjectInputStream in = null;
+  private Socket socket = null;
+  private GreetingServer server;
+  private GreetingClient client;
+
   public DistributedTextEditor() {
+    //initialize server and client (but don't start them)
+
     area1.setFont(new Font("Monospaced",Font.PLAIN,12));
 
     area2.setFont(new Font("Monospaced",Font.PLAIN,12));
@@ -101,36 +110,30 @@ public class DistributedTextEditor extends JFrame {
     public void actionPerformed(ActionEvent e) {
       saveOld();
       area1.setText("");
-      // TODO: Become a server listening for connections on some port.
-      dServer server = new dServer();
-      new Thread(new Runnable() {
-        public void run() {
-          server.run();
-        }
-      }).start();
-      setTitle("I'm listening on " + server.localhostAddress);
+      try {
+        server = new GreetingServer(er);
+      } catch (IOException ex) {
+        ex.printStackTrace();
+      }
+      new Thread(server).start();
+      setTitle("I'm listening on...");
       changed = false;
       Save.setEnabled(false);
       SaveAs.setEnabled(false);
     }
   };
-  
-  dClient client = new dClient();
-  
+
   Action Connect = new AbstractAction("Connect") {
     public void actionPerformed(ActionEvent e) {
       saveOld();
       area1.setText("");
-      new Thread(new Runnable(){
-    	  public void run(){
-    		  client.run(ipaddress.getText());
-    	  }
-      }).start();
+      client = new GreetingClient(ipaddress.getText(), er);
+      new Thread(client).start();
       setTitle("Connected to " + ipaddress.getText() + ":" + portNumber.getText());
       changed = false;
       Save.setEnabled(false);
       SaveAs.setEnabled(false);
-      
+
     }
   };
 
@@ -138,16 +141,12 @@ public class DistributedTextEditor extends JFrame {
     public void actionPerformed(ActionEvent e) {
       setTitle("Disconnected");
       area1.setText("");
-      new Thread(new Runnable(){
-    	  public void run(){
-    		  try {
-				client.disconnect();
-			} catch (IOException e) {
-				System.err.println(e);
-			}
-    	  }
-      }).start();
-      // TODO serversocket.close();
+      if (client != null) {
+        client.disconnect();
+      }
+      if (server != null) {
+        server.shutdown();
+      }
     }
   };
 

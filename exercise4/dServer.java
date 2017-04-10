@@ -71,7 +71,7 @@ public class dServer {
       }
     }
   }
-  
+
   /**
   *
   * Waits for the next client to connect on port number portNumber or takes the
@@ -90,9 +90,7 @@ public class dServer {
 
   public void run() {
     while (true) {
-      Socket socket = waitForConnectionFromClient();
-      System.out.println("Connection from: " + socket);
-      new Thread(new QuestionHandler(socket, questionQueue)).start();
+
     }
   }
 

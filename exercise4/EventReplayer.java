@@ -1,71 +1,116 @@
 import javax.swing.JTextArea;
 import java.awt.EventQueue;
-
+import java.io.IOException;
 /**
- * 
- * Takes the event recorded by the DocumentEventCapturer and replays
- * them in a JTextArea. The delay of 1 sec is only to make the individual
- * steps in the reply visible to humans.
- * 
- * @author Jesper Buus Nielsen
- *
- */
+*
+* Takes the event recorded by the DocumentEventCapturer and replays
+* them in a JTextArea. The delay of 1 sec is only to make the individual
+* steps in the reply visible to humans.
+*
+* @author Jesper Buus Nielsen
+*
+*/
 public class EventReplayer implements Runnable {
-	
-    private DocumentEventCapturer dec;
-    private JTextArea area;
-	
-    public EventReplayer(DocumentEventCapturer dec, JTextArea area) {
-	this.dec = dec;
-	this.area = area;
-    }
-	
-    public void run() {
-	boolean wasInterrupted = false;
-	while (!wasInterrupted) {
-	    //waitForOneSecond();
-	    try {
-		MyTextEvent mte = dec.take();
-		if (mte instanceof TextInsertEvent) {
-		    final TextInsertEvent tie = (TextInsertEvent)mte;
-		    EventQueue.invokeLater(new Runnable() {
-			    public void run() {
-				try {
-				    area.insert(tie.getText(), tie.getOffset());				
-				} catch (Exception e) {
-				    System.err.println(e);
-				    /* We catch all axceptions, as an uncaught exception would make the 
-				     * EDT unwind, which is now healthy.
-				     */
-				}
-			    }
-			});
-		} else if (mte instanceof TextRemoveEvent) {
-		    final TextRemoveEvent tre = (TextRemoveEvent)mte;
-		    EventQueue.invokeLater(new Runnable() {
-			    public void run() {
-				try {
-				    area.replaceRange(null, tre.getOffset(), tre.getOffset()+tre.getLength());
-				} catch (Exception e) {
-				    System.err.println(e);
-				    /* We catch all axceptions, as an uncaught exception would make the 
-				     * EDT unwind, which is now healthy.
-				     */
-				}
-			    }
-			});
-		} 
-	    } catch (Exception e) {
-		wasInterrupted = true;
-	    }
+
+	private DocumentEventCapturer dec;
+	private JTextArea area;
+	private ConnectionHandler connectionHandler;
+	public EventReplayer(DocumentEventCapturer dec, JTextArea area) {
+		this.dec = dec;
+		this.area = area;
 	}
-	System.out.println("I'm the thread running the EventReplayer, now I die!");
-    }
-    
-    public void waitForOneSecond() {
-	try {
-	    Thread.sleep(1000);
-	} catch(InterruptedException e) {
+
+	public void setConnectionHandler(ConnectionHandler h) {
+		connectionHandler = h;
+		if (h == null) {
+
+			System.out.println("connectionhandler set to null");
+		} else {
+			System.out.println("connectionhandler set!");
+		}
 	}
-    }
+
+	public void listenOnPeerEvent() {
+		new Thread(new Runnable() {
+			public void run() {
+				while (true) {
+					if (connectionHandler != null && !connectionHandler.isClosed()) {
+					MyTextEvent mte = null;
+					try {
+						System.out.println("waiting for receiving object");
+						//blocks until received object
+						mte = (MyTextEvent) connectionHandler.receiveObject();
+					} catch (IOException ex) {
+						System.err.println(ex);
+						sleep(10);
+						System.out.println("closing connection with server.");
+						connectionHandler.closeConnection();
+					}
+					if (mte instanceof TextInsertEvent) {
+						final TextInsertEvent tie = (TextInsertEvent)mte;
+						EventQueue.invokeLater(new Runnable() {
+							public void run() {
+								//TODO: send event to connection
+								try {
+									area.insert(tie.getText(), tie.getOffset());
+								} catch (Exception e) {
+									System.err.println(e);
+									/* We catch all axceptions, as an uncaught exception would make the
+									* EDT unwind, which is now healthy.
+									*/
+								}
+							}
+						});
+					} else if (mte instanceof TextRemoveEvent) {
+						final TextRemoveEvent tre = (TextRemoveEvent)mte;
+						EventQueue.invokeLater(new Runnable() {
+							public void run() {
+								//TODO: send event to connection
+								try {
+									area.replaceRange(null, tre.getOffset(), tre.getOffset()+tre.getLength());
+								} catch (Exception e) {
+									System.err.println(e);
+									/* We catch all axceptions, as an uncaught exception would make the
+									* EDT unwind, which is now healthy.
+									*/
+								}
+							}
+						});
+					}
+				}
+				}
+			}
+		}).start();
+	}
+
+	public void run() {
+
+		//runs in own thread
+		listenOnPeerEvent();
+
+		boolean wasInterrupted = false;
+		while (!wasInterrupted) {
+			try {
+				MyTextEvent mte = dec.take();
+				if (connectionHandler != null && !connectionHandler.isClosed()) {
+					connectionHandler.sendObject(mte);
+					System.out.println("sending object to server");
+				}
+			} catch (IOException ex) {
+				connectionHandler.closeConnection();
+			} catch (Exception e) {
+				e.printStackTrace();
+				wasInterrupted = true;
+				connectionHandler.closeConnection();
+			}
+		}
+		System.out.println("I'm the thread running the EventReplayer, now I die!");
+	}
+
+	public void sleep(int i) {
+		try {
+			Thread.sleep(i);
+		} catch(InterruptedException e) {
+		}
+	}
 }
