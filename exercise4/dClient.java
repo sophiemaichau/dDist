@@ -1,8 +1,9 @@
 import java.net.*;
 import java.io.*;
-import java.io.ObjectInputStream;
 import java.net.NetworkInterface;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 /**
 *
@@ -11,6 +12,7 @@ import java.util.Enumeration;
 */
 
 public class dClient {
+	final List<Socket> clients = new ArrayList<>();
 
   /*
   * Your group should use port number 40HGG, where H is your "hold nummer (1,2 or 3)
@@ -47,6 +49,19 @@ public class dClient {
     }
     return res;
   }
+  
+  public void disconnect() throws IOException{
+	  System.out.println("in method disconnect()");
+	  if(!clients.isEmpty()){
+		  for(Socket s : clients){
+			  s.close();
+			  System.out.println("Disconnected " + s);
+			  clients.remove(s);
+		  }
+	  }else{
+		  System.out.println("No socket to disconnect");
+	  }
+  }
 
   public void run(String serverName) {
     System.out.println("Starting client. Type CTRL-D to shut down.");
@@ -54,6 +69,7 @@ public class dClient {
     Socket socket = connectToServer(serverName);
     if (socket != null) {
       System.out.println("Connected to " + socket);
+      clients.add(socket);
       try {
         // For reading from standard input - exercise 2
         BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));

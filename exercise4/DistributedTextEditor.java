@@ -2,6 +2,8 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.Socket;
+
 import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.event.*;
@@ -11,7 +13,7 @@ public class DistributedTextEditor extends JFrame {
 
   private JTextArea area1 = new JTextArea(20,120);
   private JTextArea area2 = new JTextArea(20,120);
-  private JTextField ipaddress = new JTextField("192.168.1.38"); // "IP address here"
+  private JTextField ipaddress = new JTextField("10.192.157.99"); // "IP address here"
   private JTextField portNumber = new JTextField("40307"); // "Port number here"
 
   private EventReplayer er;
@@ -112,18 +114,19 @@ public class DistributedTextEditor extends JFrame {
       SaveAs.setEnabled(false);
     }
   };
-
+  
+  dClient client = new dClient();
+  
   Action Connect = new AbstractAction("Connect") {
     public void actionPerformed(ActionEvent e) {
       saveOld();
       area1.setText("");
-      dClient client = new dClient();
       new Thread(new Runnable(){
     	  public void run(){
     		  client.run(ipaddress.getText());
     	  }
       }).start();
-      setTitle("Connecting to " + ipaddress.getText() + ":" + portNumber.getText() + "...");
+      setTitle("Connected to " + ipaddress.getText() + ":" + portNumber.getText());
       changed = false;
       Save.setEnabled(false);
       SaveAs.setEnabled(false);
@@ -134,7 +137,17 @@ public class DistributedTextEditor extends JFrame {
   Action Disconnect = new AbstractAction("Disconnect") {
     public void actionPerformed(ActionEvent e) {
       setTitle("Disconnected");
-      // TODO
+      area1.setText("");
+      new Thread(new Runnable(){
+    	  public void run(){
+    		  try {
+				client.disconnect();
+			} catch (IOException e) {
+				System.err.println(e);
+			}
+    	  }
+      }).start();
+      // TODO serversocket.close();
     }
   };
 
