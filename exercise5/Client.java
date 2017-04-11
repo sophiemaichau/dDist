@@ -14,38 +14,20 @@ public class Client implements Runnable {
 
 	public Client(String serverName, EventReplayer er, int port) {
 		this.er = er;
-		this.doc = doc;
 		this.port = port;
 		this.serverName = serverName;
 	}
 
-  public void run() {
-    System.out.println("Starting client. Type CTRL-D to shut down.");
-    //printLocalHostAddress();
-    socket = connectToServer(serverName);
-    if (socket != null) {
-      System.out.println("Connected to " + socket);
-      try {
-        //For sending objects to the server
-        ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
-        ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
-        objOutStream.flush();
-        handler = new ConnectionHandler(socket, objInputStream, objOutStream);
-        er.setConnectionHandler(handler);
-      } catch (IOException e) {
-        System.err.println(e);
-        handler.closeConnection();
-      }
-    }
-  }
-
-  public void disconnect() {
-    handler.closeConnection();
-  }
+	/*
+	 * If a client has connection with a server, we create a new
+	 * ConnectionHandler object and sets this object with setConnectionHandler
+	 * from EvenReplayer. If an error occurs, we close the connection through
+	 * ConnectionHandler.
+	 */
 	public void run() {
 		System.out.println("Starting client. Type CTRL-D to shut down.");
-		// printLocalHostAddress();
 		socket = connectToServer(serverName);
+
 		if (socket != null) {
 			System.out.println("Connected to " + socket);
 			try {
@@ -73,7 +55,6 @@ public class Client implements Runnable {
 	}
 
 	/**
-	 *
 	 * Connects to the server on IP address serverName and port number
 	 * portNumber.
 	 */

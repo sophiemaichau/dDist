@@ -1,38 +1,23 @@
-
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.net.Socket;
 import java.net.UnknownHostException;
-
 import javax.swing.*;
 import javax.swing.text.*;
-import javax.swing.event.*;
-import java.util.concurrent.*;
 import java.net.InetAddress;
-import java.net.ServerSocket;
 
 public class DistributedTextEditor extends JFrame {
-
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 1L;
 	private JTextArea area1 = new JTextArea(20, 120);
 	private JTextArea area2 = new JTextArea(20, 120);
 	private JTextField ipaddress; // "IP address here"
-	private JTextField portNumber = new JTextField("40499"); // "Port number
-																// here"
-
+	private JTextField portNumber = new JTextField("40499");
 	private EventReplayer er;
 	private Thread ert;
-
 	private JFileChooser dialog = new JFileChooser(System.getProperty("user.dir"));
-
 	private String currentFile = "Untitled";
 	private boolean changed = false;
 	private DocumentEventCapturer dec = new DocumentEventCapturer();
-
 	private Server server;
 	private Client client;
 
