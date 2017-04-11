@@ -27,8 +27,9 @@ public class EventReplayer implements Runnable {
 
 	private class ConnectionListener implements ClosedConnectionListener {
 		public void notifyClosedConnection() {
-			//area2.replaceRange("", 0, area2.getText().length());
+			area1.setText("");
 			area2.setBackground(Color.RED);
+			area2.setText("");
 		}
 	}
 
@@ -36,7 +37,6 @@ public class EventReplayer implements Runnable {
 		connectionHandler = h;
 		connectionHandler.addListener(new ConnectionListener());
 		area2.setBackground(Color.WHITE);
-
 	}
 
 	public void listenOnPeerEvent() {
@@ -44,16 +44,24 @@ public class EventReplayer implements Runnable {
 			public void run() {
 				while (true) {
 					if (connectionHandler != null && !connectionHandler.isClosed()) {
-					MyTextEvent mte = null;
+					Object mte = null;
 					try {
 						//blocks until received object
-						mte = (MyTextEvent) connectionHandler.receiveObject();
+						mte = connectionHandler.receiveObject();
 					} catch (IOException ex) {
 						sleep(10);
 						System.out.println("closing connection with server.");
 						connectionHandler.closeConnection();
 
 					}
+					
+					if(mte instanceof JTextArea){
+						JTextArea a = (JTextArea)mte;
+						area2.setText("HELLO AGAIN");
+					}
+					
+					mte = (MyTextEvent)mte;
+					
 					if (mte instanceof TextInsertEvent) {
 						final TextInsertEvent tie = (TextInsertEvent)mte;
 						EventQueue.invokeLater(new Runnable() {
