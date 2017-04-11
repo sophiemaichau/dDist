@@ -5,10 +5,10 @@ public class Server extends Thread {
 	private ServerSocket serverSocket;
 	private int port = 40499;
 	private ConnectionHandler handler;
-	private EventReplayer er;
+	private EventHandler eventHandler;
 
-	public Server(EventReplayer er, int port) throws IOException {
-		this.er = er;
+	public Server(EventHandler er, int port) throws IOException {
+		this.eventHandler = er;
 		this.port = port;
 		serverSocket = new ServerSocket(port);
 	}
@@ -41,7 +41,7 @@ public class Server extends Thread {
 				ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
 				ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
 				handler = new ConnectionHandler(socket, objInputStream, objOutStream);
-				er.setConnectionHandler(handler);
+				eventHandler.setConnectionHandler(handler);
 			} catch (SocketTimeoutException s) {
 				System.out.println("Socket timed out!");
 				break;
@@ -50,7 +50,6 @@ public class Server extends Thread {
 				break;
 			}
 		}
-
 	}
 
 	public ConnectionHandler getConnectionHandler() {

@@ -6,14 +6,13 @@ import java.io.IOException;
 public class Client implements Runnable {
 
 	private ConnectionHandler handler;
-	private DocumentEventCapturer doc;
 	private String serverName;
-	private EventReplayer er;
+	private EventHandler eventHandler;
 	private Socket socket = null;
 	private int port;
 
-	public Client(String serverName, EventReplayer er, int port) {
-		this.er = er;
+	public Client(String serverName, EventHandler er, int port) {
+		this.eventHandler = er;
 		this.port = port;
 		this.serverName = serverName;
 	}
@@ -36,7 +35,7 @@ public class Client implements Runnable {
 				ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
 				objOutStream.flush();
 				handler = new ConnectionHandler(socket, objInputStream, objOutStream);
-				er.setConnectionHandler(handler);
+				eventHandler.setConnectionHandler(handler);
 			} catch (IOException e) {
 				System.err.println(e);
 				if (handler != null) {

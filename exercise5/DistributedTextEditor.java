@@ -12,7 +12,7 @@ public class DistributedTextEditor extends JFrame {
 	private JTextArea area2 = new JTextArea(20, 120);
 	private JTextField ipaddress; // "IP address here"
 	private JTextField portNumber = new JTextField("40499");
-	private EventReplayer er;
+	private EventHandler er;
 	private Thread ert;
 	private JFileChooser dialog = new JFileChooser(System.getProperty("user.dir"));
 	private String currentFile = "Untitled";
@@ -79,7 +79,7 @@ public class DistributedTextEditor extends JFrame {
 		area1.insert("Example of how to capture stuff from the event queue and replay it in another buffer.\n"
 				+ "Try to type and delete stuff in the top area.\n" + "Then figure out how it works.\n", 0);
 
-		er = new EventReplayer(dec, area1, area2);
+		er = new EventHandler(dec, area1, area2);
 		ert = new Thread(er);
 		ert.start();
 	}

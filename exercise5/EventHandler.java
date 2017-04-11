@@ -4,14 +4,14 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.io.IOException;
 
-public class EventReplayer implements Runnable {
+public class EventHandler implements Runnable {
 
 	private DocumentEventCapturer dec;
 	private JTextArea area1;
 	private JTextArea area2;
 	private ConnectionHandler connectionHandler;
 
-	public EventReplayer(DocumentEventCapturer dec, JTextArea area1, JTextArea area2) {
+	public EventHandler(DocumentEventCapturer dec, JTextArea area1, JTextArea area2) {
 		this.dec = dec;
 		this.area1 = area1;
 		this.area2 = area2;
