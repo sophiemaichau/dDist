@@ -18,7 +18,7 @@ public class dClient {
   * use the port number 40103. This will avoid the unfortunate situation that you
   * connect to each others servers.
   */
-  protected int portNumber = 40307;
+  protected int portNumber = 40499;
 
   /**
   *
@@ -26,7 +26,7 @@ public class dClient {
   */
   protected void printLocalHostAddress() {
     try {
-      InetAddress localhost = java.net.InetAddress.getLocalHost();
+      InetAddress localhost = InetAddress.getLocalHost();
       String localhostAddress = localhost.getHostAddress();
       System.out.println("I'm a client running with IP address " + localhostAddress);
     } catch (UnknownHostException e) {

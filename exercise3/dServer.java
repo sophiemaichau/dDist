@@ -17,7 +17,7 @@ public class dServer {
   * use the port number 40103. This will avoid the unfortunate situation that you
   * connect to each others servers.
   */
-  protected int portNumber = 40307;
+  protected int portNumber = 40499;
   protected ServerSocket serverSocket;
   private LinkedBlockingQueue<QAWrapper> questionQueue = new LinkedBlockingQueue<QAWrapper>();
 

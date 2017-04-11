@@ -10,10 +10,12 @@ public class Client implements Runnable {
   String serverName;
   private EventReplayer er;
   private Socket socket = null;
+  int port = 40499;
 
-  public Client(String serverName, EventReplayer er) {
+  public Client(String serverName, EventReplayer er, int port) {
     this.er = er;
     this.doc = doc;
+    this.port = port;
     this.serverName = serverName;
   }
 
@@ -52,7 +54,7 @@ public class Client implements Runnable {
   protected Socket connectToServer(String serverName) {
     Socket res = null;
     try {
-      res = new Socket(serverName, 40307);
+      res = new Socket(serverName, port);
     } catch (IOException e) {
       // We return null on IOExceptions
     }
