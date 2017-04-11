@@ -5,12 +5,12 @@ import java.io.IOException;
 
 public class Client implements Runnable {
 
-	ConnectionHandler handler;
-	DocumentEventCapturer doc;
-	String serverName;
+	private ConnectionHandler handler;
+	private DocumentEventCapturer doc;
+	private String serverName;
 	private EventReplayer er;
 	private Socket socket = null;
-	int port = 40499;
+	private int port;
 
 	public Client(String serverName, EventReplayer er, int port) {
 		this.er = er;
@@ -19,29 +19,6 @@ public class Client implements Runnable {
 		this.serverName = serverName;
 	}
 
-  public void run() {
-    System.out.println("Starting client. Type CTRL-D to shut down.");
-    //printLocalHostAddress();
-    socket = connectToServer(serverName);
-    if (socket != null) {
-      System.out.println("Connected to " + socket);
-      try {
-        //For sending objects to the server
-        ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
-        ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
-        objOutStream.flush();
-        handler = new ConnectionHandler(socket, objInputStream, objOutStream);
-        er.setConnectionHandler(handler);
-      } catch (IOException e) {
-        System.err.println(e);
-        handler.closeConnection();
-      }
-    }
-  }
-
-  public void disconnect() {
-    handler.closeConnection();
-  }
 	public void run() {
 		System.out.println("Starting client. Type CTRL-D to shut down.");
 		// printLocalHostAddress();

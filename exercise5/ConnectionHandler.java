@@ -3,7 +3,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-
+/**
+* Handles sending and receiving objects to a particular socket.
+*
+*/
 public class ConnectionHandler {
 
   private Socket socket;
@@ -19,10 +22,16 @@ public class ConnectionHandler {
     isClosed = false;
   }
 
+  /*
+  * Send object to socket
+  */
   public <E> void sendObject(E o) throws IOException {
     out.writeObject(o);
   }
 
+  /*
+  * Receive object from socket. Blocks until received.
+  */
   @SuppressWarnings("unchecked")
   public <E> E receiveObject() throws IOException {
     E o;
@@ -40,7 +49,9 @@ public class ConnectionHandler {
   public boolean isClosed() {
     return isClosed;
   }
-
+  /*
+  * Properly closes connection and corresponding streams and notifies listeners.
+  */
   public void closeConnection() {
     try {
       isClosed = true;
