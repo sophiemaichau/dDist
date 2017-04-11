@@ -1,4 +1,6 @@
 import javax.swing.JTextArea;
+
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.io.IOException;
 /**
@@ -18,6 +20,7 @@ public class EventReplayer implements Runnable {
 	public EventReplayer(DocumentEventCapturer dec, JTextArea area) {
 		this.dec = dec;
 		this.area = area;
+		area.getText().length();
 	}
 
 	public void setConnectionHandler(ConnectionHandler h) {

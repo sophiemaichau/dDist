@@ -20,7 +20,8 @@ public class ConnectionHandler {
     out.writeObject(o);
   }
 
-  public <E> E receiveObject() throws IOException {
+  @SuppressWarnings("unchecked")
+public <E> E receiveObject() throws IOException {
     E o;
     try {
       while ((o = (E) in.readObject()) != null) {

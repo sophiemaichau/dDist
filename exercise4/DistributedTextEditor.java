@@ -116,7 +116,7 @@ public class DistributedTextEditor extends JFrame {
         ex.printStackTrace();
       }
       new Thread(server).start();
-      setTitle("I'm listening on...");
+      setTitle("I'm listening on " + ipaddress.getText() + " : " + portNumber.getText());
       changed = false;
       Save.setEnabled(false);
       SaveAs.setEnabled(false);
