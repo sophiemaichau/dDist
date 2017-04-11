@@ -1,6 +1,7 @@
 import javax.swing.JTextArea;
 import java.awt.EventQueue;
 import java.io.IOException;
+import java.awt.Color;
 /**
 *
 * Takes the event recorded by the DocumentEventCapturer and replays
@@ -13,15 +14,27 @@ import java.io.IOException;
 public class EventReplayer implements Runnable {
 
 	private DocumentEventCapturer dec;
-	private JTextArea area;
+	private JTextArea area1;
+	private JTextArea area2;
 	private ConnectionHandler connectionHandler;
-	public EventReplayer(DocumentEventCapturer dec, JTextArea area) {
+	public EventReplayer(DocumentEventCapturer dec, JTextArea area1, JTextArea area2) {
 		this.dec = dec;
-		this.area = area;
+		this.area1 = area1;
+		this.area2 = area2;
+	}
+
+	private class ConnectionListener implements ClosedConnectionListener {
+		public void notifyClosedConnection() {
+			//area2.replaceRange("", 0, area2.getText().length());
+			area2.setBackground(Color.RED);
+		}
 	}
 
 	public void setConnectionHandler(ConnectionHandler h) {
 		connectionHandler = h;
+		connectionHandler.addListener(new ConnectionListener());
+		area2.setBackground(Color.WHITE);
+
 	}
 
 	public void listenOnPeerEvent() {
@@ -37,13 +50,14 @@ public class EventReplayer implements Runnable {
 						sleep(10);
 						System.out.println("closing connection with server.");
 						connectionHandler.closeConnection();
+
 					}
 					if (mte instanceof TextInsertEvent) {
 						final TextInsertEvent tie = (TextInsertEvent)mte;
 						EventQueue.invokeLater(new Runnable() {
 							public void run() {
 								try {
-									area.insert(tie.getText(), tie.getOffset());
+									area2.insert(tie.getText(), tie.getOffset());
 								} catch (Exception e) {
 									System.err.println(e);
 								}
@@ -54,7 +68,7 @@ public class EventReplayer implements Runnable {
 						EventQueue.invokeLater(new Runnable() {
 							public void run() {
 								try {
-									area.replaceRange(null, tre.getOffset(), tre.getOffset()+tre.getLength());
+									area2.replaceRange(null, tre.getOffset(), tre.getOffset()+tre.getLength());
 								} catch (Exception e) {
 									System.err.println(e);
 								}
@@ -81,10 +95,13 @@ public class EventReplayer implements Runnable {
 				}
 			} catch (IOException ex) {
 				connectionHandler.closeConnection();
+
+
 			} catch (Exception e) {
 				e.printStackTrace();
 				wasInterrupted = true;
 				connectionHandler.closeConnection();
+
 			}
 		}
 		System.out.println("I'm the thread running the EventReplayer, now I die!");

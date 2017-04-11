@@ -1,0 +1,61 @@
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
+import java.net.Socket;
+import java.io.IOException;
+
+public class GreetingClient implements Runnable {
+
+  ConnectionHandler handler;
+  DocumentEventCapturer doc;
+  String serverName;
+  private EventReplayer er;
+  private Socket socket = null;
+
+  public GreetingClient(String serverName, EventReplayer er) {
+    this.er = er;
+    this.doc = doc;
+    this.serverName = serverName;
+  }
+
+  public void run() {
+    System.out.println("Starting client. Type CTRL-D to shut down.");
+    //printLocalHostAddress();
+    socket = connectToServer(serverName);
+    if (socket != null) {
+      System.out.println("Connected to " + socket);
+      try {
+        //For sending objects to the server
+        ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
+        ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
+        objOutStream.flush();
+        handler = new ConnectionHandler(socket, objInputStream, objOutStream);
+        er.setConnectionHandler(handler);
+      } catch (IOException e) {
+        System.err.println(e);
+        handler.closeConnection();
+      }
+    }
+  }
+
+  public void disconnect() {
+    handler.closeConnection();
+  }
+
+  public ConnectionHandler getConnectionHandler() {
+    return handler;
+  }
+
+  /**
+  *
+  * Connects to the server on IP address serverName and port number portNumber.
+  */
+  protected Socket connectToServer(String serverName) {
+    Socket res = null;
+    try {
+      res = new Socket(serverName, 40307);
+    } catch (IOException e) {
+      // We return null on IOExceptions
+    }
+    return res;
+  }
+}
