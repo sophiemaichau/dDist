@@ -27,7 +27,7 @@ public class Server extends Thread {
 	 * Starts a server and blocks until a connection from a client succeeds.
 	 * Furthermore it creates a new ConnectionHandler object, when we have a
 	 * connection to a client. Then we set the ConnectionHandler with the method
-	 * setConnectopnHandler from EventReplay class.
+	 * setConnectopnHandler from EventHandler class.
 	 */
 	@SuppressWarnings("static-access")
 	public void run() {

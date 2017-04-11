@@ -112,7 +112,7 @@ public class EventHandler implements Runnable {
 
 			}
 		}
-		System.out.println("I'm the thread running the EventReplayer, now I die!");
+		System.out.println("I'm the thread running the EventHandler, now I die!");
 	}
 
 	public void sleep(int i) {

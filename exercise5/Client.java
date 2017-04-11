@@ -20,7 +20,7 @@ public class Client implements Runnable {
 	/*
 	 * If a client has connection with a server, we create a new
 	 * ConnectionHandler object and sets this object with setConnectionHandler
-	 * from EvenReplayer. If an error occurs, we close the connection through
+	 * from EvenHandler. If an error occurs, we close the connection through
 	 * ConnectionHandler.
 	 */
 	public void run() {
