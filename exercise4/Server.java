@@ -2,13 +2,13 @@
 import java.net.*;
 import java.io.*;
 
-public class GreetingServer extends Thread {
+public class Server extends Thread {
    private ServerSocket serverSocket;
    private int port = 40307;
    private ConnectionHandler handler;
    private EventReplayer er;
 
-   public GreetingServer(EventReplayer er) throws IOException {
+   public Server(EventReplayer er) throws IOException {
      this.er = er;
      serverSocket = new ServerSocket(port);
    }

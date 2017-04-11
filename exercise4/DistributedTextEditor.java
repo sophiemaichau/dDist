@@ -31,8 +31,8 @@ public class DistributedTextEditor extends JFrame {
   private ObjectOutputStream out = null;
   private ObjectInputStream in = null;
   private Socket socket = null;
-  private GreetingServer server;
-  private GreetingClient client;
+  private Server server;
+  private Client client;
 
   public DistributedTextEditor() {
     //initialize server and client (but don't start them)
@@ -111,7 +111,7 @@ public class DistributedTextEditor extends JFrame {
       saveOld();
       area1.setText("");
       try {
-        server = new GreetingServer(er);
+        server = new Server(er);
       } catch (IOException ex) {
         ex.printStackTrace();
       }
@@ -127,7 +127,7 @@ public class DistributedTextEditor extends JFrame {
     public void actionPerformed(ActionEvent e) {
       saveOld();
       area1.setText("");
-      client = new GreetingClient(ipaddress.getText(), er);
+      client = new Client(ipaddress.getText(), er);
       new Thread(client).start();
       setTitle("Connected to " + ipaddress.getText() + ":" + portNumber.getText());
       changed = false;

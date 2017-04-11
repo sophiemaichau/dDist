@@ -3,7 +3,7 @@ import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.io.IOException;
 
-public class GreetingClient implements Runnable {
+public class Client implements Runnable {
 
   ConnectionHandler handler;
   DocumentEventCapturer doc;
@@ -11,7 +11,7 @@ public class GreetingClient implements Runnable {
   private EventReplayer er;
   private Socket socket = null;
 
-  public GreetingClient(String serverName, EventReplayer er) {
+  public Client(String serverName, EventReplayer er) {
     this.er = er;
     this.doc = doc;
     this.serverName = serverName;
