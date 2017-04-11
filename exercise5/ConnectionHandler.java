@@ -11,6 +11,7 @@ public class ConnectionHandler {
   private ObjectOutputStream out;
   private boolean isClosed;
   private ArrayList<ClosedConnectionListener> listeners = new ArrayList<>();
+
   public ConnectionHandler(Socket s, ObjectInputStream in, ObjectOutputStream out) {
     this.in = in;
     this.out = out;
@@ -23,7 +24,7 @@ public class ConnectionHandler {
   }
 
   @SuppressWarnings("unchecked")
-public <E> E receiveObject() throws IOException {
+  public <E> E receiveObject() throws IOException {
     E o;
     try {
       while ((o = (E) in.readObject()) != null) {
@@ -47,7 +48,7 @@ public <E> E receiveObject() throws IOException {
       out.close();
       socket.close();
     } catch (IOException e) {
-        System.err.println(e);
+      System.err.println(e);
     } finally {
       notifyListeners();
     }

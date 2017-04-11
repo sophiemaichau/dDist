@@ -15,7 +15,7 @@ import java.net.ServerSocket;
 public class DistributedTextEditor extends JFrame {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 	private JTextArea area1 = new JTextArea(20, 120);
@@ -108,9 +108,6 @@ public class DistributedTextEditor extends JFrame {
 	};
 
 	Action Listen = new AbstractAction("Listen") {
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent e) {
@@ -130,9 +127,6 @@ public class DistributedTextEditor extends JFrame {
 	};
 
 	Action Connect = new AbstractAction("Connect") {
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent e) {
@@ -149,9 +143,6 @@ public class DistributedTextEditor extends JFrame {
 	};
 
 	Action Disconnect = new AbstractAction("Disconnect") {
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent e) {
@@ -167,9 +158,6 @@ public class DistributedTextEditor extends JFrame {
 	};
 
 	Action Save = new AbstractAction("Save") {
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent e) {
@@ -181,9 +169,6 @@ public class DistributedTextEditor extends JFrame {
 	};
 
 	Action SaveAs = new AbstractAction("Save as...") {
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent e) {
@@ -192,9 +177,6 @@ public class DistributedTextEditor extends JFrame {
 	};
 
 	Action Quit = new AbstractAction("Quit") {
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent e) {

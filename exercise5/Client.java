@@ -38,7 +38,7 @@ public class Client implements Runnable {
       }
     }
   }
-  
+
   public void disconnect() {
     handler.closeConnection();
   }
