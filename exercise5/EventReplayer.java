@@ -3,28 +3,23 @@ import javax.swing.JTextArea;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.io.IOException;
-import java.awt.Color;
-/**
-*
-* Takes the event recorded by the DocumentEventCapturer and replays
-* them in a JTextArea. The delay of 1 sec is only to make the individual
-* steps in the reply visible to humans.
-*
-* @author Jesper Buus Nielsen
-*
-*/
+
 public class EventReplayer implements Runnable {
 
 	private DocumentEventCapturer dec;
 	private JTextArea area1;
 	private JTextArea area2;
 	private ConnectionHandler connectionHandler;
+
 	public EventReplayer(DocumentEventCapturer dec, JTextArea area1, JTextArea area2) {
 		this.dec = dec;
 		this.area1 = area1;
 		this.area2 = area2;
 	}
 
+	/*
+	 * This class implements the interface ClosedConnectionListener. 
+	 */
 	private class ConnectionListener implements ClosedConnectionListener {
 		public void notifyClosedConnection() {
 			area1.setText("");
@@ -33,67 +28,71 @@ public class EventReplayer implements Runnable {
 		}
 	}
 
+	/*
+	 * Sets the ConnectionHandler object and add a ConnectionListener to it, that we use in the run method.
+	 */
 	public void setConnectionHandler(ConnectionHandler h) {
 		connectionHandler = h;
 		connectionHandler.addListener(new ConnectionListener());
 		area2.setBackground(Color.WHITE);
 	}
 
+	/*
+	 * If we have a connection, we listen on MyTextEvents from the given connection.
+	 * We execute the MyTextEvents on the bottom JTextArea.
+	 */
 	public void listenOnPeerEvent() {
 		new Thread(new Runnable() {
 			public void run() {
 				while (true) {
 					if (connectionHandler != null && !connectionHandler.isClosed()) {
-					Object mte = null;
-					try {
-						//blocks until received object
-						mte = connectionHandler.receiveObject();
-					} catch (IOException ex) {
-						sleep(10);
-						System.out.println("closing connection with server.");
-						connectionHandler.closeConnection();
+						MyTextEvent mte = null;
+						try {
+							// blocks until received object
+							mte = (MyTextEvent) connectionHandler.receiveObject();
+						} catch (IOException ex) {
+							sleep(10);
+							System.out.println("closing connection with server.");
+							connectionHandler.closeConnection();
 
-					}
-					
-					if(mte instanceof JTextArea){
-						JTextArea a = (JTextArea)mte;
-						area2.setText("HELLO AGAIN");
-					}
-					
-					mte = (MyTextEvent)mte;
-					
-					if (mte instanceof TextInsertEvent) {
-						final TextInsertEvent tie = (TextInsertEvent)mte;
-						EventQueue.invokeLater(new Runnable() {
-							public void run() {
-								try {
-									area2.insert(tie.getText(), tie.getOffset());
-								} catch (Exception e) {
-									System.err.println(e);
+						}
+
+						if (mte instanceof TextInsertEvent) {
+							final TextInsertEvent tie = (TextInsertEvent) mte;
+							EventQueue.invokeLater(new Runnable() {
+								public void run() {
+									try {
+										area2.insert(tie.getText(), tie.getOffset());
+									} catch (Exception e) {
+										System.err.println(e);
+									}
 								}
-							}
-						});
-					} else if (mte instanceof TextRemoveEvent) {
-						final TextRemoveEvent tre = (TextRemoveEvent)mte;
-						EventQueue.invokeLater(new Runnable() {
-							public void run() {
-								try {
-									area2.replaceRange(null, tre.getOffset(), tre.getOffset()+tre.getLength());
-								} catch (Exception e) {
-									System.err.println(e);
+							});
+						} else if (mte instanceof TextRemoveEvent) {
+							final TextRemoveEvent tre = (TextRemoveEvent) mte;
+							EventQueue.invokeLater(new Runnable() {
+								public void run() {
+									try {
+										area2.replaceRange(null, tre.getOffset(), tre.getOffset() + tre.getLength());
+									} catch (Exception e) {
+										System.err.println(e);
+									}
 								}
-							}
-						});
+							});
+						}
 					}
-				}
 				}
 			}
 		}).start();
 	}
 
+	/*
+	 * This run method runs listenOnPeerEvent in a seperate thread and sends MyTextEvents objects through sendObject method from ConnectionHandler class.
+	 * If any errors occur we close the connectopn through ConnectionHandler.
+	 */
 	public void run() {
 
-		//runs in own thread
+		// runs in own thread
 		listenOnPeerEvent();
 
 		boolean wasInterrupted = false;
@@ -105,7 +104,6 @@ public class EventReplayer implements Runnable {
 				}
 			} catch (IOException ex) {
 				connectionHandler.closeConnection();
-
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -120,7 +118,7 @@ public class EventReplayer implements Runnable {
 	public void sleep(int i) {
 		try {
 			Thread.sleep(i);
-		} catch(InterruptedException e) {
+		} catch (InterruptedException e) {
 		}
 	}
 }
