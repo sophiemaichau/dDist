@@ -2,6 +2,7 @@ import java.net.Socket;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class ConnectionHandler {
 
@@ -9,6 +10,7 @@ public class ConnectionHandler {
   private ObjectInputStream in;
   private ObjectOutputStream out;
   private boolean isClosed;
+  private ArrayList<ClosedConnectionListener> listeners = new ArrayList<>();
   public ConnectionHandler(Socket s, ObjectInputStream in, ObjectOutputStream out) {
     this.in = in;
     this.out = out;
@@ -46,6 +48,18 @@ public <E> E receiveObject() throws IOException {
       socket.close();
     } catch (IOException e) {
         System.err.println(e);
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  public void addListener(ClosedConnectionListener e) {
+    listeners.add(e);
+  }
+
+  private void notifyListeners() {
+    for (ClosedConnectionListener e : listeners) {
+      e.notifyClosedConnection();
     }
   }
 }
