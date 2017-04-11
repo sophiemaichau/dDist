@@ -22,12 +22,6 @@ public class EventReplayer implements Runnable {
 
 	public void setConnectionHandler(ConnectionHandler h) {
 		connectionHandler = h;
-		if (h == null) {
-
-			System.out.println("connectionhandler set to null");
-		} else {
-			System.out.println("connectionhandler set!");
-		}
 	}
 
 	public void listenOnPeerEvent() {
@@ -37,11 +31,9 @@ public class EventReplayer implements Runnable {
 					if (connectionHandler != null && !connectionHandler.isClosed()) {
 					MyTextEvent mte = null;
 					try {
-						System.out.println("waiting for receiving object");
 						//blocks until received object
 						mte = (MyTextEvent) connectionHandler.receiveObject();
 					} catch (IOException ex) {
-						System.err.println(ex);
 						sleep(10);
 						System.out.println("closing connection with server.");
 						connectionHandler.closeConnection();
@@ -50,14 +42,10 @@ public class EventReplayer implements Runnable {
 						final TextInsertEvent tie = (TextInsertEvent)mte;
 						EventQueue.invokeLater(new Runnable() {
 							public void run() {
-								//TODO: send event to connection
 								try {
 									area.insert(tie.getText(), tie.getOffset());
 								} catch (Exception e) {
 									System.err.println(e);
-									/* We catch all axceptions, as an uncaught exception would make the
-									* EDT unwind, which is now healthy.
-									*/
 								}
 							}
 						});
@@ -65,14 +53,10 @@ public class EventReplayer implements Runnable {
 						final TextRemoveEvent tre = (TextRemoveEvent)mte;
 						EventQueue.invokeLater(new Runnable() {
 							public void run() {
-								//TODO: send event to connection
 								try {
 									area.replaceRange(null, tre.getOffset(), tre.getOffset()+tre.getLength());
 								} catch (Exception e) {
 									System.err.println(e);
-									/* We catch all axceptions, as an uncaught exception would make the
-									* EDT unwind, which is now healthy.
-									*/
 								}
 							}
 						});
@@ -94,7 +78,6 @@ public class EventReplayer implements Runnable {
 				MyTextEvent mte = dec.take();
 				if (connectionHandler != null && !connectionHandler.isClosed()) {
 					connectionHandler.sendObject(mte);
-					System.out.println("sending object to server");
 				}
 			} catch (IOException ex) {
 				connectionHandler.closeConnection();
