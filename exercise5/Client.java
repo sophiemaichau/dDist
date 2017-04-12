@@ -10,8 +10,10 @@ public class Client implements Runnable {
 	private EventHandler eventHandler;
 	private Socket socket = null;
 	private int port;
+	DistributedTextEditor frame;
 
-	public Client(String serverName, EventHandler er, int port) {
+	public Client(String serverName, EventHandler er, int port, DistributedTextEditor frame) {
+		this.frame = frame;
 		this.eventHandler = er;
 		this.port = port;
 		this.serverName = serverName;
@@ -26,8 +28,8 @@ public class Client implements Runnable {
 	public void run() {
 		System.out.println("Starting client. Type CTRL-D to shut down.");
 		socket = connectToServer(serverName);
-
 		if (socket != null) {
+			frame.clientConnected();
 			System.out.println("Connected to " + socket);
 			try {
 				// For sending objects to the server
@@ -38,15 +40,15 @@ public class Client implements Runnable {
 				eventHandler.setConnectionHandler(handler);
 			} catch (IOException e) {
 				System.err.println(e);
-				if (handler != null) {
-					handler.closeConnection();
-				}
+				disconnect();
 			}
 		}
 	}
 
 	public void disconnect() {
-		handler.closeConnection();
+		if (handler != null) {
+			handler.closeConnection();
+		}
 	}
 
 	public ConnectionHandler getConnectionHandler() {

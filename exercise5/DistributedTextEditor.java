@@ -109,15 +109,21 @@ public class DistributedTextEditor extends JFrame {
 		}
 	};
 
+	public void clientConnected() {
+		setTitle("Connected to " + ipaddress.getText() + ":" + portNumber.getText());
+
+	}
+
 	Action Connect = new AbstractAction("Connect") {
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent e) {
 			saveOld();
 			area1.setText("");
-			client = new Client(ipaddress.getText(), er, Integer.parseInt(portNumber.getText()));
+			client = new Client(ipaddress.getText(), er, Integer.parseInt(portNumber.getText()), DistributedTextEditor.this);
 			new Thread(client).start();
-			setTitle("Connected to " + ipaddress.getText() + ":" + portNumber.getText());
+			setTitle("Trying to connect to " + ipaddress.getText() + ":" + portNumber.getText());
+
 			changed = false;
 			Save.setEnabled(false);
 			SaveAs.setEnabled(false);
