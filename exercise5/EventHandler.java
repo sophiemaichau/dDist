@@ -88,7 +88,7 @@ public class EventHandler implements Runnable {
 
 	/*
 	 * This run method runs listenOnPeerEvent in a seperate thread and sends MyTextEvents objects through sendObject method from ConnectionHandler class.
-	 * If any errors occur we close the connectopn through ConnectionHandler.
+	 * If any errors occur we close the connection through ConnectionHandler.
 	 */
 	public void run() {
 
