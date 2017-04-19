@@ -6,10 +6,12 @@ public class Server extends Thread {
 	private int port = 40499;
 	private ConnectionHandler handler;
 	private EventHandler eventHandler;
+	private DistributedTextEditor frame;
 
-	public Server(EventHandler er, int port) throws IOException {
+	public Server(EventHandler er, int port, DistributedTextEditor frame) throws IOException {
 		this.eventHandler = er;
 		this.port = port;
+		this.frame = frame;
 		serverSocket = new ServerSocket(port);
 	}
 
@@ -35,8 +37,9 @@ public class Server extends Thread {
 			try {
 				System.out.println("Waiting for client on "
 						+ serverSocket.getInetAddress().getLocalHost().getHostAddress() + " : " + port);
+				frame.setTitle("I'm listening on " + " : " + serverSocket.getInetAddress().getLocalHost().getHostAddress()
+						+ " : " + port);
 				Socket socket = waitForConnectionFromClient();
-
 				System.out.println("Connection from " + socket.getRemoteSocketAddress());
 				ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
 				ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());

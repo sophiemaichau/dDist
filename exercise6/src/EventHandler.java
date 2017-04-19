@@ -52,41 +52,40 @@ public class EventHandler implements Runnable {
 						try {
 							// blocks until received object
 							mw = (MessageWrapper) connectionHandler.receiveObject();
+							if(!mw.getIp().equals(ip)) {
+								if (mw.getMte() instanceof TextInsertEvent) {
+									final TextInsertEvent tie = (TextInsertEvent) mw.getMte();
+									EventQueue.invokeLater(new Runnable() {
+										public void run() {
+											try {
+												dec.disabled = true;
+												area2.insert(tie.getText(), tie.getOffset());
+												dec.disabled = false;
+											} catch (Exception e) {
+												System.err.println(e);
+											}
+										}
+									});
+								} else if (mw.getMte() instanceof TextRemoveEvent) {
+									final TextRemoveEvent tre = (TextRemoveEvent) mw.getMte();
+									EventQueue.invokeLater(new Runnable() {
+										public void run() {
+											try {
+												dec.disabled = true;
+												area2.replaceRange(null, tre.getOffset(), tre.getOffset() + tre.getLength());
+												dec.disabled = false;
+											} catch (Exception e) {
+												System.err.println(e);
+											}
+										}
+									});
+								}
+							}
 						} catch (IOException ex) {
 							sleep(10);
 							System.out.println("closing connection with server.");
 							connectionHandler.closeConnection();
 
-						}
-
-						if(!mw.getIp().equals(ip)) {
-							if (mw.getMte() instanceof TextInsertEvent) {
-								final TextInsertEvent tie = (TextInsertEvent) mw.getMte();
-								EventQueue.invokeLater(new Runnable() {
-									public void run() {
-										try {
-											dec.disabled = true;
-											area2.insert(tie.getText(), tie.getOffset());
-											dec.disabled = false;
-										} catch (Exception e) {
-											System.err.println(e);
-										}
-									}
-								});
-							} else if (mw.getMte() instanceof TextRemoveEvent) {
-								final TextRemoveEvent tre = (TextRemoveEvent) mw.getMte();
-								EventQueue.invokeLater(new Runnable() {
-									public void run() {
-										try {
-											dec.disabled = true;
-											area2.replaceRange(null, tre.getOffset(), tre.getOffset() + tre.getLength());
-											dec.disabled = false;
-										} catch (Exception e) {
-											System.err.println(e);
-										}
-									}
-								});
-							}
 						}
 					}
 				}
@@ -116,7 +115,7 @@ public class EventHandler implements Runnable {
 
 			} catch (Exception e) {
 				e.printStackTrace();
-				wasInterrupted = true;
+				//wasInterrupted = true;
 				connectionHandler.closeConnection();
 
 			}
