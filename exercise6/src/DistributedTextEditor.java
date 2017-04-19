@@ -8,8 +8,7 @@ import java.net.InetAddress;
 
 public class DistributedTextEditor extends JFrame {
 	private static final long serialVersionUID = 1L;
-	private JTextArea area1 = new JTextArea(20, 120);
-	private JTextArea area2 = new JTextArea(20, 120);
+	private JTextArea area1 = new JTextArea(20, 60);
 	private JTextField ipaddress; // "IP address here"
 	private JTextField portNumber = new JTextField("40499");
 	private EventHandler er;
@@ -30,9 +29,7 @@ public class DistributedTextEditor extends JFrame {
 
 		area1.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
-		area2.setFont(new Font("Monospaced", Font.PLAIN, 12));
 		((AbstractDocument) area1.getDocument()).setDocumentFilter(dec);
-		area2.setEditable(false);
 
 		Container content = getContentPane();
 		content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
@@ -40,10 +37,6 @@ public class DistributedTextEditor extends JFrame {
 		JScrollPane scroll1 = new JScrollPane(area1, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		content.add(scroll1, BorderLayout.CENTER);
-
-		JScrollPane scroll2 = new JScrollPane(area2, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		content.add(scroll2, BorderLayout.CENTER);
 
 		content.add(ipaddress, BorderLayout.CENTER);
 		content.add(portNumber, BorderLayout.CENTER);
@@ -77,7 +70,7 @@ public class DistributedTextEditor extends JFrame {
 		setTitle("Disconnected");
 		setVisible(true);
 
-		er = new EventHandler(dec, area1, area2);
+		er = new EventHandler(dec, area1, area1, ipaddress.getText());
 		ert = new Thread(er);
 		ert.start();
 	}
