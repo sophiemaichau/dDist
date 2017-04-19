@@ -26,6 +26,8 @@ public class DocumentEventCapturer extends DocumentFilter {
   */
   protected LinkedBlockingQueue<MyTextEvent> eventHistory = new LinkedBlockingQueue<MyTextEvent>();
 
+  public boolean disabled = false;
+
   /**
   * If the queue is empty, then the call will block until an element arrives.
   * If the thread gets interrupted while waiting, we throw InterruptedException.
@@ -38,22 +40,28 @@ public class DocumentEventCapturer extends DocumentFilter {
 
   /* Queue a copy of the event and then modify the textarea */
   public void insertString(FilterBypass fb, int offset, String str, AttributeSet a) throws BadLocationException {
-    eventHistory.add(new TextInsertEvent(offset, str));
+    if (!disabled) {
+      eventHistory.add(new TextInsertEvent(offset, str));
+    }
     super.insertString(fb, offset, str, a);
   }
 
   /* Queue a copy of the event and then modify the textarea */
   public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
-    eventHistory.add(new TextRemoveEvent(offset, length));
+    if (!disabled) {
+      eventHistory.add(new TextRemoveEvent(offset, length));
+    }
     super.remove(fb, offset, length);
   }
 
   /* Queue a copy of the event and then modify the text */
   public void replace(FilterBypass fb, int offset, int length, String str, AttributeSet a) throws BadLocationException {
-    if (length > 0) {
-      eventHistory.add(new TextRemoveEvent(offset, length));
+    if (!disabled) {
+      if (length > 0) {
+        eventHistory.add(new TextRemoveEvent(offset, length));
+      }
+      eventHistory.add(new TextInsertEvent(offset, str));
     }
-    eventHistory.add(new TextInsertEvent(offset, str));
     super.replace(fb, offset, length, str, a);
   }
 }

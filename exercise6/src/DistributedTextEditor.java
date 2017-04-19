@@ -5,6 +5,8 @@ import java.net.UnknownHostException;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.net.InetAddress;
+import java.util.Random;
+import java.lang.Integer;
 
 public class DistributedTextEditor extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -70,7 +72,10 @@ public class DistributedTextEditor extends JFrame {
 		setTitle("Disconnected");
 		setVisible(true);
 
-		er = new EventHandler(dec, area1, area1, ipaddress.getText());
+		Random rn = new Random();
+		int i = rn.nextInt(10000);
+		System.out.println(i);
+		er = new EventHandler(dec, area1, area1, Integer.toString(i));
 		ert = new Thread(er);
 		ert.start();
 	}

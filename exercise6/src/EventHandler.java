@@ -20,7 +20,7 @@ public class EventHandler implements Runnable {
 	}
 
 	/*
-	 * This class implements the interface ClosedConnectionListener. 
+	 * This class implements the interface ClosedConnectionListener.
 	 */
 	private class ConnectionListener implements ClosedConnectionListener {
 		public void notifyClosedConnection() {
@@ -65,7 +65,9 @@ public class EventHandler implements Runnable {
 								EventQueue.invokeLater(new Runnable() {
 									public void run() {
 										try {
+											dec.disabled = true;
 											area2.insert(tie.getText(), tie.getOffset());
+											dec.disabled = false;
 										} catch (Exception e) {
 											System.err.println(e);
 										}
@@ -76,7 +78,9 @@ public class EventHandler implements Runnable {
 								EventQueue.invokeLater(new Runnable() {
 									public void run() {
 										try {
+											dec.disabled = true;
 											area2.replaceRange(null, tre.getOffset(), tre.getOffset() + tre.getLength());
+											dec.disabled = false;
 										} catch (Exception e) {
 											System.err.println(e);
 										}
