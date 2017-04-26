@@ -10,7 +10,7 @@ import java.lang.Integer;
 
 public class DistributedTextEditor extends JFrame {
 	private static final long serialVersionUID = 1L;
-	private JTextArea area1 = new JTextArea(20, 60);
+	private JTextArea area = new JTextArea(20, 60);
 	private JTextField ipaddress; // "IP address here"
 	private JTextField portNumber = new JTextField("40499");
 	private EventHandler er;
@@ -29,14 +29,14 @@ public class DistributedTextEditor extends JFrame {
 			e.printStackTrace();
 		}
 
-		area1.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		area.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
-		((AbstractDocument) area1.getDocument()).setDocumentFilter(dec);
+		((AbstractDocument) area.getDocument()).setDocumentFilter(dec);
 
 		Container content = getContentPane();
 		content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
 
-		JScrollPane scroll1 = new JScrollPane(area1, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+		JScrollPane scroll1 = new JScrollPane(area, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		content.add(scroll1, BorderLayout.CENTER);
 
@@ -68,14 +68,14 @@ public class DistributedTextEditor extends JFrame {
 
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		pack();
-		area1.addKeyListener(k1);
+		area.addKeyListener(k1);
 		setTitle("Disconnected");
 		setVisible(true);
 
 		Random rn = new Random();
 		int i = rn.nextInt(10000);
 		System.out.println(i);
-		er = new EventHandler(dec, area1, area1, Integer.toString(i));
+		er = new EventHandler(dec, area, Integer.toString(i));
 		ert = new Thread(er);
 		ert.start();
 	}
@@ -93,16 +93,17 @@ public class DistributedTextEditor extends JFrame {
 
 		public void actionPerformed(ActionEvent e) {
 			saveOld();
-			area1.setText("");
+			area.setText("");
 			try {
-				server = new Server(er, Integer.parseInt(portNumber.getText()), DistributedTextEditor.this);
-				client = new Client(ipaddress.getText(), er, Integer.parseInt(portNumber.getText()), DistributedTextEditor.this);
+				server = new Server(Integer.parseInt(portNumber.getText()), DistributedTextEditor.this);
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
 			new Thread(server).start();
+
 			while(true) {
 				if (server.isReadyForConnection()) {
+					client = new Client(ipaddress.getText(), er, Integer.parseInt(portNumber.getText()), DistributedTextEditor.this);
 					new Thread(client).start();
 					break;
 				}
@@ -123,7 +124,7 @@ public class DistributedTextEditor extends JFrame {
 
 		public void actionPerformed(ActionEvent e) {
 			saveOld();
-			area1.setText("");
+			area.setText("");
 			client = new Client(ipaddress.getText(), er, Integer.parseInt(portNumber.getText()), DistributedTextEditor.this);
 			new Thread(client).start();
 			setTitle("Trying to connect to " + ipaddress.getText() + ":" + portNumber.getText());
@@ -140,7 +141,7 @@ public class DistributedTextEditor extends JFrame {
 
 		public void actionPerformed(ActionEvent e) {
 			setTitle("Disconnected");
-			area1.setText("");
+			area.setText("");
 			if (client != null) {
 				client.disconnect();
 			}
@@ -178,7 +179,7 @@ public class DistributedTextEditor extends JFrame {
 		}
 	};
 
-	ActionMap m = area1.getActionMap();
+	ActionMap m = area.getActionMap();
 
 	Action Copy = m.get(DefaultEditorKit.copyAction);
 	Action Paste = m.get(DefaultEditorKit.pasteAction);
@@ -199,7 +200,7 @@ public class DistributedTextEditor extends JFrame {
 	private void saveFile(String fileName) {
 		try {
 			FileWriter w = new FileWriter(fileName);
-			area1.write(w);
+			area.write(w);
 			w.close();
 			currentFile = fileName;
 			changed = false;

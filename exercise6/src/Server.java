@@ -12,8 +12,7 @@ public class Server extends Thread {
 	private LinkedBlockingQueue<MyTextEvent> eventQueue = new LinkedBlockingQueue<MyTextEvent>();
 	private ArrayList<ConnectionHandler> connectionList = new ArrayList<>();
 
-	public Server(EventHandler er, int port, DistributedTextEditor frame) throws IOException {
-		this.eventHandler = er;
+	public Server(int port, DistributedTextEditor frame) throws IOException {
 		this.port = port;
 		this.frame = frame;
 		serverSocket = new ServerSocket(port);
@@ -44,6 +43,8 @@ public class Server extends Thread {
 					broadcastEvents();
 				} catch (IOException e) {
 					e.printStackTrace();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
 			}
 		}).start();
@@ -71,14 +72,14 @@ public class Server extends Thread {
 				}).start();
 			} catch (SocketTimeoutException s) {
 				System.out.println("Socket timed out!");
+				handler.closeConnection();
+				connectionList.remove(handler);
 				break;
 			} catch (IOException e) {
 				System.err.println(e);
-				break;
-			}
-			finally {
 				handler.closeConnection();
 				connectionList.remove(handler);
+				break;
 			}
 		}
 	}
@@ -92,16 +93,13 @@ public class Server extends Thread {
 		}
 	}
 
-	public void broadcastEvents() throws IOException {
+	public void broadcastEvents() throws IOException, InterruptedException {
 		while(true){
 			if(!eventQueue.isEmpty()){
+				MyTextEvent event = eventQueue.take();
 				for(ConnectionHandler connection : connectionList){
 					if(!connection.isClosed()) {
-						try {
-							connection.sendObject(eventQueue.take());
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
+						connection.sendObject(event);
 					} else {
 						connectionList.remove(connection);
 					}
@@ -110,9 +108,6 @@ public class Server extends Thread {
 		}
 	}
 
-	public ConnectionHandler getConnectionHandler() {
-		return handler;
-	}
 
 	public boolean isReadyForConnection(){
 		return serverSocket.isBound();

@@ -8,14 +8,12 @@ public class EventHandler implements Runnable {
 
 	private String ip;
 	private DocumentEventCapturer dec;
-	private JTextArea area1;
-	private JTextArea area2;
+	private JTextArea area;
 	private ConnectionHandler connectionHandler;
 
-	public EventHandler(DocumentEventCapturer dec, JTextArea area1, JTextArea area2, String ip) {
+	public EventHandler(DocumentEventCapturer dec, JTextArea area, String ip) {
 		this.dec = dec;
-		this.area1 = area1;
-		this.area2 = area2;
+		this.area = area;
 		this.ip = ip;
 	}
 
@@ -24,11 +22,12 @@ public class EventHandler implements Runnable {
 	 */
 	private class ConnectionListener implements ClosedConnectionListener {
 		public void notifyClosedConnection() {
-			area1.setText("");
-			area2.setBackground(Color.RED);
-			area2.setText("");
+			area.setText("");
+			area.setBackground(Color.RED);
+			area.setText("");
 		}
 	}
+
 
 	/*
 	 * Sets the ConnectionHandler object and add a ConnectionListener to it, that we use in the run method.
@@ -36,7 +35,7 @@ public class EventHandler implements Runnable {
 	public void setConnectionHandler(ConnectionHandler h) {
 		connectionHandler = h;
 		connectionHandler.addListener(new ConnectionListener());
-		area2.setBackground(Color.WHITE);
+		area.setBackground(Color.WHITE);
 	}
 
 	/*
@@ -58,7 +57,8 @@ public class EventHandler implements Runnable {
 										public void run() {
 											try {
 												dec.disabled = true;
-												area2.insert(tie.getText(), tie.getOffset());
+												//area.insert(tie.getText(), tie.getOffset());
+												area.append(tie.getText());
 												dec.disabled = false;
 											} catch (Exception e) {
 												System.err.println(e);
@@ -71,7 +71,7 @@ public class EventHandler implements Runnable {
 										public void run() {
 											try {
 												dec.disabled = true;
-												area2.replaceRange(null, tre.getOffset(), tre.getOffset() + tre.getLength());
+												area.replaceRange(null, tre.getOffset(), tre.getOffset() + tre.getLength());
 												dec.disabled = false;
 											} catch (Exception e) {
 												System.err.println(e);
@@ -105,9 +105,8 @@ public class EventHandler implements Runnable {
 		while (!wasInterrupted) {
 			try {
 				MyTextEvent mte = dec.take();
-				MessageWrapper mw = new MessageWrapper(ip, mte);
 				if (connectionHandler != null && !connectionHandler.isClosed()) {
-					connectionHandler.sendObject(mw);
+					connectionHandler.sendObject(mte);
 				}
 			} catch (IOException ex) {
 				connectionHandler.closeConnection();
