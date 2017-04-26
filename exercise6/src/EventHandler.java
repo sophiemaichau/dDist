@@ -48,13 +48,12 @@ public class EventHandler implements Runnable {
 			public void run() {
 				while (true) {
 					if (connectionHandler != null && !connectionHandler.isClosed()) {
-						MessageWrapper mw = null;
+						MyTextEvent mw = null;
 						try {
 							// blocks until received object
-							mw = (MessageWrapper) connectionHandler.receiveObject();
-							if(!mw.getIp().equals(ip)) {
-								if (mw.getMte() instanceof TextInsertEvent) {
-									final TextInsertEvent tie = (TextInsertEvent) mw.getMte();
+							mw = (MyTextEvent) connectionHandler.receiveObject();
+								if (mw instanceof TextInsertEvent) {
+									final TextInsertEvent tie = (TextInsertEvent) mw;
 									EventQueue.invokeLater(new Runnable() {
 										public void run() {
 											try {
@@ -66,8 +65,8 @@ public class EventHandler implements Runnable {
 											}
 										}
 									});
-								} else if (mw.getMte() instanceof TextRemoveEvent) {
-									final TextRemoveEvent tre = (TextRemoveEvent) mw.getMte();
+								} else if (mw instanceof TextRemoveEvent) {
+									final TextRemoveEvent tre = (TextRemoveEvent) mw;
 									EventQueue.invokeLater(new Runnable() {
 										public void run() {
 											try {
@@ -80,9 +79,9 @@ public class EventHandler implements Runnable {
 										}
 									});
 								}
-							}
 						} catch (IOException ex) {
 							sleep(10);
+							ex.printStackTrace();
 							System.out.println("closing connection with server.");
 							connectionHandler.closeConnection();
 

@@ -1,5 +1,7 @@
 import java.net.*;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Server extends Thread {
 	private ServerSocket serverSocket;
@@ -7,6 +9,8 @@ public class Server extends Thread {
 	private ConnectionHandler handler;
 	private EventHandler eventHandler;
 	private DistributedTextEditor frame;
+	private LinkedBlockingQueue<MyTextEvent> eventQueue = new LinkedBlockingQueue<MyTextEvent>();
+	private ArrayList<ConnectionHandler> connectionList = new ArrayList<>();
 
 	public Server(EventHandler er, int port, DistributedTextEditor frame) throws IOException {
 		this.eventHandler = er;
@@ -33,6 +37,17 @@ public class Server extends Thread {
 	 */
 	@SuppressWarnings("static-access")
 	public void run() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					broadcastEvents();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+
 		while (Thread.currentThread().isInterrupted() == false) {
 			try {
 				System.out.println("Waiting for client on "
@@ -44,13 +59,53 @@ public class Server extends Thread {
 				ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
 				ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
 				handler = new ConnectionHandler(socket, objInputStream, objOutStream);
-				eventHandler.setConnectionHandler(handler);
+				connectionList.add(handler);
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							incomingEvents(handler);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}).start();
 			} catch (SocketTimeoutException s) {
 				System.out.println("Socket timed out!");
 				break;
 			} catch (IOException e) {
 				System.err.println(e);
 				break;
+			}
+			finally {
+				handler.closeConnection();
+				connectionList.remove(handler);
+			}
+		}
+	}
+
+	public void incomingEvents(ConnectionHandler handler) throws IOException {
+		while(true) {
+			if(!handler.isClosed()) {
+				MyTextEvent textEvent = (MyTextEvent) handler.receiveObject();
+				eventQueue.add(textEvent);
+			}
+		}
+	}
+
+	public void broadcastEvents() throws IOException {
+		while(true){
+			if(!eventQueue.isEmpty()){
+				for(ConnectionHandler connection : connectionList){
+					if(!connection.isClosed()) {
+						try {
+							connection.sendObject(eventQueue.take());
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					} else {
+						connectionList.remove(connection);
+					}
+				}
 			}
 		}
 	}
@@ -59,9 +114,15 @@ public class Server extends Thread {
 		return handler;
 	}
 
+	public boolean isReadyForConnection(){
+		return serverSocket.isBound();
+	}
+
 	public void shutdown() {
-		if (handler != null) {
-			handler.closeConnection();
+		for(ConnectionHandler handler : connectionList) {
+			if (handler != null) {
+				handler.closeConnection();
+			}
 		}
 		try {
 			serverSocket.close();

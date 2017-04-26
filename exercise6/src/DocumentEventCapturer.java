@@ -43,7 +43,6 @@ public class DocumentEventCapturer extends DocumentFilter {
     if (!disabled) {
       eventHistory.add(new TextInsertEvent(offset, str));
     }
-    super.insertString(fb, offset, str, a);
   }
 
   /* Queue a copy of the event and then modify the textarea */
@@ -51,7 +50,6 @@ public class DocumentEventCapturer extends DocumentFilter {
     if (!disabled) {
       eventHistory.add(new TextRemoveEvent(offset, length));
     }
-    super.remove(fb, offset, length);
   }
 
   /* Queue a copy of the event and then modify the text */
@@ -62,6 +60,5 @@ public class DocumentEventCapturer extends DocumentFilter {
       }
       eventHistory.add(new TextInsertEvent(offset, str));
     }
-    super.replace(fb, offset, length, str, a);
   }
 }

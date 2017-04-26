@@ -96,10 +96,17 @@ public class DistributedTextEditor extends JFrame {
 			area1.setText("");
 			try {
 				server = new Server(er, Integer.parseInt(portNumber.getText()), DistributedTextEditor.this);
+				client = new Client(ipaddress.getText(), er, Integer.parseInt(portNumber.getText()), DistributedTextEditor.this);
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
 			new Thread(server).start();
+			while(true) {
+				if (server.isReadyForConnection()) {
+					new Thread(client).start();
+					break;
+				}
+			}
 			changed = false;
 			Save.setEnabled(false);
 			SaveAs.setEnabled(false);
