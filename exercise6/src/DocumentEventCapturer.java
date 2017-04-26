@@ -40,8 +40,10 @@ public class DocumentEventCapturer extends DocumentFilter {
 
   /* Queue a copy of the event and then modify the textarea */
   public void insertString(FilterBypass fb, int offset, String str, AttributeSet a) throws BadLocationException {
-    if (!disabled) {
-      eventHistory.add(new TextInsertEvent(offset, str));
+    if(!disabled) {
+    eventHistory.add(new TextInsertEvent(offset, str));
+    } else {
+      super.insertString(fb, offset, str, a);
     }
   }
 
@@ -49,6 +51,8 @@ public class DocumentEventCapturer extends DocumentFilter {
   public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
     if (!disabled) {
       eventHistory.add(new TextRemoveEvent(offset, length));
+    } else{
+      super.remove(fb, offset, length);
     }
   }
 
@@ -59,6 +63,8 @@ public class DocumentEventCapturer extends DocumentFilter {
         eventHistory.add(new TextRemoveEvent(offset, length));
       }
       eventHistory.add(new TextInsertEvent(offset, str));
+    } else {
+      super.replace(fb, offset, length, str, a);
     }
   }
 }

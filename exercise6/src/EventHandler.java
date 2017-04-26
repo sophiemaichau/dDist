@@ -57,8 +57,7 @@ public class EventHandler implements Runnable {
 										public void run() {
 											try {
 												dec.disabled = true;
-												//area.insert(tie.getText(), tie.getOffset());
-												area.append(tie.getText());
+												area.insert(tie.getText(), tie.getOffset());
 												dec.disabled = false;
 											} catch (Exception e) {
 												System.err.println(e);
