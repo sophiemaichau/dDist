@@ -116,7 +116,6 @@ public class DistributedTextEditor extends JFrame {
 						RemoteList<Pair<String, Long>> stub = (RemoteList<Pair<String, Long>>) UnicastRemoteObject.exportObject(connectionList, 0);
 						Registry registry = LocateRegistry.getRegistry();
 						registry.rebind(name, stub);
-						stub.add(new Pair<String, Long>(ipaddress.getText(), System.currentTimeMillis()));
 						System.out.println("connectionList bound");
 
 						client = new Client(ipaddress.getText(), er, Integer.parseInt(portNumber.getText()), DistributedTextEditor.this);

@@ -1,7 +1,5 @@
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.net.Socket;
-import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -15,6 +13,7 @@ public class Client implements Runnable {
 	private Socket socket = null;
 	private int port;
 	DistributedTextEditor frame;
+	RemoteList<Pair<String, Long>> backupStub = null;
 
 	public Client(String serverIP, EventHandler er, int port, DistributedTextEditor frame) {
 		this.frame = frame;
@@ -37,20 +36,59 @@ public class Client implements Runnable {
 				frame.clientConnected();
 				RemoteList<Pair<String, Long>> stub = setupRMI(serverIP);
 				stub.add(new Pair<>(socket.getInetAddress().getLocalHost().getHostAddress().toString(), System.currentTimeMillis()));
-				System.out.println(stub.prettyToString());
+				backupStub = deepCopy(stub);
 				// For sending objects to the server
 				ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
 				ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
 				objOutStream.flush();
 				handler = new ConnectionHandler(socket, objInputStream, objOutStream);
 				eventHandler.setConnectionHandler(handler);
+				new Thread(new Runnable(){
+					@Override
+					public void run() {
+						try {
+							while(true) {
+								if(!handler.isClosed()) {
+									stub.prettyToString();
+									backupStub = deepCopy(stub);
+									System.out.println("backupStub: " + backupStub.prettyToString());
+								}
+								Thread.sleep(10000);
+							}
+						} catch (RemoteException e) {
+							e.printStackTrace();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						} catch (IOException e) {
+							e.printStackTrace();
+						} catch (ClassNotFoundException e) {
+							e.printStackTrace();
+						}
+					}
+				}).start();
 			} catch (IOException e) {
 				System.err.println(e);
 				disconnect();
 			} catch (NotBoundException e) {
 				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
 			}
 		}
+	}
+
+	private RemoteList<Pair<String,Long>> deepCopy(RemoteList<Pair<String, Long>> stub) throws IOException, ClassNotFoundException {
+		// Convert stub to a stream of bytes
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(bos);
+		oos.writeObject(stub);
+		oos.flush();
+		oos.close();
+		byte[] byteData = bos.toByteArray();
+
+		// Restore copy of stub from a stream of bytes
+		ByteArrayInputStream bais = new ByteArrayInputStream(byteData);
+		return (RemoteList<Pair<String, Long>>) new ObjectInputStream(bais).readObject();
 	}
 
 	private RemoteList<Pair<String,Long>> setupRMI(String ip) throws RemoteException, NotBoundException {
