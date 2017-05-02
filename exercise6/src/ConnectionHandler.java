@@ -84,5 +84,9 @@ public class ConnectionHandler {
         this.socket = socket;
     }
 
-
+    public boolean equal(Object o) {
+        if (o instanceof ConnectionHandler) {
+            return o.toString().equals(this.toString());
+        } else { return false;}
+    }
 }

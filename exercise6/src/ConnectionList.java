@@ -42,4 +42,14 @@ public class ConnectionList<E> implements RemoteList<E>, Serializable {
     public String prettyToString() throws RemoteException {
         return connectionList.toString();
     }
+
+    @Override
+    public void clear() throws RemoteException {
+        connectionList.clear();
+    }
+
+    @Override
+    public int size() throws RemoteException {
+        return connectionList.size();
+    }
 }

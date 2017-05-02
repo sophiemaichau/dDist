@@ -21,6 +21,11 @@ public class Server extends Thread {
 		this.port = port;
 		this.frame = frame;
 		serverSocket = new ServerSocket(port);
+		try {
+			stub = setupRMI();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
 	}
 
 	protected Socket waitForConnectionFromClient() {
@@ -41,13 +46,12 @@ public class Server extends Thread {
 	 */
 	@SuppressWarnings("static-access")
 	public void run() {
+
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
 					broadcastEvents();
-				} catch (IOException e) {
-					e.printStackTrace();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -89,6 +93,17 @@ public class Server extends Thread {
 		}
 	}
 
+	private RemoteList<Pair<String,Long>> setupRMI() throws RemoteException {
+		//setup RMI
+		String name = "connectionList";
+		RemoteList<Pair<String, Long>> connectionList = new ConnectionList<>();
+		RemoteList<Pair<String, Long>> stub = (RemoteList<Pair<String, Long>>) UnicastRemoteObject.exportObject(connectionList, 0);
+		Registry registry = LocateRegistry.getRegistry();
+		registry.rebind(name, stub);
+		System.out.println("connectionList bound");
+		return stub;
+	}
+
 
 	public void incomingEvents(ConnectionHandler handler) throws IOException {
 		while(true) {
@@ -99,16 +114,24 @@ public class Server extends Thread {
 		}
 	}
 
-	public void broadcastEvents() throws IOException, InterruptedException {
+	public void broadcastEvents() throws InterruptedException {
 		while(true){
 			if(!eventQueue.isEmpty()){
 				MyTextEvent event = eventQueue.take();
+				ArrayList<ConnectionHandler> removeList = new ArrayList<>();
+				System.out.println("taking event out of queue: " + event + "and sending to: " + connectionHandlerList);
 				for(ConnectionHandler connection : connectionHandlerList){
-					if(!connection.isClosed()) {
+					System.out.println("in item: " + connection);
+					try {
 						connection.sendObject(event);
-					} else {
-						connectionHandlerList.remove(connection);
+						System.out.println("succesfully sent object to: " + connection);
+					} catch (IOException e) {
+						e.printStackTrace();
+						removeList.add(connection);
 					}
+				}
+				for (ConnectionHandler c : removeList) {
+					connectionHandlerList.remove(c);
 				}
 			}
 		}
@@ -133,7 +156,10 @@ public class Server extends Thread {
 		interrupt();
 	}
 
-	public void setStub(RemoteList<Pair<String, Long>> stub) {
-		this.stub = stub;
+	public void replaceStub(RemoteList<Pair<String, Long>> list) throws RemoteException {
+		stub.clear();
+		for (int i = 0; i < list.size() - 1; i++) {
+			stub.add(list.get(i));
+		}
 	}
 }

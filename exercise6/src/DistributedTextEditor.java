@@ -82,7 +82,7 @@ public class DistributedTextEditor extends JFrame {
 		Random rn = new Random();
 		int i = rn.nextInt(10000);
 		System.out.println(i);
-		er = new EventHandler(dec, area, Integer.toString(i), Integer.parseInt(portNumber.getText()), DistributedTextEditor.this);
+		er = new EventHandler(dec, area, ipaddress.getText(), Integer.parseInt(portNumber.getText()), DistributedTextEditor.this);
 		ert = new Thread(er);
 		ert.start();
 	}
@@ -111,22 +111,9 @@ public class DistributedTextEditor extends JFrame {
 			while(true) {
 				if (server.isReadyForConnection()) {
 					try {
-						//setup RMI
-						String name = "connectionList";
-						RemoteList<Pair<String, Long>> connectionList = new ConnectionList<>();
-						RemoteList<Pair<String, Long>> stub = (RemoteList<Pair<String, Long>>) UnicastRemoteObject.exportObject(connectionList, 0);
-						Registry registry = LocateRegistry.getRegistry();
-						registry.rebind(name, stub);
-						System.out.println("connectionList bound");
-						server.setStub(stub);
-
 						client = new Client(ipaddress.getText(), er, Integer.parseInt(portNumber.getText()), DistributedTextEditor.this);
 						new Thread(client).start();
 						System.out.println("Started client");
-					} catch (AccessException e1) {
-						e1.printStackTrace();
-					} catch (RemoteException e1) {
-						e1.printStackTrace();
 					} finally {
 						break;
 					}
@@ -165,8 +152,8 @@ public class DistributedTextEditor extends JFrame {
 
 		public void actionPerformed(ActionEvent e) {
 			setTitle("Disconnected");
-			area.setText("");
 			if (client != null) {
+				er.clientClosed = true;
 				client.disconnect();
 			}
 			if (server != null) {

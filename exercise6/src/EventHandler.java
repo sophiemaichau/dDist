@@ -13,6 +13,7 @@ public class EventHandler implements Runnable {
 	private int portNumber;
 	private DistributedTextEditor distributedTextEditor;
 	private Client client;
+	public boolean clientClosed = false;
 
 	public EventHandler(DocumentEventCapturer dec, JTextArea area, String ip, int portNumber, DistributedTextEditor distributedTextEditor) {
 		this.dec = dec;
@@ -26,6 +27,8 @@ public class EventHandler implements Runnable {
         this.client = client;
     }
 
+
+
     /*
      * This class implements the interface ClosedConnectionListener.
      */
@@ -37,19 +40,17 @@ public class EventHandler implements Runnable {
 			*/
 
 			try {
-                if (client.getBackupStub().get(1).getIp().equals(ip)) {
-                    client.getBackupStub().remove(0);
-                    Server s = new Server(portNumber, distributedTextEditor);
-                    s.setStub(client.getBackupStub());
-                    new Thread(() -> {
-                        s.start();
-                    });
+                System.out.println(client.getBackupStub().prettyToString());
+                System.out.println("own ip: " + ip);
+                if (!clientClosed && client.getBackupStub().get(1).getIp().equals(ip)) {
+                    //client.getBackupStub().remove(0);
+                    System.out.println("trying to start new server...");
+                    distributedTextEditor.Listen.actionPerformed(null);
                 }
 
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-
 
 		}
 	}
@@ -126,8 +127,7 @@ public class EventHandler implements Runnable {
 		// runs in own thread
 		listenOnPeerEvent();
 
-		boolean wasInterrupted = false;
-		while (!wasInterrupted) {
+		while (true) {
 			try {
 				MyTextEvent mte = dec.take();
 				if (connectionHandler != null && !connectionHandler.isClosed()) {
@@ -143,7 +143,6 @@ public class EventHandler implements Runnable {
 
 			}
 		}
-		System.out.println("I'm the thread running the EventHandler, now I die!");
 	}
 
 	public void sleep(int i) {

@@ -13,8 +13,6 @@ public class Client implements Runnable {
 	private Socket socket = null;
 	private int port;
 	private DistributedTextEditor frame;
-
-
     private RemoteList<Pair<String, Long>> backupStub = null;
 
 	public Client(String serverIP, EventHandler er, int port, DistributedTextEditor frame) {
@@ -36,6 +34,7 @@ public class Client implements Runnable {
 		if (socket != null) {
 			try {
 				frame.clientConnected();
+
 				RemoteList<Pair<String, Long>> stub = setupRMI(serverIP);
 				stub.add(new Pair<>(socket.getInetAddress().getLocalHost().getHostAddress().toString(), System.currentTimeMillis()));
 				backupStub = deepCopy(stub);
@@ -45,6 +44,7 @@ public class Client implements Runnable {
 				objOutStream.flush();
 				handler = new ConnectionHandler(socket, objInputStream, objOutStream);
 				eventHandler.setConnectionHandler(handler);
+				eventHandler.clientClosed = false;
 				eventHandler.setClient(this);
 				new Thread(new Runnable(){
 					@Override

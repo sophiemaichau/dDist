@@ -9,5 +9,6 @@ public interface RemoteList<E> extends Remote {
     boolean contains(E e) throws RemoteException;
     E get(int i) throws RemoteException;
     String prettyToString() throws RemoteException;
-
+    void clear() throws RemoteException;
+    int size() throws RemoteException;
 }
