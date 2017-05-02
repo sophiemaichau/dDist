@@ -104,6 +104,11 @@ public class EventHandler implements Runnable {
 											}
 										}
 									});
+								} else if(mw instanceof TextCopyEvent){
+									final TextCopyEvent tce = (TextCopyEvent) mw;
+									dec.disabled = true;
+									area.setText(tce.getCopiedText());
+									dec.disabled = false;
 								}
 						} catch (IOException ex) {
 							sleep(10);

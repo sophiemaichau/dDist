@@ -17,7 +17,7 @@ import java.lang.Integer;
 
 public class DistributedTextEditor extends JFrame {
 	private static final long serialVersionUID = 1L;
-	private JTextArea area = new JTextArea(20, 60);
+	public JTextArea area = new JTextArea(20, 60);
 	private JTextField ipaddress; // "IP address here"
 	private JTextField portNumber = new JTextField("40499");
 	private EventHandler er;

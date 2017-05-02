@@ -70,6 +70,7 @@ public class Server extends Thread {
 				ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
 				handler = new ConnectionHandler(socket, objInputStream, objOutStream);
 				connectionHandlerList.add(handler);
+				handler.sendObject(new TextCopyEvent(0, frame.area.getText()));
 				new Thread(new Runnable() {
 					public void run() {
 						try {
