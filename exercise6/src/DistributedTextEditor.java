@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.net.InetAddress;
+import java.rmi.AccessException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -81,7 +82,7 @@ public class DistributedTextEditor extends JFrame {
 		Random rn = new Random();
 		int i = rn.nextInt(10000);
 		System.out.println(i);
-		er = new EventHandler(dec, area, Integer.toString(i));
+		er = new EventHandler(dec, area, Integer.toString(i), Integer.parseInt(portNumber.getText()), DistributedTextEditor.this);
 		ert = new Thread(er);
 		ert.start();
 	}
@@ -109,20 +110,22 @@ public class DistributedTextEditor extends JFrame {
 
 			while(true) {
 				if (server.isReadyForConnection()) {
-					// RMI
 					try {
+						//setup RMI
 						String name = "connectionList";
 						RemoteList<Pair<String, Long>> connectionList = new ConnectionList<>();
 						RemoteList<Pair<String, Long>> stub = (RemoteList<Pair<String, Long>>) UnicastRemoteObject.exportObject(connectionList, 0);
 						Registry registry = LocateRegistry.getRegistry();
 						registry.rebind(name, stub);
 						System.out.println("connectionList bound");
+						server.setStub(stub);
 
 						client = new Client(ipaddress.getText(), er, Integer.parseInt(portNumber.getText()), DistributedTextEditor.this);
 						new Thread(client).start();
 						System.out.println("Started client");
+					} catch (AccessException e1) {
+						e1.printStackTrace();
 					} catch (RemoteException e1) {
-						System.err.println("connectionList exception: ");
 						e1.printStackTrace();
 					} finally {
 						break;

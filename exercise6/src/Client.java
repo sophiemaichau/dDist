@@ -7,13 +7,15 @@ import java.rmi.registry.Registry;
 
 public class Client implements Runnable {
 
-	private ConnectionHandler handler;
+    private ConnectionHandler handler;
 	private String serverIP;
 	private EventHandler eventHandler;
 	private Socket socket = null;
 	private int port;
-	DistributedTextEditor frame;
-	RemoteList<Pair<String, Long>> backupStub = null;
+	private DistributedTextEditor frame;
+
+
+    private RemoteList<Pair<String, Long>> backupStub = null;
 
 	public Client(String serverIP, EventHandler er, int port, DistributedTextEditor frame) {
 		this.frame = frame;
@@ -43,6 +45,7 @@ public class Client implements Runnable {
 				objOutStream.flush();
 				handler = new ConnectionHandler(socket, objInputStream, objOutStream);
 				eventHandler.setConnectionHandler(handler);
+				eventHandler.setClient(this);
 				new Thread(new Runnable(){
 					@Override
 					public void run() {
@@ -120,4 +123,16 @@ public class Client implements Runnable {
 		}
 		return res;
 	}
+
+    public RemoteList<Pair<String, Long>> getBackupStub() {
+        return backupStub;
+    }
+
+    public ConnectionHandler getHandler() {
+        return handler;
+    }
+
+    public void setHandler(ConnectionHandler handler) {
+        this.handler = handler;
+    }
 }

@@ -19,6 +19,11 @@ public class ConnectionList<E> implements RemoteList<E>, Serializable {
     }
 
     @Override
+    public E remove(int i) throws RemoteException {
+        return connectionList.remove(i);
+    }
+
+    @Override
     public boolean isEmpty() throws RemoteException {
         return connectionList.isEmpty();
     }

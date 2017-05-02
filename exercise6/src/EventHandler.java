@@ -1,4 +1,4 @@
-import javax.swing.JTextArea;
+import javax.swing.*;
 
 import java.awt.Color;
 import java.awt.EventQueue;
@@ -10,21 +10,47 @@ public class EventHandler implements Runnable {
 	private DocumentEventCapturer dec;
 	private JTextArea area;
 	private ConnectionHandler connectionHandler;
+	private int portNumber;
+	private DistributedTextEditor distributedTextEditor;
+	private Client client;
 
-	public EventHandler(DocumentEventCapturer dec, JTextArea area, String ip) {
+	public EventHandler(DocumentEventCapturer dec, JTextArea area, String ip, int portNumber, DistributedTextEditor distributedTextEditor) {
 		this.dec = dec;
 		this.area = area;
 		this.ip = ip;
+        this.portNumber = portNumber;
+        this.distributedTextEditor = distributedTextEditor;
 	}
 
-	/*
-	 * This class implements the interface ClosedConnectionListener.
-	 */
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    /*
+     * This class implements the interface ClosedConnectionListener.
+     */
 	private class ConnectionListener implements ClosedConnectionListener {
 		public void notifyClosedConnection() {
-			area.setText("");
+			/*area.setText("");
 			area.setBackground(Color.RED);
 			area.setText("");
+			*/
+
+			try {
+                if (client.getBackupStub().get(1).getIp().equals(ip)) {
+                    client.getBackupStub().remove(0);
+                    Server s = new Server(portNumber, distributedTextEditor);
+                    s.setStub(client.getBackupStub());
+                    new Thread(() -> {
+                        s.start();
+                    });
+                }
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+
 		}
 	}
 

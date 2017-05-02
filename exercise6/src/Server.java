@@ -1,5 +1,9 @@
 import java.net.*;
 import java.io.*;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -10,7 +14,8 @@ public class Server extends Thread {
 	private EventHandler eventHandler;
 	private DistributedTextEditor frame;
 	private LinkedBlockingQueue<MyTextEvent> eventQueue = new LinkedBlockingQueue<MyTextEvent>();
-	private ArrayList<ConnectionHandler> connectionList = new ArrayList<>();
+	private ArrayList<ConnectionHandler> connectionHandlerList = new ArrayList<>();
+	private RemoteList<Pair<String, Long>> stub;
 
 	public Server(int port, DistributedTextEditor frame) throws IOException {
 		this.port = port;
@@ -60,7 +65,7 @@ public class Server extends Thread {
 				ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
 				ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
 				handler = new ConnectionHandler(socket, objInputStream, objOutStream);
-				connectionList.add(handler);
+				connectionHandlerList.add(handler);
 				new Thread(new Runnable() {
 					public void run() {
 						try {
@@ -73,16 +78,17 @@ public class Server extends Thread {
 			} catch (SocketTimeoutException s) {
 				System.out.println("Socket timed out!");
 				handler.closeConnection();
-				connectionList.remove(handler);
+				connectionHandlerList.remove(handler);
 				break;
 			} catch (IOException e) {
 				System.err.println(e);
 				handler.closeConnection();
-				connectionList.remove(handler);
+				connectionHandlerList.remove(handler);
 				break;
 			}
 		}
 	}
+
 
 	public void incomingEvents(ConnectionHandler handler) throws IOException {
 		while(true) {
@@ -97,11 +103,11 @@ public class Server extends Thread {
 		while(true){
 			if(!eventQueue.isEmpty()){
 				MyTextEvent event = eventQueue.take();
-				for(ConnectionHandler connection : connectionList){
+				for(ConnectionHandler connection : connectionHandlerList){
 					if(!connection.isClosed()) {
 						connection.sendObject(event);
 					} else {
-						connectionList.remove(connection);
+						connectionHandlerList.remove(connection);
 					}
 				}
 			}
@@ -114,7 +120,7 @@ public class Server extends Thread {
 	}
 
 	public void shutdown() {
-		for(ConnectionHandler handler : connectionList) {
+		for(ConnectionHandler handler : connectionHandlerList) {
 			if (handler != null) {
 				handler.closeConnection();
 			}
@@ -125,5 +131,9 @@ public class Server extends Thread {
 			System.err.println(e);
 		}
 		interrupt();
+	}
+
+	public void setStub(RemoteList<Pair<String, Long>> stub) {
+		this.stub = stub;
 	}
 }
