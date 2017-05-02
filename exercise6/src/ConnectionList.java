@@ -27,4 +27,14 @@ public class ConnectionList<E> implements RemoteList<E>, Serializable {
     public boolean contains(E e) throws RemoteException {
         return connectionList.contains(e);
     }
+
+    @Override
+    public E get(int i) throws RemoteException {
+        return connectionList.get(i);
+    }
+
+    @Override
+    public String prettyToString() throws RemoteException {
+        return connectionList.toString();
+    }
 }

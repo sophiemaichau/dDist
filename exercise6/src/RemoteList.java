@@ -7,4 +7,6 @@ public interface RemoteList<E> extends Remote {
     boolean remove(E e) throws RemoteException;
     boolean isEmpty() throws RemoteException;
     boolean contains(E e) throws RemoteException;
+    E get(int i) throws RemoteException;
+    String prettyToString() throws RemoteException;
 }

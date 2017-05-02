@@ -2,21 +2,25 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.io.IOException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 
 public class Client implements Runnable {
 
 	private ConnectionHandler handler;
-	private String serverName;
+	private String serverIP;
 	private EventHandler eventHandler;
 	private Socket socket = null;
 	private int port;
 	DistributedTextEditor frame;
 
-	public Client(String serverName, EventHandler er, int port, DistributedTextEditor frame) {
+	public Client(String serverIP, EventHandler er, int port, DistributedTextEditor frame) {
 		this.frame = frame;
 		this.eventHandler = er;
 		this.port = port;
-		this.serverName = serverName;
+		this.serverIP = serverIP;
 	}
 
 	/*
@@ -27,11 +31,13 @@ public class Client implements Runnable {
 	 */
 	public void run() {
 		System.out.println("Starting client. Type CTRL-D to shut down.");
-		socket = connectToServer(serverName);
+		socket = connectToServer(serverIP);
 		if (socket != null) {
-			frame.clientConnected();
-			System.out.println("Connected to " + socket);
 			try {
+				frame.clientConnected();
+				RemoteList<Pair<String, Long>> stub = setupRMI(serverIP);
+				stub.add(new Pair<>(socket.getInetAddress().getLocalHost().getHostAddress().toString(), System.currentTimeMillis()));
+				System.out.println(stub.prettyToString());
 				// For sending objects to the server
 				ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
 				ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
@@ -41,8 +47,16 @@ public class Client implements Runnable {
 			} catch (IOException e) {
 				System.err.println(e);
 				disconnect();
+			} catch (NotBoundException e) {
+				e.printStackTrace();
 			}
 		}
+	}
+
+	private RemoteList<Pair<String,Long>> setupRMI(String ip) throws RemoteException, NotBoundException {
+		String name = "connectionList";
+		Registry registry = LocateRegistry.getRegistry(ip);
+		return (RemoteList<Pair<String, Long>>) registry.lookup(name);
 	}
 
 	public void disconnect() {

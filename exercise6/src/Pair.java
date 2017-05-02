@@ -1,7 +1,9 @@
+import java.io.Serializable;
+
 /**
  * Created by sophiemaichau on 02/05/2017.
  */
-public class Pair<I, T> {
+public class Pair<I, T> implements Serializable {
     private I ip;
     private T timestamp;
 
@@ -24,5 +26,9 @@ public class Pair<I, T> {
 
     public void setTimestamp(T timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String toString() {
+        return "(" + ip + ", " + timestamp + ")";
     }
 }
