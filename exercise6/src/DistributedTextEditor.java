@@ -5,6 +5,12 @@ import java.net.UnknownHostException;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.net.InetAddress;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.Random;
 import java.lang.Integer;
 
@@ -105,7 +111,21 @@ public class DistributedTextEditor extends JFrame {
 				if (server.isReadyForConnection()) {
 					client = new Client(ipaddress.getText(), er, Integer.parseInt(portNumber.getText()), DistributedTextEditor.this);
 					new Thread(client).start();
-					break;
+
+					// RMI
+					try {
+						String name = "connectionList";
+						RemoteList<Pair<String, Long>> connectionList = new ConnectionList<>();
+						RemoteList<Pair<String, Long>> stub = (RemoteList<Pair<String, Long>>) UnicastRemoteObject.exportObject(connectionList, 0);
+						Registry registry = LocateRegistry.getRegistry();
+						registry.rebind(name, stub);
+						System.out.println("connectionList bound");
+					} catch (RemoteException e1) {
+						System.err.println("connectionList exception: ");
+						e1.printStackTrace();
+					} finally {
+						break;
+					}
 				}
 			}
 			changed = false;
