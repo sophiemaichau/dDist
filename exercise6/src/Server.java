@@ -120,14 +120,10 @@ public class Server extends Thread {
 			if(!eventQueue.isEmpty()){
 				MyTextEvent event = eventQueue.take();
 				ArrayList<ConnectionHandler> removeList = new ArrayList<>();
-				System.out.println("taking event out of queue: " + event + "and sending to: " + connectionHandlerList);
 				for(ConnectionHandler connection : connectionHandlerList){
-					System.out.println("in item: " + connection);
 					try {
 						connection.sendObject(event);
-						System.out.println("succesfully sent object to: " + connection);
 					} catch (IOException e) {
-						e.printStackTrace();
 						removeList.add(connection);
 					}
 				}

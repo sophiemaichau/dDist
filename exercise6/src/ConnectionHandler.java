@@ -37,7 +37,6 @@ public class ConnectionHandler {
         E o;
         try {
             while ((o = (E) in.readObject()) != null) {
-                System.out.println("received object: " + o);
                 return o;
             }
         } catch (ClassNotFoundException e) {

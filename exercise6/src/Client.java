@@ -54,7 +54,6 @@ public class Client implements Runnable {
 								if(!handler.isClosed()) {
 									stub.prettyToString();
 									backupStub = deepCopy(stub);
-									System.out.println("backupStub: " + backupStub.prettyToString());
 								}
 								Thread.sleep(10000);
 							}
