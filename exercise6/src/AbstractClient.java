@@ -48,6 +48,7 @@ public abstract class AbstractClient {
     public abstract void onReceivedFromServer(Object o);
     public abstract void onConnect(String serverIP);
     public abstract void onDisconnect();
+
     protected boolean sendToServer(Object o) {
         try {
             handler.sendObject(o);
