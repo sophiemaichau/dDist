@@ -24,7 +24,7 @@ public abstract class AbstractServer {
 
     public abstract void onNewConnection(ConnectionHandler connectionHandler, String ipAddress);
     public abstract void onLostConnection(String ipAddress);
-
+    public abstract void onShutDown();
     /*public boolean sendToClient(int clientID, Object data) {
         ConnectionHandler h = connectionHandlerMap.get(clientID);
         if (h == null) { return false;}
@@ -136,6 +136,7 @@ public abstract class AbstractServer {
     }
 
     public void shutdown() {
+        onShutDown();
         for(ConnectionHandler handler : connectionHandlerList) {
             if (handler != null) {
                 handler.closeConnection();

@@ -108,14 +108,24 @@ public class ConcreteClient extends AbstractClient {
                 new Thread(() -> {
                     try {
                         ConcreteServer server = new ConcreteServer(40499, area);
-                        server.replaceStub(backupStub);
+                        //server.replaceStub(backupStub);
                         undergoingElection = false;
                         server.startListening();
+                        //TODO: start client also
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
 
                 }).start();
+
+                try {
+                    Thread.sleep(800);
+                    startAndConnectTo(getServerIP(), 40499);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             } else {
                 try {
                     startAndConnectTo(electionStrategy.nextServerIP().substring(1, electionStrategy.nextServerIP().length()), 40499);

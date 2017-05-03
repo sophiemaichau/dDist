@@ -1,10 +1,10 @@
 import javax.swing.*;
 import java.io.IOException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
 
 /**
  * Created by milo on 02-05-17.
@@ -12,6 +12,7 @@ import java.util.ArrayList;
 public class ConcreteServer extends AbstractServer {
     private final JTextArea area;
     private RemoteList<Pair<String, Long>> stub;
+    private Registry registry;
 
     public ConcreteServer(int port, JTextArea area) throws IOException {
         super(port);
@@ -24,7 +25,7 @@ public class ConcreteServer extends AbstractServer {
         String name = "connectionList";
         RemoteList<Pair<String, Long>> connectionList = new ConnectionList<>();
         stub = (RemoteList<Pair<String, Long>>) UnicastRemoteObject.exportObject(connectionList, 0);
-        Registry registry = LocateRegistry.getRegistry();
+        registry = LocateRegistry.getRegistry();
         registry.rebind(name, stub);
         System.out.println("connectionList bound");
     }
@@ -43,6 +44,17 @@ public class ConcreteServer extends AbstractServer {
     @Override
     public void onLostConnection(String ipAddress) {
         //somehow remove from stub list
+    }
+
+    @Override
+    public void onShutDown() {
+        try {
+            registry.unbind("connectionList");
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (NotBoundException e) {
+            e.printStackTrace();
+        }
     }
 
     public void replaceStub(RemoteList<Pair<String, Long>> list) throws RemoteException {
