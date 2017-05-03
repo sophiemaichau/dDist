@@ -5,6 +5,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Server extends Thread {
@@ -15,6 +17,7 @@ public class Server extends Thread {
 	private DistributedTextEditor frame;
 	private LinkedBlockingQueue<MyTextEvent> eventQueue = new LinkedBlockingQueue<MyTextEvent>();
 	private ArrayList<ConnectionHandler> connectionHandlerList = new ArrayList<>();
+	private Map<String, ConnectionHandler> connectionHandlerMap = new HashMap<>();
 	private RemoteList<Pair<String, Long>> stub;
 
 	public Server(int port, DistributedTextEditor frame) throws IOException {
@@ -70,7 +73,7 @@ public class Server extends Thread {
 				ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
 				handler = new ConnectionHandler(socket, objInputStream, objOutStream);
 				connectionHandlerList.add(handler);
-				handler.sendObject(new TextCopyEvent(0, frame.area.getText()));
+				handler.sendObject(new TextCopyEvent(0, frame.area.getText(), 0));
 				new Thread(new Runnable() {
 					public void run() {
 						try {

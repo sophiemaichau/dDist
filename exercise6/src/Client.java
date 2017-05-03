@@ -33,6 +33,9 @@ public class Client implements Runnable {
 		socket = connectToServer(serverIP);
 		if (socket != null) {
 			try {
+				//add eventlistener
+
+
 				frame.clientConnected();
 
 				RemoteList<Pair<String, Long>> stub = setupRMI(serverIP);

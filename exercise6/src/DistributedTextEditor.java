@@ -5,13 +5,6 @@ import java.net.UnknownHostException;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.net.InetAddress;
-import java.rmi.AccessException;
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
 import java.util.Random;
 import java.lang.Integer;
 
@@ -26,8 +19,8 @@ public class DistributedTextEditor extends JFrame {
 	private String currentFile = "Untitled";
 	private boolean changed = false;
 	private DocumentEventCapturer dec = new DocumentEventCapturer();
-	private Server server;
-	private Client client;
+	private AbstractServer server;
+	private ConcreteClient client;
 
 	public DistributedTextEditor() {
 		try {
@@ -82,9 +75,6 @@ public class DistributedTextEditor extends JFrame {
 		Random rn = new Random();
 		int i = rn.nextInt(10000);
 		System.out.println(i);
-		er = new EventHandler(dec, area, ipaddress.getText(), Integer.parseInt(portNumber.getText()), DistributedTextEditor.this);
-		ert = new Thread(er);
-		ert.start();
 	}
 
 	private KeyListener k1 = new KeyAdapter() {
@@ -99,22 +89,32 @@ public class DistributedTextEditor extends JFrame {
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent e) {
-			saveOld();
 			area.setText("");
 			try {
-				server = new Server(Integer.parseInt(portNumber.getText()), DistributedTextEditor.this);
+				server = new ConcreteServer(Integer.parseInt(portNumber.getText()), area);
+				new Thread(() -> {
+                    try {
+                        setTitle("Listening on incoming connections...");
+                        server.startListening();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                        setTitle("An error occurred starting the server");
+                    }
+                }).start();
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
-			new Thread(server).start();
 
 			while(true) {
 				if (server.isReadyForConnection()) {
 					try {
-						client = new Client(ipaddress.getText(), er, Integer.parseInt(portNumber.getText()), DistributedTextEditor.this);
-						new Thread(client).start();
-						System.out.println("Started client");
-					} finally {
+						client = new ConcreteClient(dec, area, new OldestFirstElectionStrategy(), DistributedTextEditor.this);
+                        try {
+                            client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumber.getText()));
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+                        }
+                    } finally {
 						break;
 					}
 				}
@@ -134,11 +134,14 @@ public class DistributedTextEditor extends JFrame {
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent e) {
-			saveOld();
-			area.setText("");
-			client = new Client(ipaddress.getText(), er, Integer.parseInt(portNumber.getText()), DistributedTextEditor.this);
-			new Thread(client).start();
 			setTitle("Trying to connect to " + ipaddress.getText() + ":" + portNumber.getText());
+			client = new ConcreteClient(dec, area, new OldestFirstElectionStrategy(), DistributedTextEditor.this);
+            try {
+                client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumber.getText()));
+                clientConnected();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
 
 			changed = false;
 			Save.setEnabled(false);
@@ -153,7 +156,6 @@ public class DistributedTextEditor extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			setTitle("Disconnected");
 			if (client != null) {
-				er.clientClosed = true;
 				client.disconnect();
 			}
 			if (server != null) {
