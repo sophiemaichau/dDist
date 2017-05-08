@@ -5,6 +5,8 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.security.Timestamp;
+import java.util.ArrayList;
 
 /**
  * Created by milo on 02-05-17.
@@ -19,6 +21,7 @@ public class ConcreteClient extends AbstractClient {
     private RemoteList<Pair<String, Long>> backupStub;
     private long timeStamp;
     private volatile boolean undergoingElection = false;
+    private Thread rmiUpdateThread;
 
     public ConcreteClient(DocumentEventCapturer dec, JTextArea area, ElectionStrategy electionStrategy, DistributedTextEditor frame) {
         this.dec = dec;
@@ -57,6 +60,11 @@ public class ConcreteClient extends AbstractClient {
                 dec.disabled = true;
                 area.setText(tce.getCopiedText());
                 timeStamp = tce.getTimeStamp();
+                /*ArrayList<Pair<String, Long>> view = tce.getView();
+
+                for (Pair<String, Long> p : view) {
+                    stub
+                }*/
                 dec.disabled = false;
             });
 
@@ -86,54 +94,72 @@ public class ConcreteClient extends AbstractClient {
         if (sendLocalEventsThread.isInterrupted() == false) {
             sendLocalEventsThread.interrupt();
         }
-
+        if (rmiUpdateThread.isInterrupted() == false) {
+            rmiUpdateThread.interrupt();
+        }
         System.out.println("disconnected from server");
     }
 
     @Override
     public void onLostConnection() {
+        disconnect();
         if (sendLocalEventsThread.isInterrupted() == false) {
             sendLocalEventsThread.interrupt();
+        }
+        if (rmiUpdateThread.isInterrupted() == false) {
+            rmiUpdateThread.interrupt();
         }
         System.out.println("unexpectedly lost connection to server. Beginning election procedure...");
         beginElection();
     }
 
     private synchronized void beginElection() {
-        if (undergoingElection == false) {
-            undergoingElection = true;
+        boolean done = false;
+        while (!done) {
             System.out.println("my timestamp: " + timeStamp);
-            if (true) {
-                System.out.println("I won the election! Starting server.");
-                new Thread(() -> {
+            try {
+                System.out.println("my view: " + backupStub.prettyToString());
+                long elect =  backupStub.get(0).getTimestamp();
+                backupStub.remove(0);
+                if (elect == timeStamp) {
+                    System.out.println("I won the election! Starting server.");
+                    new Thread(() -> {
+                        try {
+                            ConcreteServer server = new ConcreteServer(40499, area);
+                            server.replaceStub(backupStub);
+                            server.startListening();
+                            frame.server = server;
+                            frame.serverStartedUpdateText();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                    }).start();
                     try {
-                        ConcreteServer server = new ConcreteServer(40499, area);
-                        //server.replaceStub(backupStub);
-                        undergoingElection = false;
-                        server.startListening();
-                        //TODO: start client also
+                        Thread.sleep(800);
+                        startAndConnectTo(getServerIP(), 40499);
+                        done = true;
                     } catch (IOException e) {
                         e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-
-                }).start();
-
-                try {
-                    Thread.sleep(800);
-                    startAndConnectTo(getServerIP(), 40499);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } else {
+                    try {
+                        Thread.sleep(400);
+                        System.out.println("I lost. Connecting to new server.");
+                        boolean connected = startAndConnectTo(electionStrategy.nextServerIP().substring(1, electionStrategy.nextServerIP().length()), 40499);
+                        if (connected) { done = true; }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        beginElection();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-            } else {
-                try {
-                    startAndConnectTo(electionStrategy.nextServerIP().substring(1, electionStrategy.nextServerIP().length()), 40499);
-                    undergoingElection = false;
-                } catch (IOException e) {
-                    System.out.println("failed to connect to new server. Beginning election procedure once again...");
-                    beginElection();
-                }
+            } catch (RemoteException e) {
+                e.printStackTrace();
+                break;
             }
         }
     }
@@ -144,17 +170,18 @@ public class ConcreteClient extends AbstractClient {
         try {
             registry = LocateRegistry.getRegistry(serverIP);
             stub = (RemoteList<Pair<String, Long>>) registry.lookup(name);
-            new Thread(() -> {
+            rmiUpdateThread = new Thread(() -> {
                 try {
-                    while(true) {
-                        System.out.println(stub.prettyToString()); //just do something random which updates the stub
+                    while (true) {
+                        stub.prettyToString(); //just do something random which updates the stub
                         backupStub = deepCopy(stub);
                         Thread.sleep(5000);
                     }
                 } catch (Exception e) {
                     //beginElection();
                 }
-            }).start();
+            });
+            rmiUpdateThread.start();
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (NotBoundException e) {
@@ -162,7 +189,7 @@ public class ConcreteClient extends AbstractClient {
         }
     }
 
-    private RemoteList<Pair<String,Long>> deepCopy(RemoteList<Pair<String, Long>> stub) throws IOException, ClassNotFoundException {
+    private RemoteList<Pair<String, Long>> deepCopy(RemoteList<Pair<String, Long>> stub) throws IOException, ClassNotFoundException {
         // Convert stub to a stream of bytes
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos);

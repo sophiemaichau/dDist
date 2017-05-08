@@ -36,7 +36,7 @@ public class Client implements Runnable {
 				//add eventlistener
 
 
-				frame.clientConnected();
+				frame.clientConnectedUpdateText();
 
 				RemoteList<Pair<String, Long>> stub = setupRMI(serverIP);
 				stub.add(new Pair<>(socket.getInetAddress().getLocalHost().getHostAddress().toString(), System.currentTimeMillis()));

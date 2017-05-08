@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 
 /**
  * Created by milo on 02-05-17.
@@ -27,15 +28,15 @@ public class ConcreteServer extends AbstractServer {
         stub = (RemoteList<Pair<String, Long>>) UnicastRemoteObject.exportObject(connectionList, 0);
         registry = LocateRegistry.getRegistry();
         registry.rebind(name, stub);
-        System.out.println("connectionList bound");
+        System.out.println("connectionList bound in server");
     }
 
     @Override
     public void onNewConnection(ConnectionHandler connectionHandler, String ipAddress) {
         try {
             long timestamp = System.currentTimeMillis();
-            connectionHandler.sendObject(new TextCopyEvent(0, area.getText(), timestamp));
             stub.add(new Pair<>(ipAddress, timestamp));
+            connectionHandler.sendObject(new TextCopyEvent(0, area.getText(), timestamp, null));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -59,10 +60,16 @@ public class ConcreteServer extends AbstractServer {
 
     public void replaceStub(RemoteList<Pair<String, Long>> list) throws RemoteException {
         stub.clear();
-        System.out.println("cleared!");
         for (int i = 0; i < list.size() - 1; i++) {
             stub.add(list.get(i));
-            System.out.println("added!");
         }
+    }
+
+    private <E, T> ArrayList<Pair<E, T>> convertToArrayList(RemoteList<Pair<E, T>> remoteList) throws RemoteException {
+        ArrayList<Pair<E, T>> result = new ArrayList<>();
+        for (int i = 0; i < remoteList.size() - 1; i++) {
+            result.add(remoteList.get(i));
+        }
+        return result;
     }
 }

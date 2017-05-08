@@ -13,14 +13,12 @@ public class DistributedTextEditor extends JFrame {
 	public JTextArea area = new JTextArea(20, 60);
 	private JTextField ipaddress; // "IP address here"
 	private JTextField portNumber = new JTextField("40499");
-	private EventHandler er;
-	private Thread ert;
 	private JFileChooser dialog = new JFileChooser(System.getProperty("user.dir"));
 	private String currentFile = "Untitled";
 	private boolean changed = false;
 	private DocumentEventCapturer dec = new DocumentEventCapturer();
-	private AbstractServer server;
-	private ConcreteClient client;
+	public AbstractServer server;
+	public ConcreteClient client;
 
 	public DistributedTextEditor() {
 		try {
@@ -125,9 +123,13 @@ public class DistributedTextEditor extends JFrame {
 		}
 	};
 
-	public void clientConnected() {
+	public void clientConnectedUpdateText() {
 		setTitle("Connected to " + ipaddress.getText() + ":" + portNumber.getText());
 
+	}
+
+	public void serverStartedUpdateText() {
+		setTitle("Listening on incoming connections...");
 	}
 
 	Action Connect = new AbstractAction("Connect") {
@@ -138,7 +140,7 @@ public class DistributedTextEditor extends JFrame {
 			client = new ConcreteClient(dec, area, new OldestFirstElectionStrategy(), DistributedTextEditor.this);
             try {
                 client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumber.getText()));
-                clientConnected();
+                clientConnectedUpdateText();
             } catch (IOException e1) {
                 e1.printStackTrace();
             }

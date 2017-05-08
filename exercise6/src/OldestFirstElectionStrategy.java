@@ -7,7 +7,7 @@ import java.util.LongSummaryStatistics;
  */
 public class OldestFirstElectionStrategy implements ElectionStrategy {
     private Pair<String, Long> lowest;
-    private int currIndex = 0;
+    private int currIndex = 1;
 
 
     public OldestFirstElectionStrategy() {

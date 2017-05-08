@@ -2,8 +2,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 
 /**
  * Created by milo on 02-05-17.
@@ -18,7 +16,7 @@ public abstract class AbstractClient {
     }
 
 
-    public void startAndConnectTo(String serverIP, int port) throws IOException {
+    public boolean startAndConnectTo(String serverIP, int port) throws IOException {
         System.out.println("Starting client. Type CTRL-D to shut down.");
         socket = connectToServer(serverIP, port);
         if (socket != null) {
@@ -41,7 +39,10 @@ public abstract class AbstractClient {
                     }
                 }
             }).start();
+        } else {
+            return false;
         }
+        return true;
     }
 
     public abstract void onLostConnection();

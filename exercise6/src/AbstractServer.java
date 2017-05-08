@@ -60,11 +60,7 @@ public abstract class AbstractServer {
                 connectionHandlerList.add(handler);
                 new Thread(new Runnable() {
                     public void run() {
-                        try {
-                            incomingEvents(handler);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        incomingEvents(handler);
                     }
                 }).start();
                 onNewConnection(handler, handler.getSocket().getInetAddress().toString());
@@ -95,10 +91,17 @@ public abstract class AbstractServer {
     }
 
 
-    public void incomingEvents(ConnectionHandler handler) throws IOException {
+    public void incomingEvents(ConnectionHandler handler) {
         while(true) {
             if(!handler.isClosed()) {
-                MyTextEvent textEvent = (MyTextEvent) handler.receiveObject();
+                MyTextEvent textEvent = null;
+                try {
+                    textEvent = (MyTextEvent) handler.receiveObject();
+                } catch (IOException e) {
+                    onLostConnection(handler.getSocket().getInetAddress().toString());
+                    handler.closeConnection();
+                    break;
+                }
                 eventQueue.add(textEvent);
             } else {
                 onLostConnection(handler.getSocket().getInetAddress().toString());
@@ -136,7 +139,6 @@ public abstract class AbstractServer {
     }
 
     public void shutdown() {
-        onShutDown();
         for(ConnectionHandler handler : connectionHandlerList) {
             if (handler != null) {
                 handler.closeConnection();
@@ -144,9 +146,11 @@ public abstract class AbstractServer {
         }
         try {
             serverSocket.close();
+            System.out.println("Closing down server");
         } catch (IOException e) {
             System.err.println(e);
         }
+        onShutDown();
         Thread.currentThread().interrupt();
     }
 
