@@ -12,16 +12,15 @@ import java.util.ArrayList;
  */
 public class ConcreteServer extends AbstractServer {
     private final JTextArea area;
-    private RemoteList<Pair<String, Long>> stub;
-    private Registry registry;
+
 
     public ConcreteServer(int port, JTextArea area) throws IOException {
         super(port);
         this.area = area;
-        setupRMI();
+        //setupRMI();
     }
 
-    private void setupRMI() throws RemoteException {
+    /*private void setupRMI() throws RemoteException {
         //setup RMI
         String name = "connectionList";
         RemoteList<Pair<String, Long>> connectionList = new ConnectionList<>();
@@ -29,47 +28,44 @@ public class ConcreteServer extends AbstractServer {
         registry = LocateRegistry.getRegistry();
         registry.rebind(name, stub);
         System.out.println("connectionList bound in server");
-    }
+    }*/
 
     @Override
-    public void onNewConnection(ConnectionHandler connectionHandler, String ipAddress) {
-        try {
-            long timestamp = System.currentTimeMillis();
-            stub.add(new Pair<>(ipAddress, timestamp));
-            connectionHandler.sendObject(new TextCopyEvent(0, area.getText(), timestamp, null));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void onNewConnection(int id, String ipAddress) {
+        sendToClient(0, new TextCopyEvent(0, area.getText(), id));
+        broadcast(new UpdateViewEvent(getView()));
     }
 
     @Override
     public void onLostConnection(String ipAddress) {
-        //somehow remove from stub list
+        System.out.println("lost connection with : " + ipAddress + "!");
+        //send view update to clients
     }
 
     @Override
     public void onShutDown() {
-        try {
-            registry.unbind("connectionList");
+        /*try {
+            //registry.unbind("connectionList");
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (NotBoundException e) {
             e.printStackTrace();
-        }
+        }*/
+        System.out.println("Closing down server");
     }
 
-    public void replaceStub(RemoteList<Pair<String, Long>> list) throws RemoteException {
+    /*public void replaceStub(RemoteList<Pair<String, Long>> list) throws RemoteException {
         stub.clear();
         for (int i = 0; i < list.size() - 1; i++) {
             stub.add(list.get(i));
         }
-    }
+    }*/
 
-    private <E, T> ArrayList<Pair<E, T>> convertToArrayList(RemoteList<Pair<E, T>> remoteList) throws RemoteException {
+    /*private <E, T> ArrayList<Pair<E, T>> convertToArrayList(RemoteList<Pair<E, T>> remoteList) throws RemoteException {
         ArrayList<Pair<E, T>> result = new ArrayList<>();
         for (int i = 0; i < remoteList.size() - 1; i++) {
             result.add(remoteList.get(i));
         }
         return result;
-    }
+    }*/
 }

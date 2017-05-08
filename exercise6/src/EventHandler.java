@@ -40,7 +40,7 @@ public class EventHandler implements Runnable {
 			*/
 
 			try {
-                if (!clientClosed && client.getBackupStub().get(1).getIp().equals(ip)) {
+                if (!clientClosed && client.getBackupStub().get(1).getFirst().equals(ip)) {
                     //client.getBackupStub().remove(0);
                     System.out.println("Trying to start new server...");
                     distributedTextEditor.Listen.actionPerformed(null);

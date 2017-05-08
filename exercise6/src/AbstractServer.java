@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -15,26 +16,60 @@ public abstract class AbstractServer {
     private int port = 40499;
     private ConnectionHandler handler;
     private LinkedBlockingQueue<MyTextEvent> eventQueue = new LinkedBlockingQueue<MyTextEvent>();
-    private ArrayList<ConnectionHandler> connectionHandlerList = new ArrayList<>();
+
+
+    private ArrayList<Pair<InetAddress, Integer>> view = new ArrayList<>();
+    private ArrayList<Pair<ConnectionHandler, Integer>> connectionList = new ArrayList<>();
 
     public AbstractServer(int port) throws IOException {
         this.port = port;
 
     }
 
-    public abstract void onNewConnection(ConnectionHandler connectionHandler, String ipAddress);
+    public abstract void onNewConnection(int id, String ipAddress);
     public abstract void onLostConnection(String ipAddress);
     public abstract void onShutDown();
-    /*public boolean sendToClient(int clientID, Object data) {
-        ConnectionHandler h = connectionHandlerMap.get(clientID);
-        if (h == null) { return false;}
-        try {
-            h.sendObject(data);
-        } catch (IOException e) {
-            return false;
+
+    public boolean sendToClient(int clientID, Object data) {
+        for (Pair<ConnectionHandler, Integer> p : connectionList) {
+            if (p.getSecond() == clientID) {
+                try {
+                    p.getFirst().sendObject(data);
+                    return true;
+                } catch (IOException e) {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean broadcast(Object o) {
+        ArrayList<Pair<ConnectionHandler, Integer>> removeList = new ArrayList<>();
+        for(Pair<ConnectionHandler, Integer> p : connectionList){
+            try {
+                p.getFirst().sendObject(o);
+            } catch (IOException e) {
+                removeList.add(p);
+                return false;
+            }
+        }
+        for (Pair<ConnectionHandler, Integer> c : removeList) {
+            onLostConnection(c.getFirst().getSocket().getInetAddress().toString());
+            c.getFirst().closeConnection();
+            connectionList.remove(c);
+            view.remove(new Pair<>(c.getFirst().getSocket().getInetAddress(), c.getSecond()));
         }
         return true;
-    }*/
+    }
+    public ArrayList<Pair<InetAddress, Integer>> getView() {
+        return view;
+    }
+
+    public void setView(ArrayList<Pair<InetAddress, Integer>> view) {
+        this.view = view;
+    }
+
 
 
     public void startListening() throws IOException {
@@ -47,33 +82,40 @@ public abstract class AbstractServer {
                 e.printStackTrace();
             }
         }).start();
-
+        int idSequencer = 0;
         while(Thread.currentThread().isInterrupted() == false) {
             System.out.println("Waiting for client on "
                     + serverSocket.getInetAddress().getLocalHost().getHostAddress() + " : " + port);
             Socket socket = waitForConnectionFromClient();
+            Pair<ConnectionHandler, Integer> pair = null;
+            Pair<InetAddress, Integer> viewPair = null;
+
             try {
-                System.out.println("Connection from " + socket.getRemoteSocketAddress());
+                //System.out.println("Connection from " + socket.getRemoteSocketAddress());
                 ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
                 ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
                 handler = new ConnectionHandler(socket, objInputStream, objOutStream);
-                connectionHandlerList.add(handler);
-                new Thread(new Runnable() {
-                    public void run() {
-                        incomingEvents(handler);
-                    }
-                }).start();
-                onNewConnection(handler, handler.getSocket().getInetAddress().toString());
+                pair = new Pair<>(handler, idSequencer);
+                viewPair = new Pair<>(handler.getSocket().getInetAddress(), idSequencer);
+                connectionList.add(pair);
+                view.add(viewPair);
+                new Thread(
+                    () -> incomingEvents(handler)
+                ).start();
+                onNewConnection(idSequencer, handler.getSocket().getInetAddress().toString());
+                idSequencer++;
             } catch (SocketTimeoutException e) {
                 System.out.println("Socket timed out!");
                 onLostConnection(handler.getSocket().getInetAddress().toString());
                 handler.closeConnection();
-                connectionHandlerList.remove(handler);
+                connectionList.remove(pair);
+                view.remove(viewPair);
             } catch (IOException e) {
                 onLostConnection(handler.getSocket().getInetAddress().toString());
                 System.out.println("IOException!");
                 handler.closeConnection();
-                connectionHandlerList.remove(handler);
+                connectionList.remove(pair);
+                view.remove(viewPair);
             }
 
         }
@@ -115,19 +157,7 @@ public abstract class AbstractServer {
         while(true){
             if(!eventQueue.isEmpty()){
                 MyTextEvent event = eventQueue.take();
-                ArrayList<ConnectionHandler> removeList = new ArrayList<>();
-                for(ConnectionHandler connection : connectionHandlerList){
-                    try {
-                        connection.sendObject(event);
-                    } catch (IOException e) {
-                        removeList.add(connection);
-                    }
-                }
-                for (ConnectionHandler c : removeList) {
-                    onLostConnection(c.getSocket().getInetAddress().toString());
-                    c.closeConnection();
-                    connectionHandlerList.remove(c);
-                }
+                broadcast(event);
             }
         }
     }
@@ -139,14 +169,15 @@ public abstract class AbstractServer {
     }
 
     public void shutdown() {
-        for(ConnectionHandler handler : connectionHandlerList) {
-            if (handler != null) {
-                handler.closeConnection();
+        for(Pair<ConnectionHandler, Integer> p : connectionList) {
+            if (p.getFirst() != null) {
+                p.getFirst().closeConnection();
             }
         }
+        connectionList.clear();
+        view.clear();
         try {
             serverSocket.close();
-            System.out.println("Closing down server");
         } catch (IOException e) {
             System.err.println(e);
         }

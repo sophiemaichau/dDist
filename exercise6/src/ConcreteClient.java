@@ -1,11 +1,11 @@
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.net.InetAddress;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.security.Timestamp;
 import java.util.ArrayList;
 
 /**
@@ -17,9 +17,8 @@ public class ConcreteClient extends AbstractClient {
     private Thread sendLocalEventsThread;
     private ElectionStrategy electionStrategy;
     private DistributedTextEditor frame;
-    private RemoteList<Pair<String, Long>> stub;
-    private RemoteList<Pair<String, Long>> backupStub;
-    private long timeStamp;
+    private ArrayList<Pair<InetAddress, Integer>> view = new ArrayList<>();
+    private int id;
     private volatile boolean undergoingElection = false;
     private Thread rmiUpdateThread;
 
@@ -59,15 +58,13 @@ public class ConcreteClient extends AbstractClient {
             EventQueue.invokeLater(() -> {
                 dec.disabled = true;
                 area.setText(tce.getCopiedText());
-                timeStamp = tce.getTimeStamp();
-                /*ArrayList<Pair<String, Long>> view = tce.getView();
-
-                for (Pair<String, Long> p : view) {
-                    stub
-                }*/
+                id = tce.getTimeStamp();
                 dec.disabled = false;
             });
 
+        } else if(o instanceof UpdateViewEvent) {
+            view = ((UpdateViewEvent) o).getView();
+            System.out.println("updated view to: " + view);
         }
     }
 
@@ -86,16 +83,13 @@ public class ConcreteClient extends AbstractClient {
             }
         });
         sendLocalEventsThread.start();
-        setupRMI(serverIP);
+        //setupRMI(serverIP);
     }
 
     @Override
     public void onDisconnect() {
         if (sendLocalEventsThread.isInterrupted() == false) {
             sendLocalEventsThread.interrupt();
-        }
-        if (rmiUpdateThread.isInterrupted() == false) {
-            rmiUpdateThread.interrupt();
         }
         System.out.println("disconnected from server");
     }
@@ -106,9 +100,7 @@ public class ConcreteClient extends AbstractClient {
         if (sendLocalEventsThread.isInterrupted() == false) {
             sendLocalEventsThread.interrupt();
         }
-        if (rmiUpdateThread.isInterrupted() == false) {
-            rmiUpdateThread.interrupt();
-        }
+
         System.out.println("unexpectedly lost connection to server. Beginning election procedure...");
         beginElection();
     }
@@ -116,17 +108,14 @@ public class ConcreteClient extends AbstractClient {
     private synchronized void beginElection() {
         boolean done = false;
         while (!done) {
-            System.out.println("my timestamp: " + timeStamp);
-            try {
-                System.out.println("my view: " + backupStub.prettyToString());
-                long elect =  backupStub.get(0).getTimestamp();
-                backupStub.remove(0);
-                if (elect == timeStamp) {
+            System.out.println("my timestamp: " + id);
+                System.out.println("my view: " + view);
+                Pair<InetAddress, Integer> elect = view.get(0);
+                if (elect.getSecond() == id) {
                     System.out.println("I won the election! Starting server.");
                     new Thread(() -> {
                         try {
                             ConcreteServer server = new ConcreteServer(40499, area);
-                            server.replaceStub(backupStub);
                             server.startListening();
                             frame.server = server;
                             frame.serverStartedUpdateText();
@@ -152,19 +141,16 @@ public class ConcreteClient extends AbstractClient {
                         if (connected) { done = true; }
                     } catch (IOException e) {
                         e.printStackTrace();
-                        beginElection();
+                        view.remove(0);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                        view.remove(0);
                     }
                 }
-            } catch (RemoteException e) {
-                e.printStackTrace();
-                break;
-            }
         }
     }
 
-    private void setupRMI(String serverIP) {
+    /*private void setupRMI(String serverIP) {
         String name = "connectionList";
         Registry registry;
         try {
@@ -203,7 +189,7 @@ public class ConcreteClient extends AbstractClient {
         return (RemoteList<Pair<String, Long>>) new ObjectInputStream(bais).readObject();
     }
 
-
+*/
     public void setElectionStrategy(ElectionStrategy electionStrategy) {
         this.electionStrategy = electionStrategy;
     }

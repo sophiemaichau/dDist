@@ -1,6 +1,4 @@
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.LongSummaryStatistics;
 
 /**
  * Created by milo on 03-05-17.
@@ -18,7 +16,7 @@ public class OldestFirstElectionStrategy implements ElectionStrategy {
         try {
             Pair<String, Long> localLowest = remoteList.get(currIndex);
             for (int i = currIndex; i < remoteList.size() - 1; i++) {
-                if (remoteList.get(i).getTimestamp() < localLowest.getTimestamp()) {
+                if (remoteList.get(i).getSecond() < localLowest.getSecond()) {
                     localLowest = remoteList.get(i);
                 }
             }
@@ -33,6 +31,6 @@ public class OldestFirstElectionStrategy implements ElectionStrategy {
     @Override
     public String nextServerIP() {
         if (lowest == null) {return null;}
-        return lowest.getIp();
+        return lowest.getFirst();
     }
 }
