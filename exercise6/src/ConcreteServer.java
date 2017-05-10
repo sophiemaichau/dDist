@@ -32,7 +32,9 @@ public class ConcreteServer extends AbstractServer {
 
     @Override
     public void onNewConnection(int id, String ipAddress) {
-        sendToClient(0, new TextCopyEvent(0, area.getText(), id));
+        System.out.println("new connection from: " + ipAddress + " with id: " + id);
+        sendToClient(id, new TextCopyEvent(0, area.getText(), id));
+        System.out.println("view after new connection: " + getView());
         broadcast(new UpdateViewEvent(getView()));
     }
 

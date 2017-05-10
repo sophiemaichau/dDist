@@ -35,6 +35,7 @@ public class ConcreteClient extends AbstractClient {
             final TextInsertEvent tie = (TextInsertEvent) o;
             EventQueue.invokeLater(() -> {
                 try {
+                    System.out.println("received insert event!");
                     dec.disabled = true;
                     area.insert(tie.getText(), tie.getOffset());
                     dec.disabled = false;
@@ -63,8 +64,9 @@ public class ConcreteClient extends AbstractClient {
             });
 
         } else if(o instanceof UpdateViewEvent) {
-            view = ((UpdateViewEvent) o).getView();
-            System.out.println("updated view to: " + view);
+            UpdateViewEvent e = (UpdateViewEvent) o;
+            view = e.getView();
+            System.out.println("updated view to: " + e.getView());
         }
     }
 
@@ -79,11 +81,10 @@ public class ConcreteClient extends AbstractClient {
                 } catch (InterruptedException e1) {
                     return;
                 }
-                boolean res = ConcreteClient.this.sendToServer(e);
+                boolean res = sendToServer(e);
             }
         });
         sendLocalEventsThread.start();
-        //setupRMI(serverIP);
     }
 
     @Override

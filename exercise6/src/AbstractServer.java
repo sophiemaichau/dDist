@@ -48,17 +48,20 @@ public abstract class AbstractServer {
         ArrayList<Pair<ConnectionHandler, Integer>> removeList = new ArrayList<>();
         for(Pair<ConnectionHandler, Integer> p : connectionList){
             try {
+                System.out.println("sending" + o + " to: " + p.getSecond());
                 p.getFirst().sendObject(o);
             } catch (IOException e) {
+                e.printStackTrace();
                 removeList.add(p);
-                return false;
             }
         }
         for (Pair<ConnectionHandler, Integer> c : removeList) {
             onLostConnection(c.getFirst().getSocket().getInetAddress().toString());
             c.getFirst().closeConnection();
             connectionList.remove(c);
-            view.remove(new Pair<>(c.getFirst().getSocket().getInetAddress(), c.getSecond()));
+            System.out.println("trying to remove id: " + c.getSecond());
+            boolean r = view.remove(new Pair<>(c.getFirst().getSocket().getInetAddress(), c.getSecond()));
+            System.out.println("removed pair: " + r);
         }
         return true;
     }
@@ -99,6 +102,9 @@ public abstract class AbstractServer {
                 viewPair = new Pair<>(handler.getSocket().getInetAddress(), idSequencer);
                 connectionList.add(pair);
                 view.add(viewPair);
+                //System.out.println("views after new connection:");
+                //System.out.println("connectionList: " + connectionList);
+                //System.out.println("view: " + view);
                 new Thread(
                     () -> incomingEvents(handler)
                 ).start();
