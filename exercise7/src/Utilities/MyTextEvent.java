@@ -1,3 +1,5 @@
+package Utilities;
+
 import java.io.Serializable;
 
 /**
@@ -10,5 +12,5 @@ public class MyTextEvent implements Serializable {
 		this.offset = offset;
 	}
 	private int offset;
-	int getOffset() { return offset; }
+	public int getOffset() { return offset; }
 }

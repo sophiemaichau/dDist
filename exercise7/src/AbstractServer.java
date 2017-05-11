@@ -1,3 +1,6 @@
+import Utilities.MyTextEvent;
+import Utilities.Pair;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;

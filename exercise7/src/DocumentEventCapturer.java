@@ -1,3 +1,7 @@
+import Utilities.MyTextEvent;
+import Utilities.TextInsertEvent;
+import Utilities.TextRemoveEvent;
+
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;

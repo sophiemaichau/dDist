@@ -1,10 +1,10 @@
-import java.util.ArrayList;
+package Utilities;
 
 public class TextCopyEvent extends MyTextEvent {
     private String copiedText;
     private int timeStamp;
 
-    TextCopyEvent(int offset, String copyText, int timeStamp) {
+    public TextCopyEvent(int offset, String copyText, int timeStamp) {
         super(offset);
         this.copiedText = copyText;
         this.timeStamp = timeStamp;

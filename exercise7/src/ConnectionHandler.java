@@ -13,7 +13,6 @@ public class ConnectionHandler {
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private boolean isClosed;
-    private ArrayList<ClosedConnectionListener> listeners = new ArrayList<>();
 
     public ConnectionHandler(Socket s, ObjectInputStream in, ObjectOutputStream out) {
         this.in = in;
@@ -60,20 +59,9 @@ public class ConnectionHandler {
             socket.close();
         } catch (IOException e) {
             System.err.println(e);
-        } finally {
-            notifyListeners();
         }
     }
 
-    public void addListener(ClosedConnectionListener e) {
-        listeners.add(e);
-    }
-
-    private void notifyListeners() {
-        for (ClosedConnectionListener e : listeners) {
-            e.notifyClosedConnection();
-        }
-    }
 
     public Socket getSocket() {
         return socket;

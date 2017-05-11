@@ -1,11 +1,9 @@
+import Utilities.*;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.net.InetAddress;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.util.ArrayList;
 
 /**
@@ -156,7 +154,7 @@ public class ConcreteClient extends AbstractClient {
         Registry registry;
         try {
             registry = LocateRegistry.getRegistry(serverIP);
-            stub = (RemoteList<Pair<String, Long>>) registry.lookup(name);
+            stub = (RemoteList<Utilities.Pair<String, Long>>) registry.lookup(name);
             rmiUpdateThread = new Thread(() -> {
                 try {
                     while (true) {
@@ -176,7 +174,7 @@ public class ConcreteClient extends AbstractClient {
         }
     }
 
-    private RemoteList<Pair<String, Long>> deepCopy(RemoteList<Pair<String, Long>> stub) throws IOException, ClassNotFoundException {
+    private RemoteList<Utilities.Pair<String, Long>> deepCopy(RemoteList<Utilities.Pair<String, Long>> stub) throws IOException, ClassNotFoundException {
         // Convert stub to a stream of bytes
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -187,7 +185,7 @@ public class ConcreteClient extends AbstractClient {
 
         // Restore copy of stub from a stream of bytes
         ByteArrayInputStream bais = new ByteArrayInputStream(byteData);
-        return (RemoteList<Pair<String, Long>>) new ObjectInputStream(bais).readObject();
+        return (RemoteList<Utilities.Pair<String, Long>>) new ObjectInputStream(bais).readObject();
     }
 
 */

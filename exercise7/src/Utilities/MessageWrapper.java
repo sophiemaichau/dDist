@@ -1,3 +1,7 @@
+package Utilities;
+
+import Utilities.MyTextEvent;
+
 import java.io.Serializable;
 
 public class MessageWrapper implements Serializable{
