@@ -37,6 +37,7 @@ public class ConcreteClient extends AbstractClient {
                     dec.disabled = false;
                 } catch (Exception e) {
                     System.err.println(e);
+                    dec.disabled = false;
                 }
             });
         } else if (o instanceof TextRemoveEvent) {
@@ -48,7 +49,8 @@ public class ConcreteClient extends AbstractClient {
                     area.replaceRange(null, tre.getOffset(), tre.getOffset() + tre.getLength());
                     dec.disabled = false;
                 } catch (Exception e) {
-                    System.err.println(e);
+                    e.printStackTrace();
+                    dec.disabled = false;
                 }
             });
         } else if (o instanceof TextCopyEvent) {
@@ -75,10 +77,10 @@ public class ConcreteClient extends AbstractClient {
                 MyTextEvent e;
                 try {
                     e = dec.take();
+                    boolean res = sendToServer(e);
                 } catch (InterruptedException e1) {
-                    return;
+                    e1.printStackTrace();
                 }
-                boolean res = sendToServer(e);
             }
         });
         sendLocalEventsThread.start();
@@ -116,7 +118,7 @@ public class ConcreteClient extends AbstractClient {
                             ConcreteServer server = new ConcreteServer(40499, area);
                             server.startListening();
                             frame.server = server;
-                            frame.serverStartedUpdateText();
+                            //frame.serverStartedUpdateText();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }

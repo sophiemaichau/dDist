@@ -143,7 +143,6 @@ public class DistributedTextEditor extends JFrame {
 			client = new ConcreteClient(dec, area, new OldestFirstElectionStrategy(), DistributedTextEditor.this);
             try {
                 client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumber.getText()));
-                clientConnectedUpdateText();
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
