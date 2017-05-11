@@ -17,8 +17,6 @@ public class ConcreteClient extends AbstractClient {
     private DistributedTextEditor frame;
     private ArrayList<Pair<InetAddress, Integer>> view = new ArrayList<>();
     private int id;
-    private volatile boolean undergoingElection = false;
-    private Thread rmiUpdateThread;
 
     public ConcreteClient(DocumentEventCapturer dec, JTextArea area, ElectionStrategy electionStrategy, DistributedTextEditor frame) {
         this.dec = dec;
@@ -33,7 +31,7 @@ public class ConcreteClient extends AbstractClient {
             final TextInsertEvent tie = (TextInsertEvent) o;
             EventQueue.invokeLater(() -> {
                 try {
-                    System.out.println("received insert event!");
+                    System.out.println("InsertEvent!");
                     dec.disabled = true;
                     area.insert(tie.getText(), tie.getOffset());
                     dec.disabled = false;
@@ -45,6 +43,7 @@ public class ConcreteClient extends AbstractClient {
             final TextRemoveEvent tre = (TextRemoveEvent) o;
             EventQueue.invokeLater(() -> {
                 try {
+                    System.out.println("RemoveEvent!");
                     dec.disabled = true;
                     area.replaceRange(null, tre.getOffset(), tre.getOffset() + tre.getLength());
                     dec.disabled = false;
@@ -149,46 +148,6 @@ public class ConcreteClient extends AbstractClient {
         }
     }
 
-    /*private void setupRMI(String serverIP) {
-        String name = "connectionList";
-        Registry registry;
-        try {
-            registry = LocateRegistry.getRegistry(serverIP);
-            stub = (RemoteList<Utilities.Pair<String, Long>>) registry.lookup(name);
-            rmiUpdateThread = new Thread(() -> {
-                try {
-                    while (true) {
-                        stub.prettyToString(); //just do something random which updates the stub
-                        backupStub = deepCopy(stub);
-                        Thread.sleep(5000);
-                    }
-                } catch (Exception e) {
-                    //beginElection();
-                }
-            });
-            rmiUpdateThread.start();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (NotBoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private RemoteList<Utilities.Pair<String, Long>> deepCopy(RemoteList<Utilities.Pair<String, Long>> stub) throws IOException, ClassNotFoundException {
-        // Convert stub to a stream of bytes
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(bos);
-        oos.writeObject(stub);
-        oos.flush();
-        oos.close();
-        byte[] byteData = bos.toByteArray();
-
-        // Restore copy of stub from a stream of bytes
-        ByteArrayInputStream bais = new ByteArrayInputStream(byteData);
-        return (RemoteList<Utilities.Pair<String, Long>>) new ObjectInputStream(bais).readObject();
-    }
-
-*/
     public void setElectionStrategy(ElectionStrategy electionStrategy) {
         this.electionStrategy = electionStrategy;
     }

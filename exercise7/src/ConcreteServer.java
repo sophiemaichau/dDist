@@ -14,7 +14,6 @@ public class ConcreteServer extends AbstractServer {
     public ConcreteServer(int port, JTextArea area) throws IOException {
         super(port);
         this.area = area;
-        //setupRMI();
     }
 
     @Override
