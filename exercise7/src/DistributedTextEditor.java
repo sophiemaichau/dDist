@@ -105,14 +105,12 @@ public class DistributedTextEditor extends JFrame {
 
 			while(true) {
 				if (server.isReadyForConnection()) {
+					client = new ConcreteClient(dec, area, new OldestFirstElectionStrategy(), DistributedTextEditor.this);
 					try {
-						client = new ConcreteClient(dec, area, new OldestFirstElectionStrategy(), DistributedTextEditor.this);
-                        try {
-                            client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumber.getText()));
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
-                        }
-                    } finally {
+						client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumber.getText()));
+						break;
+					} catch (IOException e1) {
+						e1.printStackTrace();
 						break;
 					}
 				}
@@ -140,7 +138,6 @@ public class DistributedTextEditor extends JFrame {
 			client = new ConcreteClient(dec, area, new OldestFirstElectionStrategy(), DistributedTextEditor.this);
             try {
                 client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumber.getText()));
-                clientConnectedUpdateText();
             } catch (IOException e1) {
                 e1.printStackTrace();
             }

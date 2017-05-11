@@ -16,7 +16,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public abstract class AbstractServer {
     private ServerSocket serverSocket;
-    private int port = 40499;
+    private int port;
     private ConnectionHandler handler;
     private LinkedBlockingQueue<MyTextEvent> eventQueue = new LinkedBlockingQueue<MyTextEvent>();
 
