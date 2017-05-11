@@ -119,7 +119,7 @@ public class ConcreteClient extends AbstractClient {
                             ConcreteServer server = new ConcreteServer(40499, area);
                             server.startListening();
                             frame.server = server;
-                            frame.serverStartedUpdateText();
+                            //frame.serverStartedUpdateText();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }

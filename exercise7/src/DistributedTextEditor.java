@@ -94,7 +94,7 @@ public class DistributedTextEditor extends JFrame {
                     try {
                         setTitle("Listening on incoming connections...");
                         server.startListening();
-                    } catch (IOException e1) {
+					} catch (IOException e1) {
                         e1.printStackTrace();
                         setTitle("An error occurred starting the server");
                     }
@@ -103,17 +103,22 @@ public class DistributedTextEditor extends JFrame {
 				ex.printStackTrace();
 			}
 
-			while(true) {
-				if (server.isReadyForConnection()) {
-					client = new ConcreteClient(dec, area, new OldestFirstElectionStrategy(), DistributedTextEditor.this);
-					try {
-						client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumber.getText()));
-						break;
-					} catch (IOException e1) {
-						e1.printStackTrace();
-						break;
+			try {
+				Thread.sleep(500);
+				while(true) {
+					if (server.isReadyForConnection()) {
+						client = new ConcreteClient(dec, area, new OldestFirstElectionStrategy(), DistributedTextEditor.this);
+						try {
+							client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumber.getText()));
+							break;
+						} catch (IOException e1) {
+							e1.printStackTrace();
+							break;
+						}
 					}
 				}
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
 			}
 			changed = false;
 			Save.setEnabled(false);
