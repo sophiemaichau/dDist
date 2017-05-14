@@ -69,7 +69,6 @@ public class ConcreteClient extends AbstractClient {
         }
     }
 
-/* For Milo */
     @Override
     public void onConnect(String serverIP) {
         sendLocalEventsThread = new Thread(() -> {
