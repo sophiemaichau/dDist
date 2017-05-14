@@ -13,4 +13,8 @@ public class MyTextEvent implements Serializable {
 	}
 	private int offset;
 	public int getOffset() { return offset; }
+
+	public String toString() {
+		return "(" + offset + ")";
+	}
 }

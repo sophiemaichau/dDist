@@ -31,7 +31,6 @@ public class ConcreteClient extends AbstractClient {
             final TextInsertEvent tie = (TextInsertEvent) o;
             EventQueue.invokeLater(() -> {
                 try {
-                    System.out.println("InsertEvent!");
                     dec.disabled = true;
                     area.insert(tie.getText(), tie.getOffset());
                     dec.disabled = false;
@@ -44,12 +43,11 @@ public class ConcreteClient extends AbstractClient {
             final TextRemoveEvent tre = (TextRemoveEvent) o;
             EventQueue.invokeLater(() -> {
                 try {
-                    System.out.println("RemoveEvent!");
                     dec.disabled = true;
                     area.replaceRange(null, tre.getOffset(), tre.getOffset() + tre.getLength());
                     dec.disabled = false;
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    System.err.println(e);
                     dec.disabled = false;
                 }
             });
@@ -65,7 +63,6 @@ public class ConcreteClient extends AbstractClient {
         } else if(o instanceof UpdateViewEvent) {
             UpdateViewEvent e = (UpdateViewEvent) o;
             view = e.getView();
-            System.out.println("updated view to: " + e.getView());
         }
     }
 
@@ -88,9 +85,6 @@ public class ConcreteClient extends AbstractClient {
 
     @Override
     public void onDisconnect() {
-        if (sendLocalEventsThread.isInterrupted() == false) {
-            sendLocalEventsThread.interrupt();
-        }
         System.out.println("disconnected from server");
     }
 
@@ -99,54 +93,56 @@ public class ConcreteClient extends AbstractClient {
         disconnect();
         if (sendLocalEventsThread.isInterrupted() == false) {
             sendLocalEventsThread.interrupt();
+            System.out.println("unexpectedly lost connection to server. Beginning election procedure...");
+            beginElection();
         }
-
-        System.out.println("unexpectedly lost connection to server. Beginning election procedure...");
-        beginElection();
     }
 
     private synchronized void beginElection() {
         boolean done = false;
         while (!done) {
             System.out.println("my timestamp: " + id);
-                System.out.println("my view: " + view);
-                Pair<InetAddress, Integer> elect = view.get(0);
-                if (elect.getSecond() == id) {
-                    System.out.println("I won the election! Starting server.");
-                    new Thread(() -> {
-                        try {
-                            ConcreteServer server = new ConcreteServer(40499, area);
-                            server.startListening();
-                            frame.server = server;
-                            //frame.serverStartedUpdateText();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+            System.out.println("my view: " + view);
+            Pair<InetAddress, Integer> elect = view.get(0);
+            if (elect.getSecond() == id) {
+                System.out.println("I won the election! Starting server.");
+                new Thread(() -> {
+                    try {
+                        ConcreteServer server = new ConcreteServer(40499, area);
+                        server.startListening();
+                        frame.server = server;
+                        //frame.serverStartedUpdateText();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
-                    }).start();
-                    try {
-                        Thread.sleep(800);
-                        startAndConnectTo(getServerIP(), 40499);
-                        done = true;
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    try {
-                        Thread.sleep(400);
-                        System.out.println("I lost. Connecting to new server.");
-                        boolean connected = startAndConnectTo(electionStrategy.nextServerIP().substring(1, electionStrategy.nextServerIP().length()), 40499);
-                        if (connected) { done = true; }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        view.remove(0);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        view.remove(0);
-                    }
+                }).start();
+                try {
+                    Thread.sleep(800);
+                    startAndConnectTo(getServerIP(), 40499);
+                    done = true;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
+            } else {
+                try {
+                    Thread.sleep(400);
+                    System.out.println("I lost. Connecting to new server.");
+                    boolean connected = startAndConnectTo(electionStrategy.nextServerIP().substring(1, electionStrategy.nextServerIP().length()), 40499);
+                    System.out.println("connected to new server: " + connected);
+                    if (connected) { done = true; }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    view.remove(0);
+                    done = false;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    view.remove(0);
+                    done = false;
+                }
+            }
         }
     }
 

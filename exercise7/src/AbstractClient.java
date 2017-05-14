@@ -24,6 +24,9 @@ public abstract class AbstractClient {
             ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
             objOutStream.flush();
             handler = new ConnectionHandler(socket, objInputStream, objOutStream);
+            if (handler.getSocket().isConnected() == false) {
+                return false;
+            }
             onConnect(serverIP); //call abstract method
             new Thread(() -> {
                 while(true) {
@@ -32,9 +35,6 @@ public abstract class AbstractClient {
                         onReceivedFromServer(o);
                     } catch (IOException e) {
                         System.err.println(e);
-                        if (handler.isClosed() == false) {
-                            onLostConnection();
-                        }
                         break;
                     }
                 }
@@ -54,7 +54,6 @@ public abstract class AbstractClient {
         try {
             handler.sendObject(o);
         } catch (IOException e) {
-            onLostConnection();
             return false;
         }
         return true;
