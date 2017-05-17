@@ -65,10 +65,10 @@ public abstract class AbstractClient {
     }
 
     public void disconnect() {
+        receiveDataFromServer.interrupt();
         if (handler != null) {
             handler.closeConnection();
         }
-        receiveDataFromServer.interrupt();
         onDisconnect();
     }
 
@@ -88,9 +88,5 @@ public abstract class AbstractClient {
 
     public String getServerIP() {
         return serverIP;
-    }
-
-    public void setServerIP(String serverIP) {
-        this.serverIP = serverIP;
     }
 }

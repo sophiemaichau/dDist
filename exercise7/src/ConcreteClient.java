@@ -19,6 +19,7 @@ public class ConcreteClient extends AbstractClient {
     private ArrayList<Pair<InetAddress, Integer>> view = new ArrayList<>();
     private int id;
     private Thread redirectThread;
+    private RedirectServer redirectServer;
 
     public ConcreteClient(DocumentEventCapturer dec, JTextArea area, ElectionStrategy electionStrategy, DistributedTextEditor frame) {
         this.dec = dec;
@@ -65,9 +66,32 @@ public class ConcreteClient extends AbstractClient {
         } else if(o instanceof UpdateViewEvent) {
             UpdateViewEvent e = (UpdateViewEvent) o;
             view = e.getView();
+
+            //start new server for redirecting new peers to sequencer
+            if (redirectThread == null) {
+                redirectThread = new Thread(() -> {
+                    try {
+                        int redirectServerPort = new Random().nextInt(99);
+                        int redirectPort = Integer.parseInt(frame.portNumber.getText());
+                        redirectServer = new RedirectServer(40400 + redirectServerPort, getServerIP(), redirectPort);
+                        System.out.println("Started redirect server!");
+                        redirectServer.startListening(false);
+                    } catch (IOException e1) {
+                        System.out.println("redirect server failed:");
+                        e1.printStackTrace();
+                    }
+                });
+                redirectThread.start(); 
+
+            }
+
         } else if (o instanceof RedirectEvent) {
             RedirectEvent e = (RedirectEvent) o;
             disconnect();
+            if (redirectServer != null) {
+                redirectServer.shutdown();
+                redirectServer = null;
+            }
             try {
                 startAndConnectTo(e.getRedirectIp(), e.getRedirectPort());
             } catch (IOException e1) {
@@ -79,21 +103,6 @@ public class ConcreteClient extends AbstractClient {
 
     @Override
     public synchronized void onConnect(String serverIP) {
-        //start new server for redirecting new peers to sequencer
-        redirectThread = new Thread(() -> {
-            try {
-                int redirectServerPort = new Random().nextInt(99);
-                int redirectPort = Integer.parseInt(frame.portNumber.getText());
-                RedirectServer redirectServer = new RedirectServer(40400 + redirectServerPort, serverIP, redirectPort);
-                System.out.println("Started redirect server!");
-                redirectServer.startListening(false);
-            } catch (IOException e) {
-                System.out.println("redirect server failed:");
-                e.printStackTrace();
-            }
-        });
-        redirectThread.start();
-
         //listen for local text events and send to sequencer
         sendLocalEventsThread = new Thread(() -> {
             while (true) {
@@ -112,8 +121,10 @@ public class ConcreteClient extends AbstractClient {
     @Override
     public synchronized void onDisconnect() {
         System.out.println("disconnected from server " + getServerIP() + " on port " + getPort());
+        if (redirectThread != null) {
+            redirectThread.interrupt();
+        }
         sendLocalEventsThread.interrupt();
-        redirectThread.interrupt();
     }
 
     @Override
