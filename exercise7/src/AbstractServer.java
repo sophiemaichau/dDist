@@ -30,7 +30,6 @@ public abstract class AbstractServer {
     public abstract void onNewConnection(int id, String ipAddress);
     public abstract void onLostConnection(String ipAddress);
     public abstract void onShutDown();
-    public abstract Object onBroadcastFiltered(Object o);
     public abstract Object incomingEventsFilter(Object o);
 
     public boolean sendToClient(int clientID, Object data) {
@@ -47,13 +46,12 @@ public abstract class AbstractServer {
         return false;
     }
 
-    public boolean broadcast(Object q) {
-        Object o = onBroadcastFiltered(q);
+    public boolean broadcast(Object o) {
 
         ArrayList<Pair<ConnectionHandler, Integer>> removeList = new ArrayList<>();
         for(Pair<ConnectionHandler, Integer> p : connectionList){
             try {
-                System.out.println("sending " + o + " to: " + p.getSecond());
+                //System.out.println("sending " + o + " to: " + p.getSecond());
                 p.getFirst().sendObject(o);
             } catch (IOException e) {
                 e.printStackTrace();

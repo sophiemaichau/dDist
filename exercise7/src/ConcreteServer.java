@@ -3,6 +3,7 @@ import Utilities.*;
 import javax.swing.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class ConcreteServer extends AbstractServer {
     private final JTextArea area;
@@ -35,19 +36,6 @@ public class ConcreteServer extends AbstractServer {
     }
 
     @Override
-    public Object onBroadcastFiltered(Object o) {
-        if(o instanceof MyTextEvent) {
-            MyTextEvent m = (MyTextEvent) o;
-            m.setCount(cServer);
-            System.out.println("countServer: " + cServer);
-            cServer++;
-            return m;
-        } else {
-            return o;
-        }
-    }
-
-    @Override
     public Object incomingEventsFilter(Object o) {
         if(o instanceof MyTextEvent){
             MyTextEvent b = (MyTextEvent) o;
@@ -56,13 +44,22 @@ public class ConcreteServer extends AbstractServer {
                     if(a.getCount() == b.getCount() && a.getOffset() <= b.getOffset()){
                         if(a instanceof TextInsertEvent) {
                             b.setOffset(b.getOffset() + 1);
+                            System.out.println("(" + b + ", count: " + b.getCount() + ", offset:" + b.getOffset() + ")");
+                            for(MyTextEvent mte : eventHistory) {
+                                System.out.println("(Offset: " + mte.getOffset() + ", Count: " + mte.getCount() + ")");
+                            }
                         } else if(a instanceof TextRemoveEvent){
                             b.setOffset(b.getOffset() - 1);
+                            System.out.println("(" + b + "," + b.getOffset() + ")");
+                            System.out.println("Eventhistory: " + eventHistory);
                         }
                     }
                 }
+            System.out.println("countServer: " + cServer);
             eventHistory.add(b);
-            return b;
+            cServer++;
+            b.setCount(cServer);
+            return o;
         }
         return o;
     }
