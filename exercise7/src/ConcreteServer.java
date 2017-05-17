@@ -44,14 +44,8 @@ public class ConcreteServer extends AbstractServer {
                     if(a.getCount() == b.getCount() && a.getOffset() <= b.getOffset()){
                         if(a instanceof TextInsertEvent) {
                             b.setOffset(b.getOffset() + 1);
-                            System.out.println("(" + b + ", count: " + b.getCount() + ", offset:" + b.getOffset() + ")");
-                            for(MyTextEvent mte : eventHistory) {
-                                System.out.println("(Offset: " + mte.getOffset() + ", Count: " + mte.getCount() + ")");
-                            }
                         } else if(a instanceof TextRemoveEvent){
                             b.setOffset(b.getOffset() - 1);
-                            System.out.println("(" + b + "," + b.getOffset() + ")");
-                            System.out.println("Eventhistory: " + eventHistory);
                         }
                     }
                 }
