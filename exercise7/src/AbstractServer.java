@@ -19,8 +19,6 @@ public abstract class AbstractServer {
     private int port;
     private ConnectionHandler handler;
     private LinkedBlockingQueue<MyTextEvent> eventQueue = new LinkedBlockingQueue<MyTextEvent>();
-
-
     private ArrayList<Pair<InetAddress, Integer>> view = new ArrayList<>();
     private ArrayList<Pair<ConnectionHandler, Integer>> connectionList = new ArrayList<>();
 
@@ -32,6 +30,7 @@ public abstract class AbstractServer {
     public abstract void onNewConnection(int id, String ipAddress);
     public abstract void onLostConnection(String ipAddress);
     public abstract void onShutDown();
+    public abstract Object onBroadcastFiltered(Object o);
 
     public boolean sendToClient(int clientID, Object data) {
         for (Pair<ConnectionHandler, Integer> p : connectionList) {
@@ -47,17 +46,20 @@ public abstract class AbstractServer {
         return false;
     }
 
-    public boolean broadcast(Object o) {
+    public boolean broadcast(Object q) {
+        Object o = onBroadcastFiltered(q);
+
         ArrayList<Pair<ConnectionHandler, Integer>> removeList = new ArrayList<>();
         for(Pair<ConnectionHandler, Integer> p : connectionList){
             try {
-                System.out.println("sending" + o + " to: " + p.getSecond());
+                System.out.println("sending " + o + " to: " + p.getSecond());
                 p.getFirst().sendObject(o);
             } catch (IOException e) {
                 e.printStackTrace();
                 removeList.add(p);
             }
         }
+
         for (Pair<ConnectionHandler, Integer> c : removeList) {
             onLostConnection(c.getFirst().getSocket().getInetAddress().toString());
             c.getFirst().closeConnection();
@@ -66,6 +68,7 @@ public abstract class AbstractServer {
             boolean r = view.remove(new Pair<>(c.getFirst().getSocket().getInetAddress(), c.getSecond()));
             System.out.println("removed pair: " + r);
         }
+
         return true;
     }
     public ArrayList<Pair<InetAddress, Integer>> getView() {

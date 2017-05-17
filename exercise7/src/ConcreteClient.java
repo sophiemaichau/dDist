@@ -6,9 +6,6 @@ import java.io.*;
 import java.net.InetAddress;
 import java.util.ArrayList;
 
-/**
- * Created by milo on 02-05-17.
- */
 public class ConcreteClient extends AbstractClient {
     private DocumentEventCapturer dec;
     private JTextArea area;
@@ -32,6 +29,7 @@ public class ConcreteClient extends AbstractClient {
             EventQueue.invokeLater(() -> {
                 try {
                     System.out.println("InsertEvent!");
+                    System.out.println("countClient: " + tie.getCount());
                     dec.disabled = true;
                     area.insert(tie.getText(), tie.getOffset());
                     dec.disabled = false;
@@ -45,6 +43,7 @@ public class ConcreteClient extends AbstractClient {
             EventQueue.invokeLater(() -> {
                 try {
                     System.out.println("RemoveEvent!");
+                    System.out.println("countClient: " + tre.getCount());
                     dec.disabled = true;
                     area.replaceRange(null, tre.getOffset(), tre.getOffset() + tre.getLength());
                     dec.disabled = false;
@@ -56,6 +55,7 @@ public class ConcreteClient extends AbstractClient {
         } else if (o instanceof TextCopyEvent) {
             final TextCopyEvent tce = (TextCopyEvent) o;
             EventQueue.invokeLater(() -> {
+                System.out.println("countClient: " + tce.getCount());
                 dec.disabled = true;
                 area.setText(tce.getCopiedText());
                 id = tce.getTimeStamp();
@@ -76,7 +76,7 @@ public class ConcreteClient extends AbstractClient {
                 MyTextEvent e;
                 try {
                     e = dec.take();
-                    boolean res = sendToServer(e);
+                    sendToServer(e);
                 } catch (InterruptedException e1) {
                     e1.printStackTrace();
                 }

@@ -8,9 +8,22 @@ import java.io.Serializable;
  *
  */
 public class MyTextEvent implements Serializable {
+	private int offset;
+	private int count;
+
 	MyTextEvent(int offset) {
 		this.offset = offset;
 	}
-	private int offset;
-	public int getOffset() { return offset; }
+
+	public int getOffset() {
+		return offset;
+	}
+
+	public int getCount() {
+		return count;
+	}
+
+	public void setCount(int count) {
+		this.count = count;
+	}
 }
