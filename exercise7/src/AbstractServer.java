@@ -31,6 +31,7 @@ public abstract class AbstractServer {
     public abstract void onLostConnection(String ipAddress);
     public abstract void onShutDown();
     public abstract Object onBroadcastFiltered(Object o);
+    public abstract Object incomingEventsFilter(Object o);
 
     public boolean sendToClient(int clientID, Object data) {
         for (Pair<ConnectionHandler, Integer> p : connectionList) {
@@ -150,7 +151,8 @@ public abstract class AbstractServer {
             if(!handler.isClosed()) {
                 MyTextEvent textEvent = null;
                 try {
-                    textEvent = (MyTextEvent) handler.receiveObject();
+                    MyTextEvent textEventReceived = (MyTextEvent) handler.receiveObject();
+                    textEvent = (MyTextEvent) incomingEventsFilter(textEventReceived);
                 } catch (IOException e) {
                     onLostConnection(handler.getSocket().getInetAddress().toString());
                     handler.closeConnection();

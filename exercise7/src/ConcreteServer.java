@@ -1,16 +1,13 @@
-import Utilities.MyTextEvent;
-import Utilities.TextCopyEvent;
-import Utilities.UpdateViewEvent;
+import Utilities.*;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.util.ArrayList;
 
-/**
- * Created by milo on 02-05-17.
- */
 public class ConcreteServer extends AbstractServer {
     private final JTextArea area;
     private int cServer;
+    private ArrayList<MyTextEvent> eventHistory = new ArrayList<>();
 
     public ConcreteServer(int port, JTextArea area) throws IOException {
         super(port);
@@ -48,5 +45,25 @@ public class ConcreteServer extends AbstractServer {
         } else {
             return o;
         }
+    }
+
+    @Override
+    public Object incomingEventsFilter(Object o) {
+        if(o instanceof MyTextEvent){
+            MyTextEvent b = (MyTextEvent) o;
+                for(int i = eventHistory.size() - 1; i > 0; i--){
+                    MyTextEvent a = eventHistory.get(i);
+                    if(a.getCount() == b.getCount() && a.getOffset() <= b.getOffset()){
+                        if(a instanceof TextInsertEvent) {
+                            b.setOffset(b.getOffset() + 1);
+                        } else if(a instanceof TextRemoveEvent){
+                            b.setOffset(b.getOffset() - 1);
+                        }
+                    }
+                }
+            eventHistory.add(b);
+            return b;
+        }
+        return o;
     }
 }

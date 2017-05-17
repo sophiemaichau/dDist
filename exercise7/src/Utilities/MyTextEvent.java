@@ -19,6 +19,10 @@ public class MyTextEvent implements Serializable {
 		return offset;
 	}
 
+	public void setOffset(int i){
+		offset = i;
+	}
+
 	public int getCount() {
 		return count;
 	}
