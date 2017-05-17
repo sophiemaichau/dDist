@@ -76,20 +76,22 @@ public abstract class AbstractServer {
 
 
 
-    public void startListening() throws IOException {
+    public void startListening(boolean shouldBroadcast) throws IOException {
         serverSocket = new ServerSocket(port);
+        if (shouldBroadcast) {
+            new Thread(() -> {
+                try {
+                    broadcastEvents();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
 
-        new Thread(() -> {
-            try {
-                broadcastEvents();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
+        }
         int idSequencer = 0;
+        System.out.println("Waiting for client on "
+                + serverSocket.getInetAddress().getLocalHost().getHostAddress() + " : " + port);
         while(Thread.currentThread().isInterrupted() == false) {
-            System.out.println("Waiting for client on "
-                    + serverSocket.getInetAddress().getLocalHost().getHostAddress() + " : " + port);
             Socket socket = waitForConnectionFromClient();
             Pair<ConnectionHandler, Integer> pair = null;
             Pair<InetAddress, Integer> viewPair = null;

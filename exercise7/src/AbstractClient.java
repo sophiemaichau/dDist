@@ -28,13 +28,13 @@ public abstract class AbstractClient {
                 return false;
             }
             onConnect(serverIP); //call abstract method
-            new Thread(() -> {
+            receiveDataFromServer = new Thread(() -> {
                 while(true) {
                     try {
                         Object o = handler.receiveObject();
                         onReceivedFromServer(o);
                     } catch (IOException e) {
-                        System.err.println(e);
+                        e.printStackTrace();
                         break;
                     }
                 }
@@ -82,5 +82,9 @@ public abstract class AbstractClient {
 
     public String getServerIP() {
         return serverIP;
+    }
+
+    public void setServerIP(String serverIP) {
+        this.serverIP = serverIP;
     }
 }

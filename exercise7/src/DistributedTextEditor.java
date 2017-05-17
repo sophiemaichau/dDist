@@ -11,8 +11,8 @@ import java.lang.Integer;
 public class DistributedTextEditor extends JFrame {
 	private static final long serialVersionUID = 1L;
 	public JTextArea area = new JTextArea(20, 60);
-	private JTextField ipaddress; // "IP address here"
-	private JTextField portNumber = new JTextField("40499");
+	public JTextField ipaddress; // "IP address here"
+	public JTextField portNumber = new JTextField("40499");
 	private JFileChooser dialog = new JFileChooser(System.getProperty("user.dir"));
 	private String currentFile = "Untitled";
 	private boolean changed = false;
@@ -93,7 +93,7 @@ public class DistributedTextEditor extends JFrame {
 				new Thread(() -> {
                     try {
                         setTitle("Listening on incoming connections...");
-                        server.startListening();
+                        server.startListening(true);
 					} catch (IOException e1) {
                         e1.printStackTrace();
                         setTitle("An error occurred starting the server");
@@ -104,7 +104,7 @@ public class DistributedTextEditor extends JFrame {
 			}
 
 			try {
-				Thread.sleep(500);
+				Thread.sleep(200);
 				while(true) {
 					if (server.isReadyForConnection()) {
 						client = new ConcreteClient(dec, area, new OldestFirstElectionStrategy(), DistributedTextEditor.this);

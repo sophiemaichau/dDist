@@ -5,6 +5,7 @@ import java.awt.*;
 import java.io.*;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by milo on 02-05-17.
@@ -17,6 +18,7 @@ public class ConcreteClient extends AbstractClient {
     private DistributedTextEditor frame;
     private ArrayList<Pair<InetAddress, Integer>> view = new ArrayList<>();
     private int id;
+    private Thread redirectThread;
 
     public ConcreteClient(DocumentEventCapturer dec, JTextArea area, ElectionStrategy electionStrategy, DistributedTextEditor frame) {
         this.dec = dec;
@@ -63,12 +65,36 @@ public class ConcreteClient extends AbstractClient {
         } else if(o instanceof UpdateViewEvent) {
             UpdateViewEvent e = (UpdateViewEvent) o;
             view = e.getView();
+        } else if (o instanceof RedirectEvent) {
+            RedirectEvent e = (RedirectEvent) o;
+            disconnect();
+            try {
+                startAndConnectTo(e.getRedirectIp(), e.getRedirectPort());
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
         }
     }
 
 
     @Override
-    public void onConnect(String serverIP) {
+    public synchronized void onConnect(String serverIP) {
+        //start new server for redirecting new peers to sequencer
+        redirectThread = new Thread(() -> {
+            try {
+                int redirectServerPort = new Random().nextInt(99);
+                int redirectPort = Integer.parseInt(frame.portNumber.getText());
+                RedirectServer redirectServer = new RedirectServer(40400 + redirectServerPort, serverIP, redirectPort);
+                System.out.println("Started redirect server!");
+                redirectServer.startListening(false);
+            } catch (IOException e) {
+                System.out.println("redirect server failed:");
+                e.printStackTrace();
+            }
+        });
+        redirectThread.start();
+
+        //listen for local text events and send to sequencer
         sendLocalEventsThread = new Thread(() -> {
             while (true) {
                 MyTextEvent e;
@@ -76,7 +102,7 @@ public class ConcreteClient extends AbstractClient {
                     e = dec.take();
                     boolean res = sendToServer(e);
                 } catch (InterruptedException e1) {
-                    e1.printStackTrace();
+                    return;
                 }
             }
         });
@@ -84,22 +110,22 @@ public class ConcreteClient extends AbstractClient {
     }
 
     @Override
-    public void onDisconnect() {
+    public synchronized void onDisconnect() {
         System.out.println("disconnected from server");
+        sendLocalEventsThread.interrupt();
+        redirectThread.interrupt();
     }
 
     @Override
     public void onLostConnection() {
-        disconnect();
-        if (sendLocalEventsThread.isInterrupted() == false) {
-            sendLocalEventsThread.interrupt();
-            System.out.println("unexpectedly lost connection to server. Beginning election procedure...");
-            beginElection();
-        }
+        sendLocalEventsThread.interrupt();
+        redirectThread.interrupt();
+        System.out.println("unexpectedly lost connection to server. Beginning election procedure...");
+        beginElection();
     }
 
     private synchronized void beginElection() {
-        boolean done = false;
+        /*boolean done = false;
         while (!done) {
             System.out.println("my timestamp: " + id);
             System.out.println("my view: " + view);
@@ -109,7 +135,7 @@ public class ConcreteClient extends AbstractClient {
                 new Thread(() -> {
                     try {
                         ConcreteServer server = new ConcreteServer(40499, area);
-                        server.startListening();
+                        server.startListening(true);
                         frame.server = server;
                         //frame.serverStartedUpdateText();
                     } catch (IOException e) {
@@ -144,6 +170,7 @@ public class ConcreteClient extends AbstractClient {
                 }
             }
         }
+        */
     }
 
     public void setElectionStrategy(ElectionStrategy electionStrategy) {
