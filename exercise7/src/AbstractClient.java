@@ -11,13 +11,17 @@ public abstract class AbstractClient {
     private Socket socket = null;
     private String serverIP;
     private int port;
+    private Thread receiveDataFromServer;
 
     public AbstractClient() {
     }
 
 
     public boolean startAndConnectTo(String serverIP, int port) throws IOException {
+        socket = null;
         System.out.println("Starting client. Type CTRL-D to shut down.");
+        this.serverIP = serverIP;
+        this.port = port;
         socket = connectToServer(serverIP, port);
         if (socket != null) {
             ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
@@ -38,7 +42,8 @@ public abstract class AbstractClient {
                         break;
                     }
                 }
-            }).start();
+            });
+            receiveDataFromServer.start();
         } else {
             return false;
         }
@@ -63,6 +68,7 @@ public abstract class AbstractClient {
         if (handler != null) {
             handler.closeConnection();
         }
+        receiveDataFromServer.interrupt();
         onDisconnect();
     }
 
@@ -71,7 +77,7 @@ public abstract class AbstractClient {
         try {
             res = new Socket(serverName, port);
         } catch (IOException e) {
-            // We return null on IOExceptions
+            e.printStackTrace();
         }
         return res;
     }

@@ -111,7 +111,7 @@ public class ConcreteClient extends AbstractClient {
 
     @Override
     public synchronized void onDisconnect() {
-        System.out.println("disconnected from server");
+        System.out.println("disconnected from server " + getServerIP() + " on port " + getPort());
         sendLocalEventsThread.interrupt();
         redirectThread.interrupt();
     }
