@@ -32,8 +32,7 @@ public class ConcreteClient extends AbstractClient {
             final TextInsertEvent tie = (TextInsertEvent) o;
             EventQueue.invokeLater(() -> {
                 try {
-                    System.out.println("InsertEvent!");
-                    count = tie.getCount();
+                        count = tie.getCount();
                     dec.disabled = true;
                     area.insert(tie.getText(), tie.getOffset());
                     dec.disabled = false;
@@ -46,7 +45,6 @@ public class ConcreteClient extends AbstractClient {
             final TextRemoveEvent tre = (TextRemoveEvent) o;
             EventQueue.invokeLater(() -> {
                 try {
-                    System.out.println("RemoveEvent!");
                     count = tre.getCount();
                     dec.disabled = true;
                     area.replaceRange(null, tre.getOffset(), tre.getOffset() + tre.getLength());
@@ -109,7 +107,6 @@ public class ConcreteClient extends AbstractClient {
                 try {
                     e = dec.take();
                     e.setCount(count + 1);
-                    System.out.println("countClient: " + e.getCount());
                     sendToServer(e);
                 } catch (InterruptedException e1) {
                     return;

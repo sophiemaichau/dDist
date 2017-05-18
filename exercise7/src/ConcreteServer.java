@@ -70,7 +70,6 @@ public class ConcreteServer extends AbstractServer {
                         }
                     }
                 }
-            System.out.println("countServer: " + cServer);
             eventHistory.add(b);
             cServer++;
             b.setCount(cServer);

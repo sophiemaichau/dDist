@@ -35,7 +35,7 @@ public abstract class AbstractClient {
                         Object o = handler.receiveObject();
                         onReceivedFromServer(o);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        System.err.println(e);
                         break;
                     }
                 }

@@ -50,7 +50,6 @@ public abstract class AbstractServer {
         ArrayList<Pair<ConnectionHandler, Integer>> removeList = new ArrayList<>();
         for(Pair<ConnectionHandler, Integer> p : connectionList){
             try {
-                System.out.println("sending" + o + " to: " + p.getSecond());
                 p.getFirst().sendObject(o);
             } catch (IOException e) {
                 System.err.println(e);
