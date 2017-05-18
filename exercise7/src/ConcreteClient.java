@@ -65,10 +65,6 @@ public class ConcreteClient extends AbstractClient {
                 dec.disabled = false;
             });
 
-        } else if(o instanceof UpdateViewEvent) {
-            UpdateViewEvent e = (UpdateViewEvent) o;
-            view = e.getView();
-
             //start new server for redirecting new peers to sequencer
             if (redirectThread == null) {
                 redirectThread = new Thread(() -> {
@@ -87,18 +83,20 @@ public class ConcreteClient extends AbstractClient {
 
             }
 
+        } else if(o instanceof UpdateViewEvent) {
+            UpdateViewEvent e = (UpdateViewEvent) o;
+            view = e.getView();
+
+
         } else if (o instanceof RedirectEvent) {
             RedirectEvent e = (RedirectEvent) o;
-            disconnect();
-            if (redirectServer != null) {
-                redirectServer.shutdown();
-                redirectServer = null;
-            }
-            try {
-                startAndConnectTo(e.getRedirectIp(), e.getRedirectPort());
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
+            new Thread(() -> {
+                frame.ipaddress.setText(e.getRedirectIp());
+                frame.portNumber.setText(Integer.toString(e.getRedirectPort()));
+                frame.Disconnect.actionPerformed(null);
+                frame.Connect.actionPerformed(null);
+            }).start();
+
         }
     }
 

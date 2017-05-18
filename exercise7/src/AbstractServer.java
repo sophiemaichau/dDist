@@ -100,6 +100,7 @@ public abstract class AbstractServer {
                 System.out.println("Connection from " + socket.getRemoteSocketAddress());
                 ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
                 ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
+                objOutStream.flush();
                 handler = new ConnectionHandler(socket, objInputStream, objOutStream);
                 pair = new Pair<>(handler, idSequencer);
                 viewPair = new Pair<>(handler.getSocket().getInetAddress(), idSequencer);

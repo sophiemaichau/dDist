@@ -15,20 +15,20 @@ public abstract class AbstractClient {
 
 
     public boolean startAndConnectTo(String serverIP, int port) throws IOException {
-        socket = null;
-        System.out.println("Starting client. Type CTRL-D to shut down.");
+        System.out.println("Starting client and connecting to " + serverIP + " on port " + port);
         this.serverIP = serverIP;
         this.port = port;
         socket = connectToServer(serverIP, port);
+        if (handler != null && handler.isClosed() == false) {
+            handler.closeConnection();
+        }
         if (socket != null) {
             ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
-            objOutStream.flush();
             handler = new ConnectionHandler(socket, objInputStream, objOutStream);
             if (handler.getSocket().isConnected() == false) {
                 return false;
             }
-            onConnect(serverIP); //call abstract method
             receiveDataFromServer = new Thread(() -> {
                 while(true) {
                     try {
@@ -41,6 +41,7 @@ public abstract class AbstractClient {
                 }
             });
             receiveDataFromServer.start();
+            onConnect(serverIP); //call abstract method
         } else {
             return false;
         }
@@ -62,10 +63,10 @@ public abstract class AbstractClient {
     }
 
     public void disconnect() {
-        receiveDataFromServer.interrupt();
         if (handler != null) {
             handler.closeConnection();
         }
+        receiveDataFromServer.interrupt();
         onDisconnect();
     }
 

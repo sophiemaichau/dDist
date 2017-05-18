@@ -55,6 +55,7 @@ public class ConnectionHandler {
         try {
             isClosed = true;
             in.close();
+            out.flush();
             out.close();
             socket.close();
         } catch (IOException e) {
