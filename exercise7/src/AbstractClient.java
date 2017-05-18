@@ -11,34 +11,39 @@ public abstract class AbstractClient {
     private Socket socket = null;
     private String serverIP;
     private int port;
+    private Thread receiveDataFromServer;
 
     public AbstractClient() {
     }
 
 
     public boolean startAndConnectTo(String serverIP, int port) throws IOException {
+        socket = null;
         System.out.println("Starting client. Type CTRL-D to shut down.");
+        this.serverIP = serverIP;
+        this.port = port;
         socket = connectToServer(serverIP, port);
         if (socket != null) {
             ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
             objOutStream.flush();
             handler = new ConnectionHandler(socket, objInputStream, objOutStream);
+            if (handler.getSocket().isConnected() == false) {
+                return false;
+            }
             onConnect(serverIP); //call abstract method
-            new Thread(() -> {
+            receiveDataFromServer = new Thread(() -> {
                 while(true) {
                     try {
                         Object o = handler.receiveObject();
                         onReceivedFromServer(o);
                     } catch (IOException e) {
-                        System.err.println(e);
-                        if (handler.isClosed() == false) {
-                            onLostConnection();
-                        }
+                        e.printStackTrace();
                         break;
                     }
                 }
-            }).start();
+            });
+            receiveDataFromServer.start();
         } else {
             return false;
         }
@@ -54,13 +59,13 @@ public abstract class AbstractClient {
         try {
             handler.sendObject(o);
         } catch (IOException e) {
-            onLostConnection();
             return false;
         }
         return true;
     }
 
     public void disconnect() {
+        receiveDataFromServer.interrupt();
         if (handler != null) {
             handler.closeConnection();
         }
@@ -72,7 +77,7 @@ public abstract class AbstractClient {
         try {
             res = new Socket(serverName, port);
         } catch (IOException e) {
-            // We return null on IOExceptions
+            e.printStackTrace();
         }
         return res;
     }

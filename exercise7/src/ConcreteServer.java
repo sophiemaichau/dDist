@@ -1,38 +1,61 @@
 import Utilities.*;
+import Utilities.Pair;
+import Utilities.TextCopyEvent;
+import Utilities.UpdateViewEvent;
 
 import javax.swing.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.net.InetAddress;
+import java.util.ArrayList;
 
 public class ConcreteServer extends AbstractServer {
     private final JTextArea area;
     private int cServer;
     private ArrayList<MyTextEvent> eventHistory = new ArrayList<>();
+    private Thread broadcastViewThread;
+
 
     public ConcreteServer(int port, JTextArea area) throws IOException {
         super(port);
         this.area = area;
         cServer = 0;
+        broadcastViewThread = new Thread(() -> {
+            try {
+                Thread.sleep(5000);
+                UpdateViewEvent e = new UpdateViewEvent((ArrayList<Pair<InetAddress, Integer>>) getView().clone());
+                broadcast(e);
+            } catch (InterruptedException e) {
+                System.out.println("stopped broadcasting view");
+            }
+        });
+        broadcastViewThread.start();
     }
 
     @Override
-    public void onNewConnection(int id, String ipAddress) {
+    public synchronized void onNewConnection(int id, String ipAddress) {
         System.out.println("new connection from: " + ipAddress + " with id: " + id);
         sendToClient(id, new TextCopyEvent(0, area.getText(), id, cServer));
         System.out.println("view after new connection: " + getView());
         broadcast(new UpdateViewEvent(getView()));
+        sendToClient(id, new TextCopyEvent(0, area.getText(), id));
+        UpdateViewEvent e = new UpdateViewEvent((ArrayList<Pair<InetAddress, Integer>>) getView().clone());
+        broadcast(e);
     }
 
     @Override
-    public void onLostConnection(String ipAddress) {
+    public synchronized void onLostConnection(String ipAddress) {
         System.out.println("lost connection with : " + ipAddress + "!");
         //send view update to clients
+        UpdateViewEvent e = new UpdateViewEvent((ArrayList<Pair<InetAddress, Integer>>) getView().clone());
+        broadcast(e);
     }
 
     @Override
-    public void onShutDown() {
+    public synchronized void onShutDown() {
         System.out.println("Closing down server");
+        broadcastViewThread.interrupt();
     }
 
     @Override

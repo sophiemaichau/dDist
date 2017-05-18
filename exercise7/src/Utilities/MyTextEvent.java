@@ -14,6 +14,12 @@ public class MyTextEvent implements Serializable {
 	MyTextEvent(int offset) {
 		this.offset = offset;
 	}
+	private int offset;
+	public int getOffset() { return offset; }
+
+	public String toString() {
+		return "(" + offset + ")";
+	}
 
 	public int getOffset() {
 		return offset;

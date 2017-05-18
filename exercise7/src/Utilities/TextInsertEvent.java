@@ -14,4 +14,17 @@ public class TextInsertEvent extends MyTextEvent {
 		this.text = text;
 	}
 	public String getText() { return text; }
+
+
+	public String toString() {
+		return "insert(" + text + ", " + getOffset() + ")";
+	}
+
+	public boolean equals(Object o) {
+		if (o instanceof TextInsertEvent) {
+			return ((TextInsertEvent) o).getText().equals(text) && ((TextInsertEvent) o).getOffset() == getOffset();
+		}
+		return false;
+	}
+
 }

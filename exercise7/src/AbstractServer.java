@@ -19,6 +19,8 @@ public abstract class AbstractServer {
     private int port;
     private ConnectionHandler handler;
     private LinkedBlockingQueue<MyTextEvent> eventQueue = new LinkedBlockingQueue<MyTextEvent>();
+    private ArrayList<Thread> handlerThreads = new ArrayList<>();
+
     private ArrayList<Pair<InetAddress, Integer>> view = new ArrayList<>();
     private ArrayList<Pair<ConnectionHandler, Integer>> connectionList = new ArrayList<>();
 
@@ -51,21 +53,19 @@ public abstract class AbstractServer {
         ArrayList<Pair<ConnectionHandler, Integer>> removeList = new ArrayList<>();
         for(Pair<ConnectionHandler, Integer> p : connectionList){
             try {
-                //System.out.println("sending " + o + " to: " + p.getSecond());
+                System.out.println("sending" + o + " to: " + p.getSecond());
                 p.getFirst().sendObject(o);
             } catch (IOException e) {
-                e.printStackTrace();
+                System.err.println(e);
                 removeList.add(p);
             }
         }
-
         for (Pair<ConnectionHandler, Integer> c : removeList) {
-            onLostConnection(c.getFirst().getSocket().getInetAddress().toString());
+            String ip = c.getFirst().getSocket().getInetAddress().toString();
             c.getFirst().closeConnection();
             connectionList.remove(c);
-            System.out.println("trying to remove id: " + c.getSecond());
             boolean r = view.remove(new Pair<>(c.getFirst().getSocket().getInetAddress(), c.getSecond()));
-            System.out.println("removed pair: " + r);
+            onLostConnection(ip);
         }
 
         return true;
@@ -80,26 +80,27 @@ public abstract class AbstractServer {
 
 
 
-    public void startListening() throws IOException {
+    public void startListening(boolean shouldBroadcast) throws IOException {
         serverSocket = new ServerSocket(port);
+        if (shouldBroadcast) {
+            new Thread(() -> {
+                try {
+                    broadcastEvents();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
 
-        new Thread(() -> {
-            try {
-                broadcastEvents();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
+        }
         int idSequencer = 0;
+        System.out.println("Waiting for client on "
+                + serverSocket.getInetAddress().getLocalHost().getHostAddress() + " : " + port);
         while(Thread.currentThread().isInterrupted() == false) {
-            System.out.println("Waiting for client on "
-                    + serverSocket.getInetAddress().getLocalHost().getHostAddress() + " : " + port);
             Socket socket = waitForConnectionFromClient();
             Pair<ConnectionHandler, Integer> pair = null;
             Pair<InetAddress, Integer> viewPair = null;
-
             try {
-                //System.out.println("Connection from " + socket.getRemoteSocketAddress());
+                System.out.println("Connection from " + socket.getRemoteSocketAddress());
                 ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
                 ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
                 handler = new ConnectionHandler(socket, objInputStream, objOutStream);
@@ -110,9 +111,12 @@ public abstract class AbstractServer {
                 //System.out.println("views after new connection:");
                 //System.out.println("connectionList: " + connectionList);
                 //System.out.println("view: " + view);
-                new Thread(
-                    () -> incomingEvents(handler)
-                ).start();
+                Thread t = new Thread(() -> {
+                    incomingEvents(handler);
+                });
+
+                handlerThreads.add(t);
+                t.start();
                 onNewConnection(idSequencer, handler.getSocket().getInetAddress().toString());
                 idSequencer++;
             } catch (SocketTimeoutException e) {
@@ -149,6 +153,8 @@ public abstract class AbstractServer {
             if(!handler.isClosed()) {
                 MyTextEvent textEvent = null;
                 try {
+                    textEvent = (MyTextEvent) handler.receiveObject();
+                    eventQueue.add(textEvent);
                     MyTextEvent textEventReceived = (MyTextEvent) handler.receiveObject();
                     textEvent = (MyTextEvent) incomingEventsFilter(textEventReceived);
                 } catch (IOException e) {
@@ -181,12 +187,17 @@ public abstract class AbstractServer {
     }
 
     public void shutdown() {
+        for (Thread t : handlerThreads) {
+            t.interrupt();
+        }
         for(Pair<ConnectionHandler, Integer> p : connectionList) {
             if (p.getFirst() != null) {
                 p.getFirst().closeConnection();
             }
         }
+        handlerThreads.clear();
         connectionList.clear();
+        eventQueue.clear();
         view.clear();
         try {
             serverSocket.close();
@@ -194,7 +205,7 @@ public abstract class AbstractServer {
             System.err.println(e);
         }
         onShutDown();
-        Thread.currentThread().interrupt();
+        //Thread.currentThread().interrupt();
     }
 
 }

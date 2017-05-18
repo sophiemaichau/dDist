@@ -10,4 +10,8 @@ public class TextRemoveEvent extends MyTextEvent {
 	}
 	
 	public int getLength() { return length; }
+
+	public String toString() {
+		return "remove(" + getOffset() + ", " + length + ")";
+	}
 }
