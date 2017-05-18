@@ -2,9 +2,6 @@ import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 
-/**
- * Created by sophiemaichau on 02/05/2017.
- */
 public class ConnectionList<E> implements RemoteList<E>, Serializable {
     private ArrayList<E> connectionList = new ArrayList<E>();
 

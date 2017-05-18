@@ -39,7 +39,6 @@ public class ConcreteServer extends AbstractServer {
         sendToClient(id, new TextCopyEvent(0, area.getText(), id, cServer));
         System.out.println("view after new connection: " + getView());
         broadcast(new UpdateViewEvent(getView()));
-        sendToClient(id, new TextCopyEvent(0, area.getText(), id));
         UpdateViewEvent e = new UpdateViewEvent((ArrayList<Pair<InetAddress, Integer>>) getView().clone());
         broadcast(e);
     }

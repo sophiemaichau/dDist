@@ -2,9 +2,6 @@ import Utilities.Pair;
 
 import java.rmi.RemoteException;
 
-/**
- * Created by milo on 03-05-17.
- */
 public class OldestFirstElectionStrategy implements ElectionStrategy {
     private Pair<String, Long> lowest;
     private int currIndex = 1;

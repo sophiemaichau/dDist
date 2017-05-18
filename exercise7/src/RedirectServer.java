@@ -2,9 +2,6 @@ import Utilities.RedirectEvent;
 
 import java.io.IOException;
 
-/**
- * Created by milo on 14-05-17.
- */
 public class RedirectServer extends AbstractServer {
 
 
@@ -32,5 +29,10 @@ public class RedirectServer extends AbstractServer {
     @Override
     public void onShutDown() {
 
+    }
+
+    @Override
+    public Object incomingEventsFilter(Object o) {
+        return null;
     }
 }

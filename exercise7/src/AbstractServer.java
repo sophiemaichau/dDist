@@ -11,9 +11,6 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
-/**
- * Created by milo on 02-05-17.
- */
 public abstract class AbstractServer {
     private ServerSocket serverSocket;
     private int port;

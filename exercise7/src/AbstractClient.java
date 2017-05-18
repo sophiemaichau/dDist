@@ -3,9 +3,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-/**
- * Created by milo on 02-05-17.
- */
 public abstract class AbstractClient {
     private ConnectionHandler handler;
     private Socket socket = null;
