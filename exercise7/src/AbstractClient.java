@@ -36,6 +36,9 @@ public abstract class AbstractClient {
                         onReceivedFromServer(o);
                     } catch (IOException e) {
                         System.err.println(e);
+                        if (handler != null && handler.isClosed() == false) {
+                            onLostConnection();
+                        }
                         break;
                     }
                 }
