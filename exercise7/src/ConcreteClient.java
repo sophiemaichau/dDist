@@ -67,9 +67,9 @@ public class ConcreteClient extends AbstractClient {
             if (redirectThread == null) {
                 redirectThread = new Thread(() -> {
                     try {
-                        int redirectServerPort = new Random().nextInt(99);
+                        int redirectServerPort = new Random().nextInt(9999);
                         int redirectPort = Integer.parseInt(frame.portNumber.getText());
-                        redirectServer = new RedirectServer(40400 + redirectServerPort, getServerIP(), redirectPort);
+                        redirectServer = new RedirectServer(30000 + redirectServerPort, getServerIP(), redirectPort);
                         System.out.println("Started redirect server!");
                         redirectServer.startListening(false);
                     } catch (IOException e1) {
@@ -84,7 +84,7 @@ public class ConcreteClient extends AbstractClient {
         } else if(o instanceof UpdateViewEvent) {
             UpdateViewEvent e = (UpdateViewEvent) o;
             view = e.getView();
-
+            System.out.println("updated client view to: " + view);
 
         } else if (o instanceof RedirectEvent) {
             RedirectEvent e = (RedirectEvent) o;
@@ -135,6 +135,21 @@ public class ConcreteClient extends AbstractClient {
     }
 
     private synchronized void beginElection() {
+        System.out.println("id" + view.get(1) + " should be the new sequencer");
+        if (id == view.get(1).getSecond()) {
+            System.out.println("I should be sequencer with id: " + id);
+            new Thread(() -> {
+                try {
+                    Thread.sleep(150);
+                    frame.Disconnect.actionPerformed(null);
+                    Thread.sleep(150);
+                    frame.Listen.actionPerformed(null);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+
+        }
         /*boolean done = false;
         while (!done) {
             System.out.println("my timestamp: " + id);

@@ -10,9 +10,11 @@ public abstract class AbstractClient {
     private int port;
     private Thread receiveDataFromServer;
 
-    public AbstractClient() {
-    }
 
+    public abstract void onLostConnection();
+    public abstract void onReceivedFromServer(Object o);
+    public abstract void onConnect(String serverIP);
+    public abstract void onDisconnect();
 
     public boolean startAndConnectTo(String serverIP, int port) throws IOException {
         System.out.println("Starting client and connecting to " + serverIP + " on port " + port);
@@ -50,11 +52,6 @@ public abstract class AbstractClient {
         }
         return true;
     }
-
-    public abstract void onLostConnection();
-    public abstract void onReceivedFromServer(Object o);
-    public abstract void onConnect(String serverIP);
-    public abstract void onDisconnect();
 
     protected boolean sendToServer(Object o) {
         try {

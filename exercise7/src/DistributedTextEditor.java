@@ -87,7 +87,6 @@ public class DistributedTextEditor extends JFrame {
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent e) {
-			area.setText("");
 			try {
 				server = new ConcreteServer(Integer.parseInt(portNumber.getText()), area);
 				new Thread(() -> {

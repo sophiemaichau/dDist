@@ -23,9 +23,11 @@ public class ConcreteServer extends AbstractServer {
         cServer = 0;
         broadcastViewThread = new Thread(() -> {
             try {
-                Thread.sleep(5000);
-                UpdateViewEvent e = new UpdateViewEvent((ArrayList<Pair<InetAddress, Integer>>) getView().clone());
-                broadcast(e);
+                while(true) {
+                    Thread.sleep(3000);
+                    UpdateViewEvent e = new UpdateViewEvent((ArrayList<Pair<InetAddress, Integer>>) getView().clone());
+                    broadcast(e);
+                }
             } catch (InterruptedException e) {
                 System.out.println("stopped broadcasting view");
             }
@@ -47,7 +49,9 @@ public class ConcreteServer extends AbstractServer {
         System.out.println("lost connection with : " + ipAddress + "!");
         //send view update to clients
         UpdateViewEvent e = new UpdateViewEvent((ArrayList<Pair<InetAddress, Integer>>) getView().clone());
-        broadcast(e);
+        if(e.getView().size() > 0 && e.getView().get(0).getSecond() == 0) {
+            broadcast(e);
+        }
     }
 
     @Override
@@ -76,7 +80,7 @@ public class ConcreteServer extends AbstractServer {
             eventHistory.add(b);
             cServer++;
             b.setCount(cServer);
-            return o;
+            return b;
         }
         return o;
     }
