@@ -148,18 +148,15 @@ public abstract class AbstractServer {
     public void incomingEvents(ConnectionHandler handler) {
         while(true) {
             if(!handler.isClosed()) {
-                MyTextEvent textEvent = null;
                 try {
-                    textEvent = (MyTextEvent) handler.receiveObject();
-                    eventQueue.add(textEvent);
-                    MyTextEvent textEventReceived = (MyTextEvent) handler.receiveObject();
-                    textEvent = (MyTextEvent) incomingEventsFilter(textEventReceived);
+                    MyTextEvent textEventReceived = handler.receiveObject();
+                    MyTextEvent filteredEvent = (MyTextEvent) incomingEventsFilter(textEventReceived);
+                    eventQueue.add(filteredEvent);
                 } catch (IOException e) {
                     onLostConnection(handler.getSocket().getInetAddress().toString());
                     handler.closeConnection();
                     break;
                 }
-                eventQueue.add(textEvent);
             } else {
                 onLostConnection(handler.getSocket().getInetAddress().toString());
                 handler.closeConnection();

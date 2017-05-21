@@ -32,7 +32,7 @@ public class ConcreteClient extends AbstractClient {
             final TextInsertEvent tie = (TextInsertEvent) o;
             EventQueue.invokeLater(() -> {
                 try {
-                        count = tie.getCount();
+                    count = tie.getCount();
                     dec.disabled = true;
                     area.insert(tie.getText(), tie.getOffset());
                     dec.disabled = false;
@@ -107,6 +107,7 @@ public class ConcreteClient extends AbstractClient {
                 try {
                     e = dec.take();
                     e.setCount(count + 1);
+                    System.out.println("sending event: " + e.toString());
                     sendToServer(e);
                 } catch (InterruptedException e1) {
                     return;
