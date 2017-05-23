@@ -10,10 +10,10 @@ import java.lang.Integer;
 
 public class DistributedTextEditor extends JFrame {
 	private static final long serialVersionUID = 1L;
-	public JTextArea area = new JTextArea(20, 60);
+	public JTextArea area = new JTextArea(18, 75);
 	public JTextField redirectPort;
 	public JTextField ipaddress; // "IP address here"
-	public JTextField portNumber = new JTextField("40499");
+	public JTextField portNumber;
 	private JFileChooser dialog = new JFileChooser(System.getProperty("user.dir"));
 	private String currentFile = "Untitled";
 	private boolean changed = false;
@@ -22,13 +22,25 @@ public class DistributedTextEditor extends JFrame {
 	public ConcreteClient client;
 
 	public DistributedTextEditor() {
-		redirectPort = new JTextField();
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
 		try {
 			ipaddress = new JTextField(InetAddress.getLocalHost().getHostAddress());
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
-
+		redirectPort = new JTextField();
+		redirectPort.setText(Integer.toString(new Random().nextInt(9999) + 30000));
+        portNumber = new JTextField("40499");
 		area.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
 		((AbstractDocument) area.getDocument()).setDocumentFilter(dec);
@@ -40,17 +52,28 @@ public class DistributedTextEditor extends JFrame {
 				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		content.add(scroll1, BorderLayout.CENTER);
 
-        int redirectServerPort = new Random().nextInt(9999);
-        redirectPort.setText(Integer.toString(redirectServerPort + 30000));
 
-        content.add(new JLabel("ip address"));
-		content.add(ipaddress, BorderLayout.CENTER);
-        content.add(new JLabel("port"));
-		content.add(portNumber, BorderLayout.CENTER);
-		content.add(new JLabel("redirect port"));
-		content.add(redirectPort, BorderLayout.CENTER);
+        JPanel ipPanel = new JPanel();
+        ipPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        ipPanel.add(new JLabel("ip address     "));
+		ipPanel.add(ipaddress);
+        content.add(ipPanel);
 
-		JMenuBar JMB = new JMenuBar();
+        JPanel portPanel = new JPanel();
+        portPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        portPanel.add(new JLabel("port               "));
+        portPanel.add(portNumber);
+		content.add(portPanel, BorderLayout.WEST);
+
+        JPanel redirectPanel = new JPanel();
+        redirectPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        redirectPanel.add(new JLabel("redirect port"));
+        redirectPanel.add(redirectPort);
+		content.add(redirectPanel);
+
+
+
+        JMenuBar JMB = new JMenuBar();
 		setJMenuBar(JMB);
 		JMenu file = new JMenu("File");
 		JMenu edit = new JMenu("Edit");
@@ -77,6 +100,7 @@ public class DistributedTextEditor extends JFrame {
 		pack();
 		area.addKeyListener(k1);
 		setTitle("Disconnected");
+        setLocationRelativeTo(null);
 		setVisible(true);
 	}
 
