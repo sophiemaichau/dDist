@@ -67,14 +67,16 @@ public class ConcreteClient extends AbstractClient {
             if (redirectThread == null) {
                 redirectThread = new Thread(() -> {
                     try {
-                        int redirectServerPort = new Random().nextInt(9999);
                         int redirectPort = Integer.parseInt(frame.portNumber.getText());
-                        redirectServer = new RedirectServer(30000 + redirectServerPort, getServerIP(), redirectPort);
+                        Thread.sleep(300);
+                        redirectServer = new RedirectServer(Integer.parseInt(frame.redirectPort.getText()), getServerIP(), redirectPort);
                         System.out.println("Started redirect server!");
                         redirectServer.startListening(false);
                     } catch (IOException e1) {
                         System.out.println("redirect server failed:");
                         e1.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 });
                 redirectThread.start();
@@ -84,8 +86,6 @@ public class ConcreteClient extends AbstractClient {
         } else if(o instanceof UpdateViewEvent) {
             UpdateViewEvent e = (UpdateViewEvent) o;
             view = e.getView();
-            System.out.println("updated client view to: " + view);
-
         } else if (o instanceof RedirectEvent) {
             RedirectEvent e = (RedirectEvent) o;
             new Thread(() -> {
@@ -100,6 +100,7 @@ public class ConcreteClient extends AbstractClient {
 
     @Override
     public synchronized void onConnect(String serverIP) {
+        frame.clientConnectedUpdateText();
         //listen for local text events and send to sequencer
         sendLocalEventsThread = new Thread(() -> {
             while (true) {
@@ -107,7 +108,6 @@ public class ConcreteClient extends AbstractClient {
                 try {
                     e = dec.take();
                     e.setCount(count + 1);
-                    System.out.println("sending event: " + e.toString());
                     sendToServer(e);
                 } catch (InterruptedException e1) {
                     return;
@@ -119,23 +119,34 @@ public class ConcreteClient extends AbstractClient {
 
     @Override
     public synchronized void onDisconnect() {
+        frame.clientDisconnectedUpdateText();
         System.out.println("disconnected from server " + getServerIP() + " on port " + getPort());
         if (redirectThread != null) {
             redirectThread.interrupt();
+            redirectThread = null;
         }
+        redirectServer.shutdown();
         sendLocalEventsThread.interrupt();
+        sendLocalEventsThread = null;
     }
 
     @Override
     public void onLostConnection() {
+        frame.clientDisconnectedUpdateText();
         sendLocalEventsThread.interrupt();
         redirectThread.interrupt();
+        redirectServer.shutdown();
         System.out.println("unexpectedly lost connection to server. Beginning election procedure...");
         beginElection();
     }
 
     private synchronized void beginElection() {
         System.out.println("id" + view.get(1) + " should be the new sequencer");
+        if (redirectThread != null) {
+            redirectThread.interrupt();
+            redirectThread = null;
+        }
+
         if (id == view.get(1).getSecond()) {
             System.out.println("I should be sequencer with id: " + id);
             new Thread(() -> {

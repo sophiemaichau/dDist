@@ -11,6 +11,7 @@ import java.lang.Integer;
 public class DistributedTextEditor extends JFrame {
 	private static final long serialVersionUID = 1L;
 	public JTextArea area = new JTextArea(20, 60);
+	public JTextField redirectPort;
 	public JTextField ipaddress; // "IP address here"
 	public JTextField portNumber = new JTextField("40499");
 	private JFileChooser dialog = new JFileChooser(System.getProperty("user.dir"));
@@ -21,6 +22,7 @@ public class DistributedTextEditor extends JFrame {
 	public ConcreteClient client;
 
 	public DistributedTextEditor() {
+		redirectPort = new JTextField();
 		try {
 			ipaddress = new JTextField(InetAddress.getLocalHost().getHostAddress());
 		} catch (UnknownHostException e) {
@@ -38,8 +40,15 @@ public class DistributedTextEditor extends JFrame {
 				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		content.add(scroll1, BorderLayout.CENTER);
 
+        int redirectServerPort = new Random().nextInt(9999);
+        redirectPort.setText(Integer.toString(redirectServerPort + 30000));
+
+        content.add(new JLabel("ip address"));
 		content.add(ipaddress, BorderLayout.CENTER);
+        content.add(new JLabel("port"));
 		content.add(portNumber, BorderLayout.CENTER);
+		content.add(new JLabel("redirect port"));
+		content.add(redirectPort, BorderLayout.CENTER);
 
 		JMenuBar JMB = new JMenuBar();
 		setJMenuBar(JMB);
@@ -69,10 +78,6 @@ public class DistributedTextEditor extends JFrame {
 		area.addKeyListener(k1);
 		setTitle("Disconnected");
 		setVisible(true);
-
-		Random rn = new Random();
-		int i = rn.nextInt(10000);
-		System.out.println(i);
 	}
 
 	private KeyListener k1 = new KeyAdapter() {
@@ -103,10 +108,10 @@ public class DistributedTextEditor extends JFrame {
 			}
 
 			try {
-				Thread.sleep(200);
+				Thread.sleep(100);
 				while(true) {
 					if (server.isReadyForConnection()) {
-						client = new ConcreteClient(dec, area, new OldestFirstElectionStrategy(), DistributedTextEditor.this);
+                        client = new ConcreteClient(dec, area, new OldestFirstElectionStrategy(), DistributedTextEditor.this);
 						try {
 							client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumber.getText()));
 							break;
@@ -116,6 +121,7 @@ public class DistributedTextEditor extends JFrame {
 						}
 					}
 				}
+                setTitle("Listening on incoming connections...");
 			} catch (InterruptedException e1) {
 				e1.printStackTrace();
 			}
@@ -129,6 +135,11 @@ public class DistributedTextEditor extends JFrame {
 		setTitle("Connected to " + ipaddress.getText() + ":" + portNumber.getText());
 
 	}
+
+	public void clientDisconnectedUpdateText() {
+        setTitle("Disconnected");
+
+    }
 
 	public void serverStartedUpdateText() {
 		setTitle("Listening on incoming connections...");
