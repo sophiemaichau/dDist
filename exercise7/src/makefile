@@ -9,7 +9,7 @@ FILE=
 
 LINUX_CONFIG3 = $(shell xterm -e "make run1" & xterm -e "make run2" & xterm -e "make run3")
 
-LINUX_CONFIG4 = $(shell xterm -e "make run1" & xterm -e "make run2" & xterm -e "make run3" & xterm -e "make run3")
+LINUX_CONFIG4 = $(shell xterm -e "make run1" & xterm -e "make run2" & xterm -e "make run3" & xterm -e "make run4")
 
 CLASSES = \
 	AbstractClient.java \
@@ -48,7 +48,7 @@ run2: classes
 run3: classes
 	$(JVM) DistributedTextEditor 1200 0
 
-run3: classes
+run4: classes
 	$(JVM) DistributedTextEditor 200 500
 
 clean:
