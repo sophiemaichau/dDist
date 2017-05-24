@@ -30,9 +30,9 @@ public class ConcreteClient extends AbstractClient {
             final TextInsertEvent tie = (TextInsertEvent) o;
             EventQueue.invokeLater(() -> {
                 try {
-                    count = tie.getCount();
                     dec.disabled = true;
                     area.insert(tie.getText(), tie.getOffset());
+                    count = tie.getCount();
                     dec.disabled = false;
                 } catch (Exception e) {
                     System.err.println(e);
@@ -43,9 +43,9 @@ public class ConcreteClient extends AbstractClient {
             final TextRemoveEvent tre = (TextRemoveEvent) o;
             EventQueue.invokeLater(() -> {
                 try {
-                    count = tre.getCount();
                     dec.disabled = true;
                     area.replaceRange(null, tre.getOffset(), tre.getOffset() + tre.getLength());
+                    count = tre.getCount();
                     dec.disabled = false;
                 } catch (Exception e) {
                     System.err.println(e);
@@ -58,6 +58,7 @@ public class ConcreteClient extends AbstractClient {
                 dec.disabled = true;
                 area.setText(tce.getCopiedText());
                 id = tce.getTimeStamp();
+                count = tce.getCount();
                 dec.disabled = false;
             });
 
@@ -104,15 +105,9 @@ public class ConcreteClient extends AbstractClient {
             while (true) {
                 MyTextEvent e;
                 try {
-                    ArrayList<MyTextEvent> list = new ArrayList<>();
-                    while (!dec.eventHistory.isEmpty()) {
-                        e = dec.take();
-                        e.setCount(count + 1);
-                        list.add(e);
-                    }
-                    for (MyTextEvent m : list ) {
-                        sendToServer(m);
-                    }
+                   e = dec.take();
+                   e.setCount(count + 1);
+                   sendToServer(e);
                 } catch (InterruptedException e1) {
                     return;
                 }
