@@ -11,33 +11,10 @@ LINUX_CONFIG3 = $(shell xterm -e "make run1" & xterm -e "make run2" & xterm -e "
 
 LINUX_CONFIG4 = $(shell xterm -e "make run1" & xterm -e "make run2" & xterm -e "make run3" & xterm -e "make run4")
 
-CLASSES = \
-	AbstractClient.java \
-	AbstractServer.java \
-    ConcreteServer.java \
-    ConcreteClient.java \
-    ConnectionHandler.java \
-    ConnectionList.java \
-    DistributedTextEditor.java \
-    DocumentEventCapturer.java \
-    ElectionStrategy.java \
-    OldestFirstElectionStrategy.java \
-    RedirectServer.java \
-    RemoteList.java \
-    Utilities/MessageWrapper.java \
-    Utilities/MyTextEvent.java \
-    Utilities/Pair.java \
-    Utilities/RedirectEvent.java \
-    Utilities/TextCopyEvent.java \
-    Utilities/TextInsertEvent.java \
-    Utilities/TextRemoveEvent.java \
-    Utilities/UpdateViewEvent.java
-
 MAIN = DistributedTextEditor
 
-default: clean classes
-
-classes: $(CLASSES:.java=.class)
+default: clean
+	@echo $(shell javac *.java)
 
 run1: classes
 	$(JVM) DistributedTextEditor 20 0

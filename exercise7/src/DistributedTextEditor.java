@@ -21,6 +21,7 @@ public class DistributedTextEditor extends JFrame {
 	private DocumentEventCapturer dec = new DocumentEventCapturer();
 	public AbstractServer server;
 	public ConcreteClient client;
+	public JComboBox<Integer> portNumberList;
 
 	public DistributedTextEditor(int x, int y) {
         try {
@@ -43,11 +44,39 @@ public class DistributedTextEditor extends JFrame {
 		redirectPort.setText(Integer.toString(new Random().nextInt(9999) + 30000));
         portNumber = new JTextField("40499");
 		area.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		portNumberList = new JComboBox<Integer>();
+		addPortNumberList(portNumberList);
 
 		((AbstractDocument) area.getDocument()).setDocumentFilter(dec);
 
 		Container content = getContentPane();
 		//content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+		content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+
+		JScrollPane scroll1 = new JScrollPane(area, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		content.add(scroll1, BorderLayout.CENTER);
+
+
+        JPanel ipPanel = new JPanel();
+        ipPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        ipPanel.add(new JLabel("ip address     "));
+		ipPanel.add(ipaddress);
+        content.add(ipPanel);
+
+        JPanel portPanel = new JPanel();
+        portPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        portPanel.add(new JLabel("port               "));
+        portPanel.add(portNumberList);
+		content.add(portPanel, BorderLayout.WEST);
+
+        JPanel redirectPanel = new JPanel();
+        redirectPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        redirectPanel.add(new JLabel("redirect port"));
+        redirectPanel.add(redirectPort);
+		content.add(redirectPanel);
+
+
 
 		addComponentsToPane(content);
 /*
@@ -313,6 +342,12 @@ public class DistributedTextEditor extends JFrame {
 
 		} else {
 			new DistributedTextEditor(Integer.parseInt(arg[0]), Integer.parseInt(arg[1]));
+		}
+	}
+
+	public void addPortNumberList(JComboBox<Integer> portNumberList){
+		for(int i=0; i < 10; i++){
+			portNumberList.addItem(40489 + i);
 		}
 	}
 
