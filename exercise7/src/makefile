@@ -7,6 +7,10 @@ FILE=
 .java.class:
 	$(JC) $(JFLAGS) $*.java
 
+LINUX = xterm -e "make run1"
+
+LINUX_CONFIG = $(shell $(LINUX))
+
 CLASSES = \
 	AbstractClient.java \
 	AbstractServer.java \
@@ -35,11 +39,21 @@ default: classes
 
 classes: $(CLASSES:.java=.class)
 
-run: classes
-	$(JVM) $(MAIN)
+run1: classes
+	$(JVM) DistributedTextEditor
+
+run2: classes
+	$(JVM) DistributedTextEditor
+
+run3: classes
+	$(JVM) DistributedTextEditor
+
+run4: classes
+	$(JVM) DistributedTextEditor
 
 clean:
 	$(RM) *.class
 	$(RM) Utilities/*.class
 
-milo: xterm -e "make run"
+all:
+	@echo $(LINUX_CONFIG)
