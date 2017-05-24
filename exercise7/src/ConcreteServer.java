@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.net.InetAddress;
 import java.util.ArrayList;
 
+@SuppressWarnings("unchecked")
 public class ConcreteServer extends AbstractServer {
     private final JTextArea area;
     private int cServer;

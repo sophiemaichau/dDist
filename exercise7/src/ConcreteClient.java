@@ -5,7 +5,6 @@ import java.awt.*;
 import java.io.*;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Random;
 
 public class ConcreteClient extends AbstractClient {
     private DocumentEventCapturer dec;
@@ -25,7 +24,6 @@ public class ConcreteClient extends AbstractClient {
         this.electionStrategy = electionStrategy;
         this.frame = frame;
     }
-
     @Override
     public void onReceivedFromServer(Object o) {
         if (o instanceof TextInsertEvent) {
@@ -83,7 +81,7 @@ public class ConcreteClient extends AbstractClient {
 
             }
 
-        } else if(o instanceof UpdateViewEvent) {
+        }else if(o instanceof UpdateViewEvent) {
             UpdateViewEvent e = (UpdateViewEvent) o;
             view = e.getView();
         } else if (o instanceof RedirectEvent) {

@@ -5,6 +5,7 @@ import java.io.Serializable;
 /**
  * Created by sophiemaichau on 02/05/2017.
  */
+@SuppressWarnings("unchecked")
 public class Pair<I, T> implements Serializable {
     private I first;
     private T second;

@@ -12,7 +12,7 @@ import java.lang.Integer;
 
 public class DistributedTextEditor extends JFrame {
 	private static final long serialVersionUID = 1L;
-	public JTextArea area = new JTextArea(18, 75);
+	public JTextArea area = new JTextArea(10, 60);
 	public JTextField redirectPort;
 	public JTextField ipaddress; // "IP address here"
 	public JTextField portNumber;
@@ -75,8 +75,8 @@ public class DistributedTextEditor extends JFrame {
         redirectPanel.add(new JLabel("redirect port"));
         redirectPanel.add(redirectPort);
 		content.add(redirectPanel);
-
-
+		area.setBackground(Color.black);
+		area.setCaretColor(Color.cyan);
 
 		addComponentsToPane(content);
 /*

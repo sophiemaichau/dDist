@@ -39,4 +39,4 @@ four: default
 	@echo $(LINUX_CONFIG4)
 
 open: default
-	@echo $(shell java DistributedTextEditor 4)
+	@echo $(shell java DistributedTextEditor)
