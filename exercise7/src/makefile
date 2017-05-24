@@ -35,7 +35,7 @@ CLASSES = \
 
 MAIN = DistributedTextEditor
 
-default: classes
+default: clean classes
 
 classes: $(CLASSES:.java=.class)
 
