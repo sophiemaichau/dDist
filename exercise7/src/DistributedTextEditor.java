@@ -113,16 +113,15 @@ public class DistributedTextEditor extends JFrame {
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.PAGE_AXIS));
 
 		JButton listenButton = new JButton("listen");
-		listenButton.setBorder(new LineBorder(Color.black));
 		JButton connectButton = new JButton("connect");
+		JButton disconnectButton = new JButton("disconnect");
 
-		listenButton.setBorder(BorderFactory.createLineBorder(Color.black, 4));
 		listenButton.addActionListener(Listen);
 		connectButton.addActionListener(Connect);
-		listenButton.setBorder(border);
-		connectButton.setBorder(border);
+		disconnectButton.addActionListener(Disconnect);
 		buttonPanel.add(listenButton);
 		buttonPanel.add(connectButton);
+		buttonPanel.add(disconnectButton);
 		pane.add(buttonPanel, BorderLayout.LINE_END);
 	}
 

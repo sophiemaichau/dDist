@@ -61,7 +61,7 @@ public class ConcreteServer extends AbstractServer {
     }
 
     @Override
-    public synchronized Object incomingEventsFilter(Object o) {
+    public Object incomingEventsFilter(Object o) {
         if(o instanceof MyTextEvent){
             MyTextEvent b = (MyTextEvent) o;
             System.out.print("received conflicting event: " + b + ", offset: " + b.getOffset() +  ", count: " + b.getCount());
