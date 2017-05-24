@@ -16,16 +16,20 @@ MAIN = DistributedTextEditor
 default: clean
 	@echo $(shell javac *.java)
 
-run1: classes
+run1:
+	@echo $(shell javac *.java)
 	$(JVM) DistributedTextEditor 20 0
 
-run2: classes
+run2:
+	@echo $(shell javac *.java)
 	$(JVM) DistributedTextEditor 600 0
 
-run3: classes
+run3:
+	@echo $(shell javac *.java)
 	$(JVM) DistributedTextEditor 1200 0
 
-run4: classes
+run4:
+	@echo $(shell javac *.java)
 	$(JVM) DistributedTextEditor 200 500
 
 clean:

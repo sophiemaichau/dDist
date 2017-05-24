@@ -3,8 +3,8 @@ import java.awt.event.*;
 import java.io.*;
 import java.net.UnknownHostException;
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.text.*;
 import java.net.InetAddress;
 import java.util.Random;
@@ -25,7 +25,7 @@ public class DistributedTextEditor extends JFrame {
 
 	public DistributedTextEditor(int x, int y) {
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {
@@ -51,31 +51,10 @@ public class DistributedTextEditor extends JFrame {
 
 		Container content = getContentPane();
 		addComponentsToPane(content);
-/*
-        JMenuBar JMB = new JMenuBar();
-		setJMenuBar(JMB);
-		JMenu file = new JMenu("File");
-		JMenu edit = new JMenu("Edit");
-		JMB.add(file);
-		JMB.add(edit);
-
-		file.add(Listen);
-		file.add(Connect);
-		file.add(Disconnect);
-		file.addSeparator();
-		file.add(Save);
-		file.add(SaveAs);
-		file.add(Quit);
-
-		edit.add(Copy);
-		edit.add(Paste);
-		edit.getItem(0).setText("Copy");
-		edit.getItem(1).setText("Paste");
-
-		Save.setEnabled(false);
-		SaveAs.setEnabled(false);
-		*/
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		area.setBackground(Color.black);
+		area.setCaretColor(Color.cyan);
+		area.setForeground(Color.cyan);
 		pack();
 		area.addKeyListener(k1);
 		setTitle("Disconnected");
@@ -121,14 +100,10 @@ public class DistributedTextEditor extends JFrame {
 
 		JPanel listPane1 = new JPanel();
 		BoxLayout l = new BoxLayout(listPane1, BoxLayout.PAGE_AXIS);
-		EmptyBorder smallBorder = new EmptyBorder(5, 5, 5, 5);
 
 		listPane1.setLayout(l);
 		listPane1.setBorder(new EmptyBorder(10, 10, 10, 10));
-		portNumber.setBorder(smallBorder);
-		ipaddress.setBorder(smallBorder);
-		redirectPort.setBorder(smallBorder);
-		listPane1.add(portNumber);
+		listPane1.add(portNumberList);
 		listPane1.add(ipaddress);
 		listPane1.add(redirectPort);
 
@@ -138,8 +113,10 @@ public class DistributedTextEditor extends JFrame {
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.PAGE_AXIS));
 
 		JButton listenButton = new JButton("listen");
+		listenButton.setBorder(new LineBorder(Color.black));
 		JButton connectButton = new JButton("connect");
 
+		listenButton.setBorder(BorderFactory.createLineBorder(Color.black, 4));
 		listenButton.addActionListener(Listen);
 		connectButton.addActionListener(Connect);
 		listenButton.setBorder(border);
