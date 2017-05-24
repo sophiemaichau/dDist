@@ -55,8 +55,8 @@ clean:
 	$(RM) *.class
 	$(RM) Utilities/*.class
 
-three:
+three: default
 	@echo $(LINUX_CONFIG3)
 
-four:
+four: default
 	@echo $(LINUX_CONFIG4)	
