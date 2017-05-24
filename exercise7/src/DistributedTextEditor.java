@@ -173,7 +173,7 @@ public class DistributedTextEditor extends JFrame {
 		setTitle("Listening on incoming connections...");
 	}
 
-	public boolean failedConnect = false ;
+	public boolean failedConnect = true ;
 	Action Connect = new AbstractAction("Connect") {
 		private static final long serialVersionUID = 1L;
 
@@ -182,7 +182,7 @@ public class DistributedTextEditor extends JFrame {
 			client = new ConcreteClient(dec, area, new OldestFirstElectionStrategy(), DistributedTextEditor.this);
             try {
                 client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumber.getText()));
-            } catch (IOException e1) {
+			} catch (IOException e1) {
 				e1.printStackTrace();
 				failedConnect = true;
 				/*int n = 1 - JOptionPane.showConfirmDialog(
@@ -201,7 +201,6 @@ public class DistributedTextEditor extends JFrame {
 				}*/
 
 			}
-			failedConnect = false;
 
 			changed = false;
 			Save.setEnabled(false);
@@ -283,11 +282,26 @@ public class DistributedTextEditor extends JFrame {
 	}
 
 	public static void main(String[] arg) {
-		new DistributedTextEditor(20, 0);
-		new DistributedTextEditor(600, 0);
-		new DistributedTextEditor(1200, 0);
+		if (arg.length <= 1) {
+			if (arg.length == 0 || arg[0].equals("1")) {
+				new DistributedTextEditor(20, 0);
+			} else if (arg[0].equals("2")) {
+				new DistributedTextEditor(20, 0);
+				new DistributedTextEditor(600, 0);
+			} else if (arg[0].equals("3")) {
+				new DistributedTextEditor(20, 0);
+				new DistributedTextEditor(600, 0);
+				new DistributedTextEditor(1200, 0);
+			} else if (arg[0].equals("4")) {
+				new DistributedTextEditor(20, 0);
+				new DistributedTextEditor(600, 0);
+				new DistributedTextEditor(1200, 0);
+				new DistributedTextEditor(20, 500);
+			}
 
-		//new DistributedTextEditor(Integer.parseInt(arg[0]), Integer.parseInt(arg[1]));
+		} else {
+			new DistributedTextEditor(Integer.parseInt(arg[0]), Integer.parseInt(arg[1]));
+		}
 	}
 
 }

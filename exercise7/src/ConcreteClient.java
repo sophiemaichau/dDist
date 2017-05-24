@@ -162,16 +162,32 @@ public class ConcreteClient extends AbstractClient {
 
         } else {
             new Thread(() -> {
-                int triesLimit = 10;
-                int tries = 0;
-                frame.ipaddress.setText(String.valueOf(view.get(1).getFirst()).substring(1));
+                int triesLimit = view.size() - 1;
+                int tries = 1;
                 while (tries < triesLimit) {
                     frame.Disconnect.actionPerformed(null);
+                    System.out.println("trying to connect to new sequencer. Attemp no. " + tries);
+                    if (id == view.get(tries).getSecond()) {
+                        System.out.println("I'm new sequencer!");
+                        new Thread(() -> {
+                            try {
+                                Thread.sleep(100);
+                                frame.Disconnect.actionPerformed(null);
+                                Thread.sleep(100);
+                                frame.Listen.actionPerformed(null);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }).start();
+                        break;
+                    }
+                    frame.ipaddress.setText(String.valueOf(view.get(tries).getFirst()).substring(1));
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(400);
                         frame.Connect.actionPerformed(null);
                         Thread.sleep(400);
                         if (frame.failedConnect == false) {
+                            System.out.println("succesfully connected to new sequencer");
                             break;
                         } else {
                             tries++;

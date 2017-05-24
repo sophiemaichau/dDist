@@ -42,4 +42,4 @@ clean:
 	$(RM) *.class
 	$(RM) Utilities/*.class
 
-milo: xterm -e "make run"
+milo: tilda
