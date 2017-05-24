@@ -108,6 +108,8 @@ public class DistributedTextEditor extends JFrame {
 		setVisible(true);
 	}
 
+	
+
 	private KeyListener k1 = new KeyAdapter() {
 		public void keyPressed(KeyEvent e) {
 			changed = true;
@@ -181,8 +183,7 @@ public class DistributedTextEditor extends JFrame {
 			setTitle("Trying to connect to " + ipaddress.getText() + ":" + portNumber.getText());
 			client = new ConcreteClient(dec, area, new OldestFirstElectionStrategy(), DistributedTextEditor.this);
             try {
-                client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumber.getText()));
-                failedConnect = false;
+                failedConnect = !client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumber.getText()));
 			} catch (IOException e1) {
 				failedConnect = true;
 				System.out.println("failedConnect: " + failedConnect);
@@ -289,33 +290,39 @@ public class DistributedTextEditor extends JFrame {
 		DistributedTextEditor c;
 		DistributedTextEditor d;
 		if (arg.length <= 1) {
-			if (arg.length == 0 || arg[0].equals("1")) {
-				a = new DistributedTextEditor(20, 0);
-			} else if (arg[0].equals("2")) {
-				a = new DistributedTextEditor(20, 0);
-				b = new DistributedTextEditor(600, 0);
+			try {
+				if (arg.length == 0 || arg[0].equals("1")) {
+					a = new DistributedTextEditor(20, 0);
+				} else if (arg[0].equals("2")) {
+					a = new DistributedTextEditor(20, 0);
+					b = new DistributedTextEditor(600, 0);
+					a.Listen.actionPerformed(null);
+					Thread.sleep(100);
+					b.Connect.actionPerformed(null);
 
-				a.Listen.actionPerformed(null);
-				b.Connect.actionPerformed(null);
+				} else if (arg[0].equals("3")) {
+					a = new DistributedTextEditor(20, 0);
+					b = new DistributedTextEditor(600, 0);
+					c = new DistributedTextEditor(1200, 0);
 
-			} else if (arg[0].equals("3")) {
-				a = new DistributedTextEditor(20, 0);
-				b = new DistributedTextEditor(600, 0);
-				c = new DistributedTextEditor(1200, 0);
+					a.Listen.actionPerformed(null);
+					Thread.sleep(100);
+					b.Connect.actionPerformed(null);
+					c.Connect.actionPerformed(null);
+				} else if (arg[0].equals("4")) {
+					a = new DistributedTextEditor(20, 0);
+					b = new DistributedTextEditor(600, 0);
+					c = new DistributedTextEditor(1200, 0);
+					d = new DistributedTextEditor(20, 500);
 
-				a.Listen.actionPerformed(null);
-				b.Connect.actionPerformed(null);
-				c.Connect.actionPerformed(null);
-			} else if (arg[0].equals("4")) {
-				a = new DistributedTextEditor(20, 0);
-				b = new DistributedTextEditor(600, 0);
-				c = new DistributedTextEditor(1200, 0);
-				d = new DistributedTextEditor(20, 500);
-
-				a.Listen.actionPerformed(null);
-				b.Connect.actionPerformed(null);
-				c.Connect.actionPerformed(null);
-				d.Connect.actionPerformed(null);
+					a.Listen.actionPerformed(null);
+					Thread.sleep(100);
+					b.Connect.actionPerformed(null);
+					c.Connect.actionPerformed(null);
+					d.Connect.actionPerformed(null);
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 
 

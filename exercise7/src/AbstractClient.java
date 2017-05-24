@@ -72,13 +72,9 @@ public abstract class AbstractClient {
         onDisconnect();
     }
 
-    private Socket connectToServer(String serverName, int port) {
+    private Socket connectToServer(String serverName, int port) throws IOException {
         Socket res = null;
-        try {
-            res = new Socket(serverName, port);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        res = new Socket(serverName, port);
         return res;
     }
 
