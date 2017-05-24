@@ -50,34 +50,6 @@ public class DistributedTextEditor extends JFrame {
 		((AbstractDocument) area.getDocument()).setDocumentFilter(dec);
 
 		Container content = getContentPane();
-		//content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-		content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-
-		JScrollPane scroll1 = new JScrollPane(area, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		content.add(scroll1, BorderLayout.CENTER);
-
-
-        JPanel ipPanel = new JPanel();
-        ipPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        ipPanel.add(new JLabel("ip address     "));
-		ipPanel.add(ipaddress);
-        content.add(ipPanel);
-
-        JPanel portPanel = new JPanel();
-        portPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        portPanel.add(new JLabel("port               "));
-        portPanel.add(portNumberList);
-		content.add(portPanel, BorderLayout.WEST);
-
-        JPanel redirectPanel = new JPanel();
-        redirectPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        redirectPanel.add(new JLabel("redirect port"));
-        redirectPanel.add(redirectPort);
-		content.add(redirectPanel);
-		area.setBackground(Color.black);
-		area.setCaretColor(Color.cyan);
-
 		addComponentsToPane(content);
 /*
         JMenuBar JMB = new JMenuBar();
@@ -124,35 +96,57 @@ public class DistributedTextEditor extends JFrame {
 		}
 
 		JScrollPane scroll1 = new JScrollPane(area, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-		//pane.add(scroll1);
+		//text area + scroll pane
+		pane.add(scroll1, BorderLayout.PAGE_START);
 
-		pane.add(area, BorderLayout.PAGE_START);
 
+		EmptyBorder border = new EmptyBorder(10, 10, 10, 10);
 		JPanel listPane = new JPanel();
 		listPane.setLayout(new BoxLayout(listPane, BoxLayout.PAGE_AXIS));
 		listPane.setBorder(new EmptyBorder(10, 10, 10, 10));
-		listPane.add(new JLabel("port"));
-		listPane.add(new JLabel("ip-address"));
-		listPane.add(new JLabel("redirect port"));
+		JLabel p = new JLabel("port");
+		p.setBorder(border);
+		listPane.add(p);
+		JLabel a = new JLabel("ip-address");
+		a.setBorder(border);
+		listPane.add(a);
+		JLabel r = new JLabel("redirect port");
+		r.setBorder(border);
+		listPane.add(r);
 
 		pane.add(listPane, BorderLayout.LINE_START);
 
 
 		JPanel listPane1 = new JPanel();
 		BoxLayout l = new BoxLayout(listPane1, BoxLayout.PAGE_AXIS);
-		
+		EmptyBorder smallBorder = new EmptyBorder(5, 5, 5, 5);
+
 		listPane1.setLayout(l);
 		listPane1.setBorder(new EmptyBorder(10, 10, 10, 10));
+		portNumber.setBorder(smallBorder);
+		ipaddress.setBorder(smallBorder);
+		redirectPort.setBorder(smallBorder);
 		listPane1.add(portNumber);
 		listPane1.add(ipaddress);
 		listPane1.add(redirectPort);
 
 		pane.add(listPane1, BorderLayout.CENTER);
 
-		JButton button = new JButton("5 (LINE_END)");
-		pane.add(button, BorderLayout.LINE_END);
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.PAGE_AXIS));
+
+		JButton listenButton = new JButton("listen");
+		JButton connectButton = new JButton("connect");
+
+		listenButton.addActionListener(Listen);
+		connectButton.addActionListener(Connect);
+		listenButton.setBorder(border);
+		connectButton.setBorder(border);
+		buttonPanel.add(listenButton);
+		buttonPanel.add(connectButton);
+		pane.add(buttonPanel, BorderLayout.LINE_END);
 	}
 
 	private KeyListener k1 = new KeyAdapter() {
