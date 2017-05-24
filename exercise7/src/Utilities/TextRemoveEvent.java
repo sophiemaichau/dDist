@@ -14,4 +14,10 @@ public class TextRemoveEvent extends MyTextEvent {
 	public String toString() {
 		return "remove(" + getOffset() + ", " + length + ")";
 	}
+
+	public Object clone() {
+		TextRemoveEvent copy = new TextRemoveEvent(getOffset(), getLength());
+		copy.setCount(getCount());
+		return copy;
+	}
 }

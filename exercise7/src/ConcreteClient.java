@@ -43,9 +43,9 @@ public class ConcreteClient extends AbstractClient {
             final TextRemoveEvent tre = (TextRemoveEvent) o;
             EventQueue.invokeLater(() -> {
                 try {
+                    count = tre.getCount();
                     dec.disabled = true;
                     area.replaceRange(null, tre.getOffset(), tre.getOffset() + tre.getLength());
-                    count = tre.getCount();
                     dec.disabled = false;
                 } catch (Exception e) {
                     System.err.println(e);
@@ -57,8 +57,8 @@ public class ConcreteClient extends AbstractClient {
             EventQueue.invokeLater(() -> {
                 dec.disabled = true;
                 area.setText(tce.getCopiedText());
-                id = tce.getTimeStamp();
                 count = tce.getCount();
+                id = tce.getTimeStamp();
                 dec.disabled = false;
             });
 
@@ -105,9 +105,15 @@ public class ConcreteClient extends AbstractClient {
             while (true) {
                 MyTextEvent e;
                 try {
-                   e = dec.take();
-                   e.setCount(count + 1);
-                   sendToServer(e);
+                    ArrayList<MyTextEvent> list = new ArrayList<>();
+                    while (!dec.eventHistory.isEmpty()) {
+                        e = dec.take();
+                        e.setCount(count + 1);
+                        list.add(e);
+                    }
+                    for (MyTextEvent m : list ) {
+                        sendToServer(m);
+                    }
                 } catch (InterruptedException e1) {
                     return;
                 }
