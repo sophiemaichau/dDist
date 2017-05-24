@@ -61,5 +61,5 @@ three: default
 four: default
 	@echo $(LINUX_CONFIG4)
 
-open:
+open: default
 	@echo $(shell java DistributedTextEditor 4)
