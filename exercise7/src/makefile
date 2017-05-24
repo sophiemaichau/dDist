@@ -7,9 +7,9 @@ FILE=
 .java.class:
 	$(JC) $(JFLAGS) $*.java
 
-LINUX = xterm -e "make run" & xterm -e "make run" & xterm -e "make run"
+LINUX_CONFIG3 = $(shell xterm -e "make run1" & xterm -e "make run2" & xterm -e "make run3")
 
-LINUX_CONFIG = $(shell $(LINUX))
+LINUX_CONFIG4 = $(shell xterm -e "make run1" & xterm -e "make run2" & xterm -e "make run3" & xterm -e "make run3")
 
 CLASSES = \
 	AbstractClient.java \
@@ -39,12 +39,24 @@ default: classes
 
 classes: $(CLASSES:.java=.class)
 
-run: classes
-	$(JVM) DistributedTextEditor
+run1: classes
+	$(JVM) DistributedTextEditor 20 0
+
+run2: classes
+	$(JVM) DistributedTextEditor 600 0
+
+run3: classes
+	$(JVM) DistributedTextEditor 1200 0
+
+run3: classes
+	$(JVM) DistributedTextEditor 200 500
 
 clean:
 	$(RM) *.class
 	$(RM) Utilities/*.class
 
-all:
-	@echo $(LINUX_CONFIG)
+three:
+	@echo $(LINUX_CONFIG3)
+
+four:
+	@echo $(LINUX_CONFIG4)	
