@@ -20,6 +20,7 @@ public class DistributedTextEditor extends JFrame {
 	private DocumentEventCapturer dec = new DocumentEventCapturer();
 	public AbstractServer server;
 	public ConcreteClient client;
+	public JComboBox<Integer> portNumberList;
 
 	public DistributedTextEditor(int x, int y) {
         try {
@@ -42,6 +43,8 @@ public class DistributedTextEditor extends JFrame {
 		redirectPort.setText(Integer.toString(new Random().nextInt(9999) + 30000));
         portNumber = new JTextField("40499");
 		area.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		portNumberList = new JComboBox<Integer>();
+		addPortNumberList(portNumberList);
 
 		((AbstractDocument) area.getDocument()).setDocumentFilter(dec);
 
@@ -62,7 +65,7 @@ public class DistributedTextEditor extends JFrame {
         JPanel portPanel = new JPanel();
         portPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         portPanel.add(new JLabel("port               "));
-        portPanel.add(portNumber);
+        portPanel.add(portNumberList);
 		content.add(portPanel, BorderLayout.WEST);
 
         JPanel redirectPanel = new JPanel();
@@ -321,6 +324,12 @@ public class DistributedTextEditor extends JFrame {
 
 		} else {
 			new DistributedTextEditor(Integer.parseInt(arg[0]), Integer.parseInt(arg[1]));
+		}
+	}
+
+	public void addPortNumberList(JComboBox<Integer> portNumberList){
+		for(int i=0; i < 10; i++){
+			portNumberList.addItem(40489 + i);
 		}
 	}
 
