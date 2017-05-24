@@ -153,63 +153,51 @@ public class ConcreteClient extends AbstractClient {
                 try {
                     Thread.sleep(150);
                     frame.Disconnect.actionPerformed(null);
-                    Thread.sleep(150);
+                    Thread.sleep(3000);
                     frame.Listen.actionPerformed(null);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }).start();
 
-        }
-        /*boolean done = false;
-        while (!done) {
-            System.out.println("my timestamp: " + id);
-            System.out.println("my view: " + view);
-            Pair<InetAddress, Integer> elect = view.get(0);
-            if (elect.getSecond() == id) {
-                System.out.println("I won the election! Starting server.");
-                new Thread(() -> {
+        } else {
+            new Thread(() -> {
+                int triesLimit = view.size() - 1;
+                int tries = 1;
+                while (tries < triesLimit) {
+                    frame.Disconnect.actionPerformed(null);
+                    System.out.println("trying to connect to new sequencer. Attemp no. " + tries);
+                    if (id == view.get(tries).getSecond()) {
+                        System.out.println("I'm new sequencer!");
+                        new Thread(() -> {
+                            try {
+                                Thread.sleep(100);
+                                frame.Disconnect.actionPerformed(null);
+                                Thread.sleep(100);
+                                frame.Listen.actionPerformed(null);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }).start();
+                        break;
+                    }
+                    frame.ipaddress.setText(String.valueOf(view.get(tries).getFirst()).substring(1));
                     try {
-                        ConcreteServer server = new ConcreteServer(40499, area);
-                        server.startListening(true);
-                        frame.server = server;
-                        //frame.serverStartedUpdateText();
-                    } catch (IOException e) {
+                        Thread.sleep(400);
+                        frame.Connect.actionPerformed(null);
+                        Thread.sleep(400);
+                        if (frame.failedConnect == false) {
+                            System.out.println("succesfully connected to new sequencer");
+                            break;
+                        } else {
+                            tries++;
+                        }
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-
-                }).start();
-                try {
-                    Thread.sleep(800);
-                    startAndConnectTo(getServerIP(), 40499);
-                    done = true;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
-            } else {
-                try {
-                    Thread.sleep(400);
-                    System.out.println("I lost. Connecting to new server.");
-                    boolean connected = startAndConnectTo(electionStrategy.nextServerIP().substring(1, electionStrategy.nextServerIP().length()), 40499);
-                    System.out.println("connected to new server: " + connected);
-                    if (connected) { done = true; }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    view.remove(0);
-                    done = false;
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    view.remove(0);
-                    done = false;
-                }
-            }
+            }).start();
         }
-        */
     }
 
-    public void setElectionStrategy(ElectionStrategy electionStrategy) {
-        this.electionStrategy = electionStrategy;
-    }
 }

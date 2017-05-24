@@ -7,7 +7,7 @@ FILE=
 .java.class:
 	$(JC) $(JFLAGS) $*.java
 
-LINUX = xterm -e "make run1"
+LINUX = xterm -e "make run" & xterm -e "make run" & xterm -e "make run"
 
 LINUX_CONFIG = $(shell $(LINUX))
 
@@ -39,16 +39,7 @@ default: classes
 
 classes: $(CLASSES:.java=.class)
 
-run1: classes
-	$(JVM) DistributedTextEditor
-
-run2: classes
-	$(JVM) DistributedTextEditor
-
-run3: classes
-	$(JVM) DistributedTextEditor
-
-run4: classes
+run: classes
 	$(JVM) DistributedTextEditor
 
 clean:
