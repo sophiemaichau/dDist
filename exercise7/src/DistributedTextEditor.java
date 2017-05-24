@@ -3,6 +3,8 @@ import java.awt.event.*;
 import java.io.*;
 import java.net.UnknownHostException;
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 import javax.swing.text.*;
 import java.net.InetAddress;
 import java.util.Random;
@@ -14,7 +16,6 @@ public class DistributedTextEditor extends JFrame {
 	public JTextField redirectPort;
 	public JTextField ipaddress; // "IP address here"
 	public JTextField portNumber;
-	private JFileChooser dialog = new JFileChooser(System.getProperty("user.dir"));
 	private String currentFile = "Untitled";
 	private boolean changed = false;
 	private DocumentEventCapturer dec = new DocumentEventCapturer();
@@ -46,33 +47,10 @@ public class DistributedTextEditor extends JFrame {
 		((AbstractDocument) area.getDocument()).setDocumentFilter(dec);
 
 		Container content = getContentPane();
-		content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+		//content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
 
-		JScrollPane scroll1 = new JScrollPane(area, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		content.add(scroll1, BorderLayout.CENTER);
-
-
-        JPanel ipPanel = new JPanel();
-        ipPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        ipPanel.add(new JLabel("ip address     "));
-		ipPanel.add(ipaddress);
-        content.add(ipPanel);
-
-        JPanel portPanel = new JPanel();
-        portPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        portPanel.add(new JLabel("port               "));
-        portPanel.add(portNumber);
-		content.add(portPanel, BorderLayout.WEST);
-
-        JPanel redirectPanel = new JPanel();
-        redirectPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        redirectPanel.add(new JLabel("redirect port"));
-        redirectPanel.add(redirectPort);
-		content.add(redirectPanel);
-
-
-
+		addComponentsToPane(content);
+/*
         JMenuBar JMB = new JMenuBar();
 		setJMenuBar(JMB);
 		JMenu file = new JMenu("File");
@@ -95,7 +73,7 @@ public class DistributedTextEditor extends JFrame {
 
 		Save.setEnabled(false);
 		SaveAs.setEnabled(false);
-
+		*/
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		pack();
 		area.addKeyListener(k1);
@@ -108,13 +86,49 @@ public class DistributedTextEditor extends JFrame {
 		setVisible(true);
 	}
 
-	
+
+	public void addComponentsToPane(Container pane) {
+
+		if (!(pane.getLayout() instanceof BorderLayout)) {
+			pane.add(new JLabel("Container doesn't use BorderLayout!"));
+			return;
+		}
+
+		JScrollPane scroll1 = new JScrollPane(area, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+
+		//pane.add(scroll1);
+
+		pane.add(area, BorderLayout.PAGE_START);
+
+		JPanel listPane = new JPanel();
+		listPane.setLayout(new BoxLayout(listPane, BoxLayout.PAGE_AXIS));
+		listPane.setBorder(new EmptyBorder(10, 10, 10, 10));
+		listPane.add(new JLabel("port"));
+		listPane.add(new JLabel("ip-address"));
+		listPane.add(new JLabel("redirect port"));
+
+		pane.add(listPane, BorderLayout.LINE_START);
+
+
+		JPanel listPane1 = new JPanel();
+		BoxLayout l = new BoxLayout(listPane1, BoxLayout.PAGE_AXIS);
+		
+		listPane1.setLayout(l);
+		listPane1.setBorder(new EmptyBorder(10, 10, 10, 10));
+		listPane1.add(portNumber);
+		listPane1.add(ipaddress);
+		listPane1.add(redirectPort);
+
+		pane.add(listPane1, BorderLayout.CENTER);
+
+		JButton button = new JButton("5 (LINE_END)");
+		pane.add(button, BorderLayout.LINE_END);
+	}
 
 	private KeyListener k1 = new KeyAdapter() {
 		public void keyPressed(KeyEvent e) {
 			changed = true;
-			Save.setEnabled(true);
-			SaveAs.setEnabled(true);
 		}
 	};
 
@@ -156,8 +170,6 @@ public class DistributedTextEditor extends JFrame {
 				e1.printStackTrace();
 			}
 			changed = false;
-			Save.setEnabled(false);
-			SaveAs.setEnabled(false);
 		}
 	};
 
@@ -206,8 +218,6 @@ public class DistributedTextEditor extends JFrame {
 			}
 
 			changed = false;
-			Save.setEnabled(false);
-			SaveAs.setEnabled(false);
 
 		}
 	};
@@ -226,25 +236,6 @@ public class DistributedTextEditor extends JFrame {
 		}
 	};
 
-	Action Save = new AbstractAction("Save") {
-		private static final long serialVersionUID = 1L;
-
-		public void actionPerformed(ActionEvent e) {
-			if (!currentFile.equals("Untitled"))
-				saveFile(currentFile);
-			else
-				saveFileAs();
-		}
-	};
-
-	Action SaveAs = new AbstractAction("Save as...") {
-		private static final long serialVersionUID = 1L;
-
-		public void actionPerformed(ActionEvent e) {
-			saveFileAs();
-		}
-	};
-
 	Action Quit = new AbstractAction("Quit") {
 		private static final long serialVersionUID = 1L;
 
@@ -258,11 +249,6 @@ public class DistributedTextEditor extends JFrame {
 
 	Action Copy = m.get(DefaultEditorKit.copyAction);
 	Action Paste = m.get(DefaultEditorKit.pasteAction);
-
-	private void saveFileAs() {
-		if (dialog.showSaveDialog(null) == JFileChooser.APPROVE_OPTION)
-			saveFile(dialog.getSelectedFile().getAbsolutePath());
-	}
 
 	private void saveOld() {
 		if (changed) {
@@ -279,7 +265,6 @@ public class DistributedTextEditor extends JFrame {
 			w.close();
 			currentFile = fileName;
 			changed = false;
-			Save.setEnabled(false);
 		} catch (IOException e) {
 		}
 	}
