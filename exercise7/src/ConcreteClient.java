@@ -110,6 +110,7 @@ public class ConcreteClient extends AbstractClient {
                     sendToServer(e);
                 } catch (InterruptedException e1) {
                     System.err.println(e1);
+                    return;
                 }
             }
         });
