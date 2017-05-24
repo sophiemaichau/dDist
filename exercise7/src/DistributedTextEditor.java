@@ -166,7 +166,7 @@ public class DistributedTextEditor extends JFrame {
 				}
                 setTitle("Listening on incoming connections...");
 			} catch (InterruptedException e1) {
-				e1.printStackTrace();
+				System.err.println(e1);
 			}
 			changed = false;
 		}
@@ -198,7 +198,7 @@ public class DistributedTextEditor extends JFrame {
 			} catch (IOException e1) {
 				failedConnect = true;
 				System.out.println("failedConnect: " + failedConnect);
-				e1.printStackTrace();
+				System.err.println(e1);
 				/*int n = 1 - JOptionPane.showConfirmDialog(
 						DistributedTextEditor.this,
 						"Lost connection.",
@@ -299,14 +299,14 @@ public class DistributedTextEditor extends JFrame {
 					c = new DistributedTextEditor(1200, 0);
 					d = new DistributedTextEditor(20, 500);
 
-					a.Listen.actionPerformed(null);
+					a.Connect.actionPerformed(null);
 					Thread.sleep(100);
 					b.Connect.actionPerformed(null);
 					c.Connect.actionPerformed(null);
 					d.Connect.actionPerformed(null);
 				}
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				System.err.println(e);
 			}
 
 

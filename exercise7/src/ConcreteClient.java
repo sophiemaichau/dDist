@@ -73,9 +73,9 @@ public class ConcreteClient extends AbstractClient {
                         redirectServer.startListening(false);
                     } catch (IOException e1) {
                         System.out.println("redirect server failed:");
-                        e1.printStackTrace();
+                        System.err.println(e1);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        System.err.println(e);
                     }
                 });
                 redirectThread.start();
@@ -105,17 +105,11 @@ public class ConcreteClient extends AbstractClient {
             while (true) {
                 MyTextEvent e;
                 try {
-                    ArrayList<MyTextEvent> list = new ArrayList<>();
-                    while (!dec.eventHistory.isEmpty()) {
-                        e = dec.take();
-                        e.setCount(count + 1);
-                        list.add(e);
-                    }
-                    for (MyTextEvent m : list ) {
-                        sendToServer(m);
-                    }
+                    e = dec.take();
+                    e.setCount(count + 1);
+                    sendToServer(e);
                 } catch (InterruptedException e1) {
-                    return;
+                    System.err.println(e1);
                 }
             }
         });
@@ -165,7 +159,7 @@ public class ConcreteClient extends AbstractClient {
                     Thread.sleep(100);
                     frame.Listen.actionPerformed(null);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    System.err.println(e);
                 }
             }).start();
 
@@ -186,7 +180,7 @@ public class ConcreteClient extends AbstractClient {
                                 Thread.sleep(100);
                                 frame.Listen.actionPerformed(null);
                             } catch (InterruptedException e) {
-                                e.printStackTrace();
+                                System.err.println(e);
                             }
                         }).start();
                         break;
@@ -203,7 +197,7 @@ public class ConcreteClient extends AbstractClient {
                             tries++;
                         }
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        System.err.println(e);
                     }
                 }
             }).start();

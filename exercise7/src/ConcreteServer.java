@@ -78,10 +78,7 @@ public class ConcreteServer extends AbstractServer {
                     }
                 }
             }
-            if(inConflict){
-                int lastElemOffset = eventHistory.get(eventHistory.size()).getOffset();
-                b.setOffset(lastElemOffset + 1);
-            }
+
             if (b instanceof TextInsertEvent) {
                 TextInsertEvent clone = (TextInsertEvent) b.clone();
                 eventHistory.add(clone);
