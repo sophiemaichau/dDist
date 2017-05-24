@@ -32,4 +32,10 @@ public class MyTextEvent implements Serializable {
 	public void setCount(int count) {
 		this.count = count;
 	}
+
+	public Object clone() {
+		MyTextEvent copy = new MyTextEvent(offset);
+		copy.setCount(count);
+		return copy;
+	}
 }

@@ -61,22 +61,27 @@ public class ConcreteServer extends AbstractServer {
     }
 
     @Override
-    public Object incomingEventsFilter(Object o) {
+    public synchronized Object incomingEventsFilter(Object o) {
         if(o instanceof MyTextEvent){
             MyTextEvent b = (MyTextEvent) o;
+            System.out.print("received conflicting event: " + b + ", offset: " + b.getOffset() +  ", count: " + b.getCount());
             for(int i = eventHistory.size() - 1; i > 0; i--){
-                    MyTextEvent a = eventHistory.get(i);
-                    if(a.getCount() == b.getCount() && a.getOffset() <= b.getOffset()){
-                        if(a instanceof TextInsertEvent) {
-                            b.setOffset(b.getOffset() + 1);
-                        } else if(a instanceof TextRemoveEvent){
-                            b.setOffset(b.getOffset() - 1);
-                        }
+                MyTextEvent a = eventHistory.get(i);
+                if(a.getCount() == b.getCount() && a.getOffset() <= b.getOffset()){
+                    if(a instanceof TextInsertEvent) {
+                        int newOffset = b.getOffset() + 1;
+                        b.setOffset(newOffset);
+                    } else if(a instanceof TextRemoveEvent){
+                        int newOffset = b.getOffset() - 1;
+                        b.setOffset(newOffset);
                     }
                 }
-            eventHistory.add(b);
+            }
+            MyTextEvent clone = (MyTextEvent) b.clone();
+            eventHistory.add(clone);
             cServer++;
             b.setCount(cServer);
+            System.out.println(" and updated it to offset: " + b.getOffset() + ", count: " + b.getCount());
             return b;
         }
         return o;

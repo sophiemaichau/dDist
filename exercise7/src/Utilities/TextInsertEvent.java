@@ -27,4 +27,10 @@ public class TextInsertEvent extends MyTextEvent {
 		return false;
 	}
 
+	public Object clone() {
+		TextInsertEvent copy = new TextInsertEvent(getOffset(), text);
+		copy.setCount(getCount());
+		return copy;
+	}
+
 }
