@@ -62,7 +62,6 @@ public class ConcreteServer extends AbstractServer {
 
     @Override
     public Object incomingEventsFilter(Object o) {
-        boolean inConflict = false;
         if(o instanceof MyTextEvent){
             MyTextEvent b = (MyTextEvent) o;
             System.out.print("received conflicting event: " + b + ", offset: " + b.getOffset() +  ", count: " + b.getCount());
@@ -71,16 +70,10 @@ public class ConcreteServer extends AbstractServer {
                 if(a.getCount() == b.getCount() && a.getOffset() <= b.getOffset()){
                     if(a instanceof TextInsertEvent) {
                         difference++;
-                        inConflict = true;
                     } else if(a instanceof TextRemoveEvent){
                         difference--;
-                        inConflict = true;
                     }
                 }
-            }
-            if(inConflict){
-                int lastElemOffset = eventHistory.get(eventHistory.size()).getOffset();
-                b.setOffset(lastElemOffset + 1);
             }
             if (b instanceof TextInsertEvent) {
                 TextInsertEvent clone = (TextInsertEvent) b.clone();

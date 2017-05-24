@@ -14,7 +14,7 @@ public class ConcreteClient extends AbstractClient {
     private DistributedTextEditor frame;
     private ArrayList<Pair<InetAddress, Integer>> view = new ArrayList<>();
     private int id;
-    private int count;
+    private Integer count = 0;
     private Thread redirectThread;
     private RedirectServer redirectServer;
 
@@ -106,13 +106,15 @@ public class ConcreteClient extends AbstractClient {
                 MyTextEvent e;
                 try {
                     ArrayList<MyTextEvent> list = new ArrayList<>();
-                    while (!dec.eventHistory.isEmpty()) {
-                        e = dec.take();
-                        e.setCount(count + 1);
-                        list.add(e);
-                    }
-                    for (MyTextEvent m : list ) {
-                        sendToServer(m);
+                    synchronized (count) {
+                        while (!dec.eventHistory.isEmpty()) {
+                            e = dec.take();
+                            e.setCount(count + 1);
+                            list.add(e);
+                        }
+                        for (MyTextEvent m : list ) {
+                            sendToServer(m);
+                        }
                     }
                 } catch (InterruptedException e1) {
                     return;
