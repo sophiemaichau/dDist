@@ -17,7 +17,7 @@ public class TextInsertEvent extends MyTextEvent {
 
 
 	public String toString() {
-		return "insert(" + text + ", " + getOffset() + ")";
+		return "insert(" + text + ", " + getOffset() + ", " + getCount() + ")";
 	}
 
 	public boolean equals(Object o) {
