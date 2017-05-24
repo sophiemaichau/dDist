@@ -182,9 +182,11 @@ public class DistributedTextEditor extends JFrame {
 			client = new ConcreteClient(dec, area, new OldestFirstElectionStrategy(), DistributedTextEditor.this);
             try {
                 client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumber.getText()));
+                failedConnect = false;
 			} catch (IOException e1) {
-				e1.printStackTrace();
 				failedConnect = true;
+				System.out.println("failedConnect: " + failedConnect);
+				e1.printStackTrace();
 				/*int n = 1 - JOptionPane.showConfirmDialog(
 						DistributedTextEditor.this,
 						"Lost connection.",
@@ -282,22 +284,40 @@ public class DistributedTextEditor extends JFrame {
 	}
 
 	public static void main(String[] arg) {
+		DistributedTextEditor a;
+		DistributedTextEditor b;
+		DistributedTextEditor c;
+		DistributedTextEditor d;
 		if (arg.length <= 1) {
 			if (arg.length == 0 || arg[0].equals("1")) {
-				new DistributedTextEditor(20, 0);
+				a = new DistributedTextEditor(20, 0);
 			} else if (arg[0].equals("2")) {
-				new DistributedTextEditor(20, 0);
-				new DistributedTextEditor(600, 0);
+				a = new DistributedTextEditor(20, 0);
+				b = new DistributedTextEditor(600, 0);
+
+				a.Listen.actionPerformed(null);
+				b.Connect.actionPerformed(null);
+
 			} else if (arg[0].equals("3")) {
-				new DistributedTextEditor(20, 0);
-				new DistributedTextEditor(600, 0);
-				new DistributedTextEditor(1200, 0);
+				a = new DistributedTextEditor(20, 0);
+				b = new DistributedTextEditor(600, 0);
+				c = new DistributedTextEditor(1200, 0);
+
+				a.Listen.actionPerformed(null);
+				b.Connect.actionPerformed(null);
+				c.Connect.actionPerformed(null);
 			} else if (arg[0].equals("4")) {
-				new DistributedTextEditor(20, 0);
-				new DistributedTextEditor(600, 0);
-				new DistributedTextEditor(1200, 0);
-				new DistributedTextEditor(20, 500);
+				a = new DistributedTextEditor(20, 0);
+				b = new DistributedTextEditor(600, 0);
+				c = new DistributedTextEditor(1200, 0);
+				d = new DistributedTextEditor(20, 500);
+
+				a.Listen.actionPerformed(null);
+				b.Connect.actionPerformed(null);
+				c.Connect.actionPerformed(null);
+				d.Connect.actionPerformed(null);
 			}
+
 
 		} else {
 			new DistributedTextEditor(Integer.parseInt(arg[0]), Integer.parseInt(arg[1]));

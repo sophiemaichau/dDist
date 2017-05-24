@@ -125,9 +125,13 @@ public class ConcreteClient extends AbstractClient {
             redirectThread.interrupt();
             redirectThread = null;
         }
-        redirectServer.shutdown();
-        sendLocalEventsThread.interrupt();
-        sendLocalEventsThread = null;
+        if (redirectServer != null) {
+            redirectServer.shutdown();
+        }
+        if (sendLocalEventsThread != null) {
+            sendLocalEventsThread.interrupt();
+            sendLocalEventsThread = null;
+        }
     }
 
     @Override
@@ -151,9 +155,9 @@ public class ConcreteClient extends AbstractClient {
             System.out.println("I should be sequencer with id: " + id);
             new Thread(() -> {
                 try {
-                    Thread.sleep(150);
+                    Thread.sleep(100);
                     frame.Disconnect.actionPerformed(null);
-                    Thread.sleep(3000);
+                    Thread.sleep(100);
                     frame.Listen.actionPerformed(null);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -164,9 +168,10 @@ public class ConcreteClient extends AbstractClient {
             new Thread(() -> {
                 int triesLimit = view.size() - 1;
                 int tries = 1;
-                while (tries < triesLimit) {
-                    frame.Disconnect.actionPerformed(null);
-                    System.out.println("trying to connect to new sequencer. Attemp no. " + tries);
+                frame.Disconnect.actionPerformed(null);
+                frame.setTitle("trying to re-establish connection");
+                while (tries <= triesLimit) {
+                    System.out.println("trying to connect to new sequencer. Attempt no. " + tries);
                     if (id == view.get(tries).getSecond()) {
                         System.out.println("I'm new sequencer!");
                         new Thread(() -> {
@@ -183,11 +188,11 @@ public class ConcreteClient extends AbstractClient {
                     }
                     frame.ipaddress.setText(String.valueOf(view.get(tries).getFirst()).substring(1));
                     try {
-                        Thread.sleep(400);
+                        Thread.sleep(3000);
                         frame.Connect.actionPerformed(null);
                         Thread.sleep(400);
                         if (frame.failedConnect == false) {
-                            System.out.println("succesfully connected to new sequencer");
+                            System.out.println("successfully connected to new sequencer");
                             break;
                         } else {
                             tries++;

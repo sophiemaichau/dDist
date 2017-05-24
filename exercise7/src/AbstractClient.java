@@ -66,7 +66,9 @@ public abstract class AbstractClient {
         if (handler != null) {
             handler.closeConnection();
         }
-        receiveDataFromServer.interrupt();
+        if (receiveDataFromServer != null) {
+            receiveDataFromServer.interrupt();
+        }
         onDisconnect();
     }
 

@@ -29,7 +29,6 @@ public class ConcreteServer extends AbstractServer {
                     broadcast(e);
                 }
             } catch (InterruptedException e) {
-                System.out.println("stopped broadcasting view");
             }
         });
         broadcastViewThread.start();
@@ -64,16 +63,13 @@ public class ConcreteServer extends AbstractServer {
     public Object incomingEventsFilter(Object o) {
         if(o instanceof MyTextEvent){
             MyTextEvent b = (MyTextEvent) o;
-            System.out.println("received event: " + b);
             for(int i = eventHistory.size() - 1; i > 0; i--){
                     MyTextEvent a = eventHistory.get(i);
                     if(a.getCount() == b.getCount() && a.getOffset() <= b.getOffset()){
                         if(a instanceof TextInsertEvent) {
                             b.setOffset(b.getOffset() + 1);
-                            System.out.println("increased offset of " + a + " by one");
                         } else if(a instanceof TextRemoveEvent){
                             b.setOffset(b.getOffset() - 1);
-                            System.out.println("decreased offset of " + a + " by one");
                         }
                     }
                 }

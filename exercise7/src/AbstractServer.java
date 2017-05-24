@@ -101,7 +101,6 @@ public abstract class AbstractServer {
                 if (socket == null) {
                     continue;
                 }
-                System.out.println("Connection from " + socket.getRemoteSocketAddress());
                 ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
                 ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
                 objOutStream.flush();
@@ -110,9 +109,6 @@ public abstract class AbstractServer {
                 viewPair = new Pair<>(handler.getSocket().getInetAddress(), idSequencer);
                 connectionList.add(pair);
                 view.add(viewPair);
-                //System.out.println("views after new connection:");
-                //System.out.println("connectionList: " + connectionList);
-                //System.out.println("view: " + view);
                 Thread t = new Thread(() -> {
                     incomingEvents(handler);
                 });
