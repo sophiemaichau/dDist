@@ -21,7 +21,7 @@ public class DistributedTextEditor extends JFrame {
 	public AbstractServer server;
 	public ConcreteClient client;
 
-	public DistributedTextEditor() {
+	public DistributedTextEditor(int x, int y) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException e) {
@@ -100,7 +100,11 @@ public class DistributedTextEditor extends JFrame {
 		pack();
 		area.addKeyListener(k1);
 		setTitle("Disconnected");
-        setLocationRelativeTo(null);
+		Dimension windowSize = new Dimension(getPreferredSize());
+		Dimension screenSize = new Dimension(Toolkit.getDefaultToolkit().getScreenSize());
+		int wdwLeft = 300 + screenSize.width / 2 - windowSize.width / 2;
+		int wdwTop = screenSize.height / 2 - windowSize.height / 2;
+		setLocation(x, y);
 		setVisible(true);
 	}
 
@@ -169,6 +173,7 @@ public class DistributedTextEditor extends JFrame {
 		setTitle("Listening on incoming connections...");
 	}
 
+	public boolean failedConnect = false ;
 	Action Connect = new AbstractAction("Connect") {
 		private static final long serialVersionUID = 1L;
 
@@ -178,8 +183,25 @@ public class DistributedTextEditor extends JFrame {
             try {
                 client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumber.getText()));
             } catch (IOException e1) {
-                e1.printStackTrace();
-            }
+				e1.printStackTrace();
+				failedConnect = true;
+				/*int n = 1 - JOptionPane.showConfirmDialog(
+						DistributedTextEditor.this,
+						"Lost connection.",
+						"Do you want to retry establishing the connection?",
+						JOptionPane.YES_NO_OPTION);
+				if (n == 1) { //if YES
+					Disconnect.actionPerformed(null);
+					try {
+						Thread.sleep(500);
+						Connect.actionPerformed(null);
+					} catch (InterruptedException e2) {
+						e2.printStackTrace();
+					}
+				}*/
+
+			}
+			failedConnect = false;
 
 			changed = false;
 			Save.setEnabled(false);
@@ -261,7 +283,11 @@ public class DistributedTextEditor extends JFrame {
 	}
 
 	public static void main(String[] arg) {
-		new DistributedTextEditor();
+		new DistributedTextEditor(20, 0);
+		new DistributedTextEditor(600, 0);
+		new DistributedTextEditor(1200, 0);
+
+		//new DistributedTextEditor(Integer.parseInt(arg[0]), Integer.parseInt(arg[1]));
 	}
 
 }
