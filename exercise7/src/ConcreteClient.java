@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 public class ConcreteClient extends AbstractClient {
@@ -180,15 +181,20 @@ public class ConcreteClient extends AbstractClient {
                                 frame.Disconnect.actionPerformed(null);
                                 Thread.sleep(100);
                                 frame.Listen.actionPerformed(null);
+                                Thread.sleep(200);
+                                frame.ipaddress.setText(String.valueOf(frame.server.getServerIpAddress().substring(1)));
+                                frame.Connect.actionPerformed(null);
                             } catch (InterruptedException e) {
                                 System.err.println(e);
+                            } catch (UnknownHostException e) {
+                                e.printStackTrace();
                             }
                         }).start();
                         break;
                     }
                     frame.ipaddress.setText(String.valueOf(view.get(tries).getFirst()).substring(1));
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(3000);
                         frame.Connect.actionPerformed(null);
                         Thread.sleep(400);
                         if (frame.failedConnect == false) {

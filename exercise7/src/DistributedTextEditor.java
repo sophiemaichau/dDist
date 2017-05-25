@@ -199,25 +199,7 @@ public class DistributedTextEditor extends JFrame {
 				failedConnect = true;
 				System.out.println("failedConnect: " + failedConnect);
 				System.err.println(e1);
-				/*int n = 1 - JOptionPane.showConfirmDialog(
-						DistributedTextEditor.this,
-						"Lost connection.",
-						"Do you want to retry establishing the connection?",
-						JOptionPane.YES_NO_OPTION);
-				if (n == 1) { //if YES
-					Disconnect.actionPerformed(null);
-					try {
-						Thread.sleep(500);
-						Connect.actionPerformed(null);
-					} catch (InterruptedException e2) {
-						e2.printStackTrace();
-					}
-				}*/
-
 			}
-
-			changed = false;
-
 		}
 	};
 

@@ -4,10 +4,7 @@ import Utilities.Pair;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -205,6 +202,10 @@ public abstract class AbstractServer {
         }
         onShutDown();
         //Thread.currentThread().interrupt();
+    }
+
+    public String getServerIpAddress() throws UnknownHostException {
+        return serverSocket.getInetAddress().getLocalHost().getHostAddress();
     }
 
 }
