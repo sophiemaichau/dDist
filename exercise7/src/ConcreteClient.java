@@ -152,6 +152,7 @@ public class ConcreteClient extends AbstractClient {
             redirectThread = null;
         }
 
+        //I
         if (id == view.get(1).getSecond()) {
             System.out.println("I should be sequencer with id: " + id);
             new Thread(() -> {
@@ -159,9 +160,12 @@ public class ConcreteClient extends AbstractClient {
                     Thread.sleep(100);
                     frame.Disconnect.actionPerformed(null);
                     Thread.sleep(100);
+                    frame.ipaddress.setText(frame.server.getServerIpAddress().substring(1));
                     frame.Listen.actionPerformed(null);
                 } catch (InterruptedException e) {
                     System.err.println(e);
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
                 }
             }).start();
 
@@ -175,36 +179,35 @@ public class ConcreteClient extends AbstractClient {
                     System.out.println("trying to connect to new sequencer. Attempt no. " + tries);
                     if (id == view.get(tries).getSecond()) {
                         System.out.println("I'm new sequencer!");
+                        int finalTries = tries;
                         new Thread(() -> {
                             try {
                                 Thread.sleep(100);
                                 frame.Disconnect.actionPerformed(null);
                                 Thread.sleep(100);
+                                frame.ipaddress.setText(String.valueOf(view.get(finalTries).getFirst()).substring(1));
                                 frame.Listen.actionPerformed(null);
-                                Thread.sleep(200);
-                                frame.ipaddress.setText(String.valueOf(frame.server.getServerIpAddress().substring(1)));
-                                frame.Connect.actionPerformed(null);
                             } catch (InterruptedException e) {
                                 System.err.println(e);
-                            } catch (UnknownHostException e) {
-                                e.printStackTrace();
                             }
                         }).start();
                         break;
-                    }
-                    frame.ipaddress.setText(String.valueOf(view.get(tries).getFirst()).substring(1));
-                    try {
-                        Thread.sleep(3000);
-                        frame.Connect.actionPerformed(null);
-                        Thread.sleep(400);
-                        if (frame.failedConnect == false) {
-                            System.out.println("successfully connected to new sequencer");
-                            break;
-                        } else {
-                            tries++;
+                    } else {
+                        frame.ipaddress.setText(String.valueOf(view.get(tries).getFirst()).substring(1));
+                        try {
+                            Thread.sleep(1000);
+                            frame.Connect.actionPerformed(null);
+                            Thread.sleep(400);
+                            if (frame.failedConnect == false) {
+                                System.out.println("successfully connected to new sequencer");
+                                break;
+                            } else {
+                                frame.Disconnect.actionPerformed(null);
+                                tries++;
+                            }
+                        } catch (InterruptedException e) {
+                            System.err.println(e);
                         }
-                    } catch (InterruptedException e) {
-                        System.err.println(e);
                     }
                 }
             }).start();
