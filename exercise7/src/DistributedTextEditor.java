@@ -1,14 +1,15 @@
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.net.UnknownHostException;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
-import javax.swing.text.*;
+import javax.swing.text.AbstractDocument;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Random;
-import java.lang.Integer;
 
 public class DistributedTextEditor extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -16,8 +17,6 @@ public class DistributedTextEditor extends JFrame {
 	public JTextField redirectPort;
 	public JTextField ipaddress; // "IP address here"
 	public JTextField portNumber;
-	private String currentFile = "Untitled";
-	private boolean changed = false;
 	private DocumentEventCapturer dec = new DocumentEventCapturer();
 	public AbstractServer server;
 	public ConcreteClient client;
@@ -44,7 +43,7 @@ public class DistributedTextEditor extends JFrame {
 		redirectPort.setText(Integer.toString(new Random().nextInt(9999) + 30000));
         portNumber = new JTextField("40499");
 		area.setFont(new Font("Monospaced", Font.PLAIN, 12));
-		portNumberList = new JComboBox<Integer>();
+		portNumberList = new JComboBox<>();
 		addPortNumberList(portNumberList);
 
 		((AbstractDocument) area.getDocument()).setDocumentFilter(dec);
@@ -59,15 +58,13 @@ public class DistributedTextEditor extends JFrame {
 		pack();
 		area.addKeyListener(k1);
 		setTitle("Disconnected");
-		Dimension windowSize = new Dimension(getPreferredSize());
-		Dimension screenSize = new Dimension(Toolkit.getDefaultToolkit().getScreenSize());
-		int wdwLeft = 300 + screenSize.width / 2 - windowSize.width / 2;
-		int wdwTop = screenSize.height / 2 - windowSize.height / 2;
 		setLocation(x, y);
 		setVisible(true);
 	}
 
-
+	/*
+	 * Set-up components in the UI.
+	 */
 	public void addComponentsToPane(Container pane) {
 
 		if (!(pane.getLayout() instanceof BorderLayout)) {
@@ -128,7 +125,6 @@ public class DistributedTextEditor extends JFrame {
 
 	private KeyListener k1 = new KeyAdapter() {
 		public void keyPressed(KeyEvent e) {
-			changed = true;
 		}
 	};
 
@@ -155,7 +151,7 @@ public class DistributedTextEditor extends JFrame {
 				Thread.sleep(100);
 				while(true) {
 					if (server.isReadyForConnection()) {
-                        client = new ConcreteClient(dec, area, new OldestFirstElectionStrategy(), DistributedTextEditor.this);
+                        client = new ConcreteClient(dec, area, DistributedTextEditor.this);
 						try {
 							client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumber.getText()));
 							break;
@@ -169,7 +165,6 @@ public class DistributedTextEditor extends JFrame {
 			} catch (InterruptedException e1) {
 				System.err.println(e1);
 			}
-			changed = false;
 		}
 	};
 
@@ -193,7 +188,7 @@ public class DistributedTextEditor extends JFrame {
 
 		public void actionPerformed(ActionEvent e) {
 			setTitle("Trying to connect to " + ipaddress.getText() + ":" + portNumber.getText());
-			client = new ConcreteClient(dec, area, new OldestFirstElectionStrategy(), DistributedTextEditor.this);
+			client = new ConcreteClient(dec, area, DistributedTextEditor.this);
             try {
                 failedConnect = !client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumber.getText()));
 			} catch (IOException e1) {
@@ -218,38 +213,7 @@ public class DistributedTextEditor extends JFrame {
 		}
 	};
 
-	Action Quit = new AbstractAction("Quit") {
-		private static final long serialVersionUID = 1L;
-
-		public void actionPerformed(ActionEvent e) {
-			saveOld();
-			System.exit(0);
-		}
-	};
-
 	ActionMap m = area.getActionMap();
-
-	Action Copy = m.get(DefaultEditorKit.copyAction);
-	Action Paste = m.get(DefaultEditorKit.pasteAction);
-
-	private void saveOld() {
-		if (changed) {
-			if (JOptionPane.showConfirmDialog(this, "Would you like to save " + currentFile + " ?", "Save",
-					JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
-				saveFile(currentFile);
-		}
-	}
-
-	private void saveFile(String fileName) {
-		try {
-			FileWriter w = new FileWriter(fileName);
-			area.write(w);
-			w.close();
-			currentFile = fileName;
-			changed = false;
-		} catch (IOException e) {
-		}
-	}
 
 	public static void main(String[] arg) {
 		DistributedTextEditor a;

@@ -11,7 +11,6 @@ public class ConcreteClient extends AbstractClient {
     private DocumentEventCapturer dec;
     private JTextArea area;
     private Thread sendLocalEventsThread;
-    private ElectionStrategy electionStrategy;
     private DistributedTextEditor frame;
     private ArrayList<Pair<InetAddress, Integer>> view = new ArrayList<>();
     private int id;
@@ -19,12 +18,11 @@ public class ConcreteClient extends AbstractClient {
     private Thread redirectThread;
     private RedirectServer redirectServer;
 
-    public ConcreteClient(DocumentEventCapturer dec, JTextArea area, ElectionStrategy electionStrategy, DistributedTextEditor frame) {
+    public ConcreteClient(DocumentEventCapturer dec, JTextArea area, DistributedTextEditor frame) {
         this.dec = dec;
         this.area = area;
-        this.electionStrategy = electionStrategy;
         this.frame = frame;
-    }
+        }
     @Override
     public void onReceivedFromServer(Object o) {
         if (o instanceof TextInsertEvent) {

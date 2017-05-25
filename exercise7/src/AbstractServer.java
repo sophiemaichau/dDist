@@ -201,11 +201,6 @@ public abstract class AbstractServer {
             System.err.println(e);
         }
         onShutDown();
-        //Thread.currentThread().interrupt();
-    }
-
-    public String getServerIpAddress() throws UnknownHostException {
-        return serverSocket.getInetAddress().getLocalHost().getHostAddress();
     }
 
 }
