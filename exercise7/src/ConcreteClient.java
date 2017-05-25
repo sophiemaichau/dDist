@@ -65,7 +65,7 @@ public class ConcreteClient extends AbstractClient {
             if (redirectThread == null) {
                 redirectThread = new Thread(() -> {
                     try {
-                        int redirectPort = Integer.parseInt(frame.portNumber.getText());
+                        int redirectPort = Integer.parseInt(frame.portNumberList.getSelectedItem().toString());
                         Thread.sleep(300);
                         redirectServer = new RedirectServer(Integer.parseInt(frame.redirectPort.getText()), getServerIP(), redirectPort);
                         System.out.println("Started redirect server!");
@@ -88,7 +88,8 @@ public class ConcreteClient extends AbstractClient {
             RedirectEvent e = (RedirectEvent) o;
             new Thread(() -> {
                 frame.ipaddress.setText(e.getRedirectIp());
-                frame.portNumber.setText(Integer.toString(e.getRedirectPort()));
+                Integer redirect = (Integer) e.getRedirectPort();
+                frame.portNumberList.addItem(redirect);
                 frame.Disconnect.actionPerformed(null);
                 frame.Connect.actionPerformed(null);
             }).start();
