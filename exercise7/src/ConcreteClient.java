@@ -88,8 +88,7 @@ public class ConcreteClient extends AbstractClient {
             RedirectEvent e = (RedirectEvent) o;
             new Thread(() -> {
                 frame.ipaddress.setText(e.getRedirectIp());
-                Integer redirect = (Integer) e.getRedirectPort();
-                frame.portNumberList.addItem(redirect);
+                frame.portNumberList.setSelectedItem(e.getRedirectPort());
                 frame.Disconnect.actionPerformed(null);
                 frame.Connect.actionPerformed(null);
             }).start();
