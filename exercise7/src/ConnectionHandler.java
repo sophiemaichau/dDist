@@ -21,16 +21,22 @@ public class ConnectionHandler {
         isClosed = false;
     }
 
-    /*
-    * Send object to socket
-    */
+    /**
+     * Send object to socket
+     * @param o
+     * @param <E>
+     * @throws IOException
+     */
     public <E> void sendObject(E o) throws IOException {
         out.writeObject(o);
     }
 
-    /*
-    * Receive object from socket. Blocks until received.
-    */
+    /**
+     * Receive object from socket. Blocks until received.
+     * @param <E>
+     * @return
+     * @throws IOException
+     */
     @SuppressWarnings("unchecked")
     public <E> E receiveObject() throws IOException {
         E o;
@@ -48,9 +54,9 @@ public class ConnectionHandler {
         return isClosed;
     }
 
-    /*
-    * Properly closes connection and corresponding streams and notifies listeners.
-    */
+    /**
+     * Properly closes connection and corresponding streams and notifies listeners.
+     */
     public void closeConnection() {
         try {
             isClosed = true;
@@ -68,13 +74,4 @@ public class ConnectionHandler {
         return socket;
     }
 
-    public void setSocket(Socket socket) {
-        this.socket = socket;
-    }
-
-    public boolean equal(Object o) {
-        if (o instanceof ConnectionHandler) {
-            return o.toString().equals(this.toString());
-        } else { return false;}
-    }
 }

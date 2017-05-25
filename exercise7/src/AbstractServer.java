@@ -8,6 +8,9 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ * Representation of a generic server class.
+ */
 public abstract class AbstractServer {
     private ServerSocket serverSocket;
     private int port;
@@ -23,11 +26,18 @@ public abstract class AbstractServer {
 
     }
 
+
+    /**
+     *  callbacks that are to be implemented in subclasses
+     */
     public abstract void onNewConnection(int id, String ipAddress);
     public abstract void onLostConnection(String ipAddress);
     public abstract void onShutDown();
     public abstract Object incomingEventsFilter(Object o);
 
+    /**
+     * send an object to a client with a certain id.
+     */
     public boolean sendToClient(int clientID, Object data) {
         for (Pair<ConnectionHandler, Integer> p : connectionList) {
             if (p.getSecond() == clientID) {
@@ -42,6 +52,9 @@ public abstract class AbstractServer {
         return false;
     }
 
+    /**
+     * broadcast an object to all clients.
+     */
     public boolean broadcast(Object o) {
 
         ArrayList<Pair<ConnectionHandler, Integer>> removeList = new ArrayList<>();
@@ -54,6 +67,7 @@ public abstract class AbstractServer {
                     removeList.add(p);
                 }
             }
+            //remove all clients from view for which the sendObject method failed
             for (Pair<ConnectionHandler, Integer> c : removeList) {
                 String ip = c.getFirst().getSocket().getInetAddress().toString();
                 c.getFirst().closeConnection();
@@ -69,15 +83,16 @@ public abstract class AbstractServer {
         return view;
     }
 
-    public void setView(ArrayList<Pair<InetAddress, Integer>> view) {
-        this.view = view;
-    }
 
-
-
+    /**
+     * start listening for events from clients and then broadcast them back to all clients.
+     * @param shouldBroadcast
+     * @throws IOException
+     */
     public void startListening(boolean shouldBroadcast) throws IOException {
         serverSocket = new ServerSocket(port);
         if (shouldBroadcast) {
+            //start broadcasting events in new thread.
             new Thread(() -> {
                 try {
                     broadcastEvents();
@@ -87,7 +102,7 @@ public abstract class AbstractServer {
             }).start();
 
         }
-        int idSequencer = 0;
+        int idSequencer = 0; //id assigned to clients
         System.out.println("Waiting for client on "
                 + serverSocket.getInetAddress().getLocalHost().getHostAddress() + " : " + port);
         while(Thread.currentThread().isInterrupted() == false && serverSocket.isClosed() == false) {
@@ -101,6 +116,7 @@ public abstract class AbstractServer {
                 ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
                 ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
                 objOutStream.flush();
+                //make new handler object for new connection, and add to view list.
                 handler = new ConnectionHandler(socket, objInputStream, objOutStream);
                 pair = new Pair<>(handler, idSequencer);
                 viewPair = new Pair<>(handler.getSocket().getInetAddress(), idSequencer);
@@ -142,7 +158,10 @@ public abstract class AbstractServer {
         return res;
     }
 
-
+    /**
+     * add incoming events to eventQueue after applying the abstract filter method
+     * @param handler
+     */
     public void incomingEvents(ConnectionHandler handler) {
         while(true) {
             if(!handler.isClosed()) {
@@ -182,6 +201,7 @@ public abstract class AbstractServer {
         for (Thread t : handlerThreads) {
             t.interrupt();
         }
+        //acquire lock on connectionList and then close all connections in list
         synchronized (connectionList) {
             for(Pair<ConnectionHandler, Integer> p : connectionList) {
                 if (p.getFirst() != null) {
@@ -189,6 +209,7 @@ public abstract class AbstractServer {
                 }
             }
         }
+        //clear everything
         handlerThreads.clear();
         connectionList.clear();
         eventQueue.clear();

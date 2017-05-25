@@ -37,7 +37,7 @@ public class DistributedTextEditor extends JFrame {
 		}
 		redirectPort = new JTextField();
 		redirectPort.setText(Integer.toString(new Random().nextInt(9999) + 30000));
-		area.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		area.setFont(new Font("Monospaced", Font.PLAIN, 13));
 		portNumberList = new JComboBox<>();
 		addPortNumberList(portNumberList);
 
@@ -57,10 +57,97 @@ public class DistributedTextEditor extends JFrame {
 		setVisible(true);
 	}
 
-	/*
+	Action Listen = new AbstractAction("Listen") {
+		private static final long serialVersionUID = 1L;
+
+		public void actionPerformed(ActionEvent e) {
+			try {
+				//start new server
+				server = new ConcreteServer(Integer.parseInt(portNumberList.getSelectedItem().toString()), area);
+				new Thread(() -> {
+                    try {
+                        setTitle("Listening on incoming connections...");
+                        server.startListening(true);
+					} catch (IOException e1) {
+                        e1.printStackTrace();
+                        setTitle("An error occurred starting the server");
+                    }
+                }).start();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+
+			//then connect a client to this server, when it's ready.
+			try {
+				Thread.sleep(100);
+				while(true) {
+					if (server.isReadyForConnection()) {
+                        client = new ConcreteClient(dec, area, DistributedTextEditor.this);
+						try {
+							client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumberList.getSelectedItem().toString()));
+							break;
+						} catch (IOException e1) {
+							e1.printStackTrace();
+							break;
+						}
+					}
+				}
+                setTitle("Listening on incoming connections...");
+			} catch (InterruptedException e1) {
+				System.err.println(e1);
+			}
+		}
+	};
+
+	public void clientConnectedUpdateText() {
+		setTitle("Connected to " + ipaddress.getText() + ":" + portNumberList.getSelectedItem().toString());
+
+	}
+
+	public void clientDisconnectedUpdateText() {
+        setTitle("Disconnected");
+
+    }
+
+	public boolean failedConnect = true;
+
+	Action Connect = new AbstractAction("Connect") {
+		private static final long serialVersionUID = 1L;
+
+		public void actionPerformed(ActionEvent e) {
+            setTitle("Trying to connect to " + ipaddress.getText() + ":" +portNumberList.getSelectedItem().toString());
+			client = new ConcreteClient(dec, area, DistributedTextEditor.this);
+
+            try {
+                failedConnect = !client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumberList.getSelectedItem().toString()));
+			} catch (IOException e1) {
+				failedConnect = true;
+				System.err.println(e1);
+				Disconnect.actionPerformed(null);
+			}
+		}
+	};
+
+	Action Disconnect = new AbstractAction("Disconnect") {
+		private static final long serialVersionUID = 1L;
+
+		public void actionPerformed(ActionEvent e) {
+			setTitle("Disconnected");
+			if (client != null) {
+				client.disconnect();
+			}
+			if (server != null) {
+				server.shutdown();
+			}
+		}
+	};
+
+	ActionMap m = area.getActionMap();
+
+	/**
 	 * Set-up components in the UI.
 	 */
-	public void addComponentsToPane(Container pane) {
+	private void addComponentsToPane(Container pane) {
 
 		if (!(pane.getLayout() instanceof BorderLayout)) {
 			pane.add(new JLabel("Container doesn't use BorderLayout!"));
@@ -123,93 +210,6 @@ public class DistributedTextEditor extends JFrame {
 		}
 	};
 
-	Action Listen = new AbstractAction("Listen") {
-		private static final long serialVersionUID = 1L;
-
-		public void actionPerformed(ActionEvent e) {
-			try {
-				server = new ConcreteServer(Integer.parseInt(portNumberList.getSelectedItem().toString()), area);
-				new Thread(() -> {
-                    try {
-                        setTitle("Listening on incoming connections...");
-                        server.startListening(true);
-					} catch (IOException e1) {
-                        e1.printStackTrace();
-                        setTitle("An error occurred starting the server");
-                    }
-                }).start();
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
-
-			try {
-				Thread.sleep(100);
-				while(true) {
-					if (server.isReadyForConnection()) {
-                        client = new ConcreteClient(dec, area, DistributedTextEditor.this);
-						try {
-							client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumberList.getSelectedItem().toString()));
-							break;
-						} catch (IOException e1) {
-							e1.printStackTrace();
-							break;
-						}
-					}
-				}
-                setTitle("Listening on incoming connections...");
-			} catch (InterruptedException e1) {
-				System.err.println(e1);
-			}
-		}
-	};
-
-	public void clientConnectedUpdateText() {
-		setTitle("Connected to " + ipaddress.getText() + ":" + portNumberList.getSelectedItem().toString());
-
-	}
-
-	public void clientDisconnectedUpdateText() {
-        setTitle("Disconnected");
-
-    }
-
-	public void serverStartedUpdateText() {
-		setTitle("Listening on incoming connections...");
-	}
-
-	public boolean failedConnect = true ;
-	Action Connect = new AbstractAction("Connect") {
-		private static final long serialVersionUID = 1L;
-
-		public void actionPerformed(ActionEvent e) {
-            setTitle("Trying to connect to " + ipaddress.getText() + ":" +portNumberList.getSelectedItem().toString());
-			client = new ConcreteClient(dec, area, DistributedTextEditor.this);
-
-            try {
-                failedConnect = !client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumberList.getSelectedItem().toString()));
-			} catch (IOException e1) {
-				failedConnect = true;
-				System.out.println("failedConnect: " + failedConnect);
-				System.err.println(e1);
-			}
-		}
-	};
-
-	Action Disconnect = new AbstractAction("Disconnect") {
-		private static final long serialVersionUID = 1L;
-
-		public void actionPerformed(ActionEvent e) {
-			setTitle("Disconnected");
-			if (client != null) {
-				client.disconnect();
-			}
-			if (server != null) {
-				server.shutdown();
-			}
-		}
-	};
-
-	ActionMap m = area.getActionMap();
 
 	public static void main(String[] arg) {
 		DistributedTextEditor a;

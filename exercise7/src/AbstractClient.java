@@ -3,6 +3,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+
+/**
+ * Representation of a generic client class. Subclasses implement the specific behaviour.
+ */
 public abstract class AbstractClient {
     private ConnectionHandler handler;
     private Socket socket = null;
@@ -16,6 +20,13 @@ public abstract class AbstractClient {
     public abstract void onConnect(String serverIP);
     public abstract void onDisconnect();
 
+    /**
+     * Connect to a server
+     * @param serverIP
+     * @param port
+     * @return
+     * @throws IOException
+     */
     public boolean startAndConnectTo(String serverIP, int port) throws IOException {
         System.out.println("Starting client and connecting to " + serverIP + " on port " + port);
         this.serverIP = serverIP;

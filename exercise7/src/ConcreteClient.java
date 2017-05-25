@@ -7,6 +7,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
+/**
+ * A concrete client implementation
+ */
 public class ConcreteClient extends AbstractClient {
     private DocumentEventCapturer dec;
     private JTextArea area;
@@ -22,9 +25,11 @@ public class ConcreteClient extends AbstractClient {
         this.dec = dec;
         this.area = area;
         this.frame = frame;
-        }
+    }
+
     @Override
     public void onReceivedFromServer(Object o) {
+        //switch on object type
         if (o instanceof TextInsertEvent) {
             final TextInsertEvent tie = (TextInsertEvent) o;
             EventQueue.invokeLater(() -> {
@@ -51,6 +56,7 @@ public class ConcreteClient extends AbstractClient {
                     dec.disabled = false;
                 }
             });
+            //copy events are only sent from server when it sees a new connection.
         } else if (o instanceof TextCopyEvent) {
             final TextCopyEvent tce = (TextCopyEvent) o;
             EventQueue.invokeLater(() -> {
@@ -81,10 +87,11 @@ public class ConcreteClient extends AbstractClient {
 
             }
 
-        }else if(o instanceof UpdateViewEvent) {
+        } else if (o instanceof UpdateViewEvent) {
             UpdateViewEvent e = (UpdateViewEvent) o;
             view = e.getView();
         } else if (o instanceof RedirectEvent) {
+            //if redirect event => disconnect and connect to the redirectIP + port
             RedirectEvent e = (RedirectEvent) o;
             new Thread(() -> {
                 frame.ipaddress.setText(e.getRedirectIp());
@@ -96,6 +103,9 @@ public class ConcreteClient extends AbstractClient {
         }
     }
 
+    /*
+        when connected, start taking events out of eventQueue and send to server
+     */
     @Override
     public synchronized void onConnect(String serverIP) {
         frame.clientConnectedUpdateText();
@@ -133,6 +143,9 @@ public class ConcreteClient extends AbstractClient {
         }
     }
 
+    /*
+        If unexpectedly lost connection, start election.
+     */
     @Override
     public void onLostConnection() {
         frame.clientDisconnectedUpdateText();
@@ -144,17 +157,15 @@ public class ConcreteClient extends AbstractClient {
     }
 
     private synchronized void beginElection() {
-        System.out.println("id" + view.get(1) + " should be the new sequencer");
         if (redirectThread != null) {
             redirectThread.interrupt();
             redirectThread = null;
         }
 
+        //if I am to be new sequencer, start listening
         if (id == view.get(1).getSecond()) {
-            System.out.println("I should be sequencer with id: " + id);
             new Thread(() -> {
                 try {
-                    Thread.sleep(100);
                     frame.Disconnect.actionPerformed(null);
                     Thread.sleep(100);
                     frame.ipaddress.setText(view.get(1).getFirst().toString().substring(1));
@@ -165,15 +176,17 @@ public class ConcreteClient extends AbstractClient {
             }).start();
 
         } else {
+
             new Thread(() -> {
                 int triesLimit = view.size() - 1;
                 int tries = 1;
                 frame.Disconnect.actionPerformed(null);
                 frame.setTitle("trying to re-establish connection");
+                //Loop through all elements in view and try to connect to them,
+                //unless I see myself, then start listening and become new sequencer
                 while (tries <= triesLimit) {
-                    System.out.println("trying to connect to new sequencer. Attempt no. " + tries);
+                    //if my id equals view.get(i) then become sequencer
                     if (id == view.get(tries).getSecond()) {
-                        System.out.println("I'm new sequencer!");
                         int finalTries = tries;
                         new Thread(() -> {
                             try {
@@ -187,12 +200,13 @@ public class ConcreteClient extends AbstractClient {
                             }
                         }).start();
                         break;
+                    //else try to connect to current index into view. If failed, continue iteration through view.
                     } else {
                         frame.ipaddress.setText(String.valueOf(view.get(tries).getFirst()).substring(1));
                         try {
-                            Thread.sleep(1000);
+                            Thread.sleep(600);
                             frame.Connect.actionPerformed(null);
-                            Thread.sleep(400);
+                            Thread.sleep(100);
                             if (frame.failedConnect == false) {
                                 System.out.println("successfully connected to new sequencer");
                                 break;
