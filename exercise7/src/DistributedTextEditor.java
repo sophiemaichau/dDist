@@ -15,7 +15,6 @@ public class DistributedTextEditor extends JFrame {
 	public JTextArea area = new JTextArea(10, 60);
 	public JTextField redirectPort;
 	public JTextField ipaddress; // "IP address here"
-	public JTextField portNumber;
 	private String currentFile = "Untitled";
 	private boolean changed = false;
 	private DocumentEventCapturer dec = new DocumentEventCapturer();
@@ -42,7 +41,6 @@ public class DistributedTextEditor extends JFrame {
 		}
 		redirectPort = new JTextField();
 		redirectPort.setText(Integer.toString(new Random().nextInt(9999) + 30000));
-        portNumber = new JTextField("40499");
 		area.setFont(new Font("Monospaced", Font.PLAIN, 12));
 		portNumberList = new JComboBox<Integer>();
 		addPortNumberList(portNumberList);
@@ -137,7 +135,7 @@ public class DistributedTextEditor extends JFrame {
 
 		public void actionPerformed(ActionEvent e) {
 			try {
-				server = new ConcreteServer(Integer.parseInt(portNumber.getText()), area);
+				server = new ConcreteServer(Integer.parseInt(portNumberList.getSelectedItem().toString()), area);
 				new Thread(() -> {
                     try {
                         setTitle("Listening on incoming connections...");
@@ -157,7 +155,7 @@ public class DistributedTextEditor extends JFrame {
 					if (server.isReadyForConnection()) {
                         client = new ConcreteClient(dec, area, new OldestFirstElectionStrategy(), DistributedTextEditor.this);
 						try {
-							client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumber.getText()));
+							client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumberList.getSelectedItem().toString()));
 							break;
 						} catch (IOException e1) {
 							e1.printStackTrace();
@@ -174,7 +172,7 @@ public class DistributedTextEditor extends JFrame {
 	};
 
 	public void clientConnectedUpdateText() {
-		setTitle("Connected to " + ipaddress.getText() + ":" + portNumber.getText());
+		setTitle("Connected to " + ipaddress.getText() + ":" + portNumberList.getSelectedItem().toString());
 
 	}
 
@@ -192,10 +190,10 @@ public class DistributedTextEditor extends JFrame {
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent e) {
-			setTitle("Trying to connect to " + ipaddress.getText() + ":" + portNumber.getText());
+			setTitle("Trying to connect to " + ipaddress.getText() + ":" +portNumberList.getSelectedItem().toString());
 			client = new ConcreteClient(dec, area, new OldestFirstElectionStrategy(), DistributedTextEditor.this);
             try {
-                failedConnect = !client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumber.getText()));
+                failedConnect = !client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumberList.getSelectedItem().toString()));
 			} catch (IOException e1) {
 				failedConnect = true;
 				System.out.println("failedConnect: " + failedConnect);
