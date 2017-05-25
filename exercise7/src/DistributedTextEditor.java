@@ -55,6 +55,7 @@ public class DistributedTextEditor extends JFrame {
 		area.setBackground(Color.black);
 		area.setCaretColor(Color.cyan);
 		area.setForeground(Color.cyan);
+		portNumberList.setEditable(true);
 		pack();
 		area.addKeyListener(k1);
 		setTitle("Disconnected");
