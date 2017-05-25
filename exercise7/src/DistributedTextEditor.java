@@ -280,30 +280,21 @@ public class DistributedTextEditor extends JFrame {
 				} else if (arg[0].equals("2")) {
 					a = new DistributedTextEditor(20, 0);
 					b = new DistributedTextEditor(600, 0);
-					a.Listen.actionPerformed(null);
 					Thread.sleep(100);
-					b.Connect.actionPerformed(null);
 
 				} else if (arg[0].equals("3")) {
 					a = new DistributedTextEditor(20, 0);
 					b = new DistributedTextEditor(600, 0);
 					c = new DistributedTextEditor(1200, 0);
 
-					a.Listen.actionPerformed(null);
 					Thread.sleep(100);
-					b.Connect.actionPerformed(null);
-					c.Connect.actionPerformed(null);
 				} else if (arg[0].equals("4")) {
 					a = new DistributedTextEditor(20, 0);
 					b = new DistributedTextEditor(600, 0);
 					c = new DistributedTextEditor(1200, 0);
 					d = new DistributedTextEditor(20, 500);
 
-					a.Connect.actionPerformed(null);
 					Thread.sleep(100);
-					b.Connect.actionPerformed(null);
-					c.Connect.actionPerformed(null);
-					d.Connect.actionPerformed(null);
 				}
 			} catch (InterruptedException e) {
 				System.err.println(e);

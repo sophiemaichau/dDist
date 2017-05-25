@@ -188,7 +188,7 @@ public class ConcreteClient extends AbstractClient {
                     }
                     frame.ipaddress.setText(String.valueOf(view.get(tries).getFirst()).substring(1));
                     try {
-                        Thread.sleep(3000);
+                        Thread.sleep(500);
                         frame.Connect.actionPerformed(null);
                         Thread.sleep(400);
                         if (frame.failedConnect == false) {
