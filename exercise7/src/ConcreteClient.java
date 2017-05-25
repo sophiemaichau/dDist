@@ -158,7 +158,7 @@ public class ConcreteClient extends AbstractClient {
                 try {
                     Thread.sleep(100);
                     frame.Disconnect.actionPerformed(null);
-                    Thread.sleep(500);
+                    Thread.sleep(100);
                     frame.ipaddress.setText(view.get(1).getFirst().toString().substring(1));
                     frame.Listen.actionPerformed(null);
                 } catch (InterruptedException e) {
@@ -182,7 +182,7 @@ public class ConcreteClient extends AbstractClient {
                                 Thread.sleep(100);
                                 frame.Disconnect.actionPerformed(null);
                                 Thread.sleep(100);
-                                frame.ipaddress.setText(view.get(finalTries).getFirst().toString().substring(1));
+                                frame.ipaddress.setText(String.valueOf(view.get(finalTries).getFirst()).substring(1));
                                 frame.Listen.actionPerformed(null);
                             } catch (InterruptedException e) {
                                 System.err.println(e);
