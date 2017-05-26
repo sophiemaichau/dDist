@@ -168,10 +168,12 @@ public class ConcreteClient extends AbstractClient {
                 try {
                     frame.Disconnect.actionPerformed(null);
                     Thread.sleep(100);
-                    frame.ipaddress.setText(view.get(1).getFirst().toString().substring(1));
+                    frame.ipaddress.setText(String.valueOf(frame.server.getServerIpAddress().substring(1)));
                     frame.Listen.actionPerformed(null);
                 } catch (InterruptedException e) {
                     System.err.println(e);
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
                 }
             }).start();
 
@@ -187,13 +189,11 @@ public class ConcreteClient extends AbstractClient {
                 while (tries <= triesLimit) {
                     //if my id equals view.get(i) then become sequencer
                     if (id == view.get(tries).getSecond()) {
-                        int finalTries = tries;
                         new Thread(() -> {
                             try {
                                 Thread.sleep(100);
                                 frame.Disconnect.actionPerformed(null);
                                 Thread.sleep(100);
-                                frame.ipaddress.setText(String.valueOf(view.get(finalTries).getFirst()).substring(1));
                                 frame.Listen.actionPerformed(null);
                             } catch (InterruptedException e) {
                                 System.err.println(e);
@@ -204,7 +204,7 @@ public class ConcreteClient extends AbstractClient {
                     } else {
                         frame.ipaddress.setText(String.valueOf(view.get(tries).getFirst()).substring(1));
                         try {
-                            Thread.sleep(600);
+                            Thread.sleep(1500);
                             frame.Connect.actionPerformed(null);
                             Thread.sleep(100);
                             if (frame.failedConnect == false) {

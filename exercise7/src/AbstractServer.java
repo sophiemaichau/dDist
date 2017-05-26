@@ -103,8 +103,8 @@ public abstract class AbstractServer {
 
         }
         int idSequencer = 0; //id assigned to clients
-        System.out.println("Waiting for client on "
-                + serverSocket.getInetAddress().getLocalHost().getHostAddress() + " : " + port);
+        System.out.println("Waiting for client on " + serverSocket.getInetAddress().getLocalHost().getHostAddress()
+                +  " : " + port);
         while(Thread.currentThread().isInterrupted() == false && serverSocket.isClosed() == false) {
             Socket socket = waitForConnectionFromClient();
             Pair<ConnectionHandler, Integer> pair = null;
@@ -166,7 +166,7 @@ public abstract class AbstractServer {
         while(true) {
             if(!handler.isClosed()) {
                 try {
-                    MyTextEvent textEventReceived = handler.receiveObject();
+                    Object textEventReceived = handler.receiveObject();
                     Object filteredEvent = incomingEventsFilter(textEventReceived);
                     eventQueue.add(filteredEvent);
                 } catch (IOException e) {
@@ -222,6 +222,10 @@ public abstract class AbstractServer {
             System.err.println(e);
         }
         onShutDown();
+    }
+
+    public String getServerIpAddress() throws UnknownHostException {
+        return serverSocket.getInetAddress().getLocalHost().getHostAddress();
     }
 
 }
