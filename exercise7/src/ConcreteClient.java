@@ -168,12 +168,9 @@ public class ConcreteClient extends AbstractClient {
                 try {
                     frame.Disconnect.actionPerformed(null);
                     Thread.sleep(100);
-                    frame.ipaddress.setText(String.valueOf(frame.server.getServerIpAddress().substring(1)));
                     frame.Listen.actionPerformed(null);
                 } catch (InterruptedException e) {
                     System.err.println(e);
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
                 }
             }).start();
 
@@ -195,8 +192,11 @@ public class ConcreteClient extends AbstractClient {
                                 frame.Disconnect.actionPerformed(null);
                                 Thread.sleep(100);
                                 frame.Listen.actionPerformed(null);
+                                frame.ipaddress.setText(String.valueOf(frame.server.getServerIpAddress().substring(1)));
                             } catch (InterruptedException e) {
                                 System.err.println(e);
+                            } catch (UnknownHostException e) {
+                                e.printStackTrace();
                             }
                         }).start();
                         break;
