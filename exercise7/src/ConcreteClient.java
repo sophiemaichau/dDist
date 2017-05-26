@@ -23,6 +23,7 @@ public class ConcreteClient extends AbstractClient {
 
     public ConcreteClient(DocumentEventCapturer dec, JTextArea area, DistributedTextEditor frame) {
         this.dec = dec;
+        dec.disabled = false;
         this.area = area;
         this.frame = frame;
     }
@@ -118,7 +119,6 @@ public class ConcreteClient extends AbstractClient {
                     e.setCount(count + 1);
                     sendToServer(e);
                 } catch (InterruptedException e1) {
-                    System.err.println(e1);
                     return;
                 }
             }
@@ -171,6 +171,7 @@ public class ConcreteClient extends AbstractClient {
                     frame.ipaddress.setText(String.valueOf(view.get(1).getFirst()).substring(1));
                     frame.Listen.actionPerformed(null);
                 } catch (InterruptedException e) {
+                    frame.Disconnect.actionPerformed(null);
                 }
             }).start();
 
@@ -193,25 +194,28 @@ public class ConcreteClient extends AbstractClient {
                                 frame.ipaddress.setText(String.valueOf(view.get(finalTries).getFirst()).substring(1));
                                 frame.Listen.actionPerformed(null);
                             } catch (InterruptedException e) {
+                                return;
                             }
                         }).start();
-                        break;
+                        return;
                     //else try to connect to current index into view. If failed, continue iteration through view.
                     } else {
                         frame.ipaddress.setText(String.valueOf(view.get(tries).getFirst()).substring(1));
                         try {
                             Thread.sleep(3000);
-                            frame.Connect.actionPerformed(null);
+                            new Thread(() -> {
+                                frame.Connect.actionPerformed(null);
+                            }).start();
                             Thread.sleep(500);
                             if (frame.failedConnect == false) {
                                 System.out.println("successfully connected to new sequencer");
-                                break;
+                                return;
                             } else {
                                 frame.Disconnect.actionPerformed(null);
                                 tries++;
                             }
                         } catch (InterruptedException e) {
-                            break;
+                            return;
                         }
                     }
                 }

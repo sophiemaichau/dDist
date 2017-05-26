@@ -79,7 +79,7 @@ public class DistributedTextEditor extends JFrame {
 				ex.printStackTrace();
 			}
 			try {
-
+				client = null;
 				Thread.sleep(500);
 				client = new ConcreteClient(dec, area, DistributedTextEditor.this);
 				client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumberList.getSelectedItem().toString()));
