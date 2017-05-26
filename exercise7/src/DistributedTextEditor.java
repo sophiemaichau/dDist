@@ -216,6 +216,7 @@ public class DistributedTextEditor extends JFrame {
 		DistributedTextEditor b;
 		DistributedTextEditor c;
 		DistributedTextEditor d;
+		DistributedTextEditor e;
 		if (arg.length <= 1) {
 			try {
 				if (arg.length == 0 || arg[0].equals("1")) {
@@ -228,19 +229,25 @@ public class DistributedTextEditor extends JFrame {
 				} else if (arg[0].equals("3")) {
 					a = new DistributedTextEditor(20, 0);
 					b = new DistributedTextEditor(600, 0);
-					c = new DistributedTextEditor(1200, 0);
+					c = new DistributedTextEditor(1200, 500);
 
 					Thread.sleep(100);
 				} else if (arg[0].equals("4")) {
 					a = new DistributedTextEditor(20, 0);
 					b = new DistributedTextEditor(600, 0);
-					c = new DistributedTextEditor(1200, 0);
+					c = new DistributedTextEditor(1200, 500);
 					d = new DistributedTextEditor(20, 500);
 
 					Thread.sleep(100);
+				} else if (arg[0].equals("5")) {
+					a = new DistributedTextEditor(20, 0);
+					b = new DistributedTextEditor(600, 0);
+					c = new DistributedTextEditor(1200, 500);
+					d = new DistributedTextEditor(20, 500);
+					e = new DistributedTextEditor(600, 500);
 				}
-			} catch (InterruptedException e) {
-				System.err.println(e);
+			} catch (InterruptedException e1) {
+				System.err.println(e1);
 			}
 
 
