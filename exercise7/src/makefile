@@ -11,6 +11,9 @@ LINUX_CONFIG3 = $(shell xterm -e "make run1" & xterm -e "make run2" & xterm -e "
 
 LINUX_CONFIG4 = $(shell xterm -e "make run1" & xterm -e "make run2" & xterm -e "make run3" & xterm -e "make run4")
 
+
+LINUX_CONFIG5 = $(shell xterm -e "make run1" & xterm -e "make run2" & xterm -e "make run3" & xterm -e "make run4" & xterm -e "make run5")
+
 MAIN = DistributedTextEditor
 
 default: clean
@@ -26,11 +29,15 @@ run2:
 
 run3:
 	@echo $(shell javac *.java)
-	$(JVM) DistributedTextEditor 1200 0
+	$(JVM) DistributedTextEditor 1200 500
 
 run4:
 	@echo $(shell javac *.java)
-	$(JVM) DistributedTextEditor 200 500
+	$(JVM) DistributedTextEditor 20 500
+
+run5:
+	@echo $(shell javac *.java)
+	$(JVM) DistributedTextEditor 600 500
 
 clean:
 	$(RM) *.class
@@ -41,6 +48,9 @@ three: default
 
 four: default
 	@echo $(LINUX_CONFIG4)
+
+five: default
+	@echo $(LINUX_CONFIG5)
 
 open: default
 	@echo $(shell java DistributedTextEditor)
