@@ -69,7 +69,6 @@ public class ConnectionHandler {
         }
     }
 
-
     public Socket getSocket() {
         return socket;
     }

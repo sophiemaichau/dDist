@@ -72,7 +72,7 @@ public abstract class AbstractServer {
                 String ip = c.getFirst().getSocket().getInetAddress().toString();
                 c.getFirst().closeConnection();
                 connectionList.remove(c);
-                boolean r = view.remove(new Pair<>(c.getFirst().getSocket().getInetAddress(), c.getSecond()));
+                view.remove(new Pair<>(c.getFirst().getSocket().getInetAddress(), c.getSecond()));
                 onLostConnection(ip);
             }
         }

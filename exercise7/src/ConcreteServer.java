@@ -23,7 +23,7 @@ public class ConcreteServer extends AbstractServer {
 
 
     @SuppressWarnings("unchecked")
-    public ConcreteServer(int port, JTextArea area) throws IOException {
+        public ConcreteServer(int port, JTextArea area) throws IOException {
         super(port);
         this.area = area;
         cServer = 0;
@@ -44,7 +44,6 @@ public class ConcreteServer extends AbstractServer {
     @SuppressWarnings("unchecked")
     public synchronized void onNewConnection(int id, String ipAddress) {
         System.out.println("new connection from: " + ipAddress + " with id: " + id);
-        broadcast(new UpdateViewEvent(getView()));
         sendToClient(id, new TextCopyEvent(0, area.getText(), id, cServer));
         UpdateViewEvent e = new UpdateViewEvent((ArrayList<Pair<InetAddress, Integer>>) getView().clone());
         broadcast(e);
@@ -75,12 +74,10 @@ public class ConcreteServer extends AbstractServer {
     @Override
     @SuppressWarnings("unchecked")
     public Object incomingEventsFilter(Object o) {
-        //only apply filter on MyTextEvents
         if(o instanceof MyTextEvent){
             MyTextEvent b = (MyTextEvent) o;
             //System.out.print("received conflicting event: " + b + ", offset: " + b.getOffset() +  ", count: " + b.getCount());
             int difference = 0; //offset difference to be added to b.
-
             //for every element in history with same count and <= offset, add length of event to difference
             for(MyTextEvent a : eventHistory){
                 if(a.getCount() == b.getCount() && a.getOffset() <= b.getOffset()){
