@@ -55,7 +55,7 @@ public abstract class AbstractServer {
     /**
      * broadcast an object to all clients.
      */
-    public boolean broadcast(Object o) {
+    public synchronized boolean broadcast(Object o) {
 
         ArrayList<Pair<ConnectionHandler, Integer>> removeList = new ArrayList<>();
         synchronized (connectionList) {

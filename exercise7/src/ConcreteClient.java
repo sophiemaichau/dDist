@@ -167,10 +167,10 @@ public class ConcreteClient extends AbstractClient {
             new Thread(() -> {
                 try {
                     frame.Disconnect.actionPerformed(null);
-                    Thread.sleep(100);
+                    Thread.sleep(500);
+                    frame.ipaddress.setText(String.valueOf(view.get(1).getFirst()).substring(1));
                     frame.Listen.actionPerformed(null);
                 } catch (InterruptedException e) {
-                    System.err.println(e);
                 }
             }).start();
 
@@ -186,17 +186,13 @@ public class ConcreteClient extends AbstractClient {
                 while (tries <= triesLimit) {
                     //if my id equals view.get(i) then become sequencer
                     if (id == view.get(tries).getSecond()) {
+                        int finalTries = tries;
                         new Thread(() -> {
                             try {
-                                Thread.sleep(100);
-                                frame.Disconnect.actionPerformed(null);
-                                Thread.sleep(100);
+                                Thread.sleep(500);
+                                frame.ipaddress.setText(String.valueOf(view.get(finalTries).getFirst()).substring(1));
                                 frame.Listen.actionPerformed(null);
-                                frame.ipaddress.setText(String.valueOf(frame.server.getServerIpAddress().substring(1)));
                             } catch (InterruptedException e) {
-                                System.err.println(e);
-                            } catch (UnknownHostException e) {
-                                e.printStackTrace();
                             }
                         }).start();
                         break;
@@ -204,9 +200,9 @@ public class ConcreteClient extends AbstractClient {
                     } else {
                         frame.ipaddress.setText(String.valueOf(view.get(tries).getFirst()).substring(1));
                         try {
-                            Thread.sleep(1500);
+                            Thread.sleep(3000);
                             frame.Connect.actionPerformed(null);
-                            Thread.sleep(100);
+                            Thread.sleep(500);
                             if (frame.failedConnect == false) {
                                 System.out.println("successfully connected to new sequencer");
                                 break;
@@ -215,7 +211,7 @@ public class ConcreteClient extends AbstractClient {
                                 tries++;
                             }
                         } catch (InterruptedException e) {
-                            System.err.println(e);
+                            break;
                         }
                     }
                 }

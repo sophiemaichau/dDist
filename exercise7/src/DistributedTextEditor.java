@@ -57,6 +57,7 @@ public class DistributedTextEditor extends JFrame {
 		setVisible(true);
 	}
 
+	private Thread serverThread;
 	Action Listen = new AbstractAction("Listen") {
 		private static final long serialVersionUID = 1L;
 
@@ -64,7 +65,7 @@ public class DistributedTextEditor extends JFrame {
 			try {
 				//start new server
 				server = new ConcreteServer(Integer.parseInt(portNumberList.getSelectedItem().toString()), area);
-				new Thread(() -> {
+				serverThread = new Thread(() -> {
                     try {
                         setTitle("Listening on incoming connections...");
                         server.startListening(true);
@@ -72,29 +73,22 @@ public class DistributedTextEditor extends JFrame {
                         e1.printStackTrace();
                         setTitle("An error occurred starting the server");
                     }
-                }).start();
+                });
+				serverThread.start();
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
-
-			//then connect a client to this server, when it's ready.
 			try {
-				Thread.sleep(100);
-				while(true) {
-					if (server.isReadyForConnection()) {
-                        client = new ConcreteClient(dec, area, DistributedTextEditor.this);
-						try {
-							client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumberList.getSelectedItem().toString()));
-							break;
-						} catch (IOException e1) {
-							e1.printStackTrace();
-							break;
-						}
-					}
-				}
-                setTitle("Listening on incoming connections...");
+
+				Thread.sleep(500);
+				client = new ConcreteClient(dec, area, DistributedTextEditor.this);
+				client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumberList.getSelectedItem().toString()));
+				setTitle("Listening on incoming connections...");
+			} catch (IOException e1) {
+				setTitle("failed to connect to own server");
+				e1.printStackTrace();
 			} catch (InterruptedException e1) {
-				System.err.println(e1);
+				e1.printStackTrace();
 			}
 		}
 	};
@@ -122,7 +116,7 @@ public class DistributedTextEditor extends JFrame {
                 failedConnect = !client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumberList.getSelectedItem().toString()));
 			} catch (IOException e1) {
 				failedConnect = true;
-				System.err.println(e1);
+				e1.printStackTrace();
 				Disconnect.actionPerformed(null);
 			}
 		}
@@ -138,6 +132,7 @@ public class DistributedTextEditor extends JFrame {
 			}
 			if (server != null) {
 				server.shutdown();
+				serverThread.interrupt();
 			}
 		}
 	};
