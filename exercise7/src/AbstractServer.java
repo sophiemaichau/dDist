@@ -169,7 +169,7 @@ public abstract class AbstractServer {
                     Object textEventReceived = handler.receiveObject();
                     Object filteredEvent = incomingEventsFilter(textEventReceived);
                     eventQueue.add(filteredEvent);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     onLostConnection(handler.getSocket().getInetAddress().toString());
                     handler.closeConnection();
                     break;

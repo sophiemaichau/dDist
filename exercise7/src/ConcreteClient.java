@@ -107,13 +107,16 @@ public class ConcreteClient extends AbstractClient {
      */
     @Override
     public synchronized void onConnect(String serverIP) {
+        dec.disabled = false;
         frame.clientConnectedUpdateText();
         //listen for local text events and send to sequencer
         sendLocalEventsThread = new Thread(() -> {
+            System.out.println("started sending local event");
             while (true) {
                 MyTextEvent e;
                 try {
                     e = dec.take();
+                    System.out.println("saw local event: " + e);
                     e.setCount(count + 1);
                     boolean result = sendToServer(e);
                     if (result == false) {
@@ -185,7 +188,7 @@ public class ConcreteClient extends AbstractClient {
             return;
 
         } else {
-            EventQueue.invokeLater(() -> {
+            /*EventQueue.invokeLater(() -> {
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
@@ -199,9 +202,9 @@ public class ConcreteClient extends AbstractClient {
                 } else {
                     System.out.println("failed to connect to new sequencer!");
                 }
-            });
+            });*/
 
-                /*new Thread(() -> {
+                new Thread(() -> {
                 frame.Disconnect.actionPerformed(null);
                 int triesLimit = view.size();
                 int tries = 1;
@@ -242,9 +245,7 @@ public class ConcreteClient extends AbstractClient {
                         }
                     }
                 }
-                frame.Disconnect.actionPerformed(null);
-                frame.Connect.actionPerformed(null);
-            }).start();*/
+            }).start();
         }
     }
 

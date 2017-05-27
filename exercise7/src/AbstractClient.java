@@ -12,7 +12,8 @@ public abstract class AbstractClient {
     private Socket socket = null;
     private String serverIP;
     private int port;
-    private Thread receiveDataFromServer;
+    private Thread receiveDataThread;
+    private ReceiveDataThread receiveDataRunnable;
 
 
     public abstract void onLostConnection();
@@ -27,38 +28,35 @@ public abstract class AbstractClient {
      * @return
      * @throws IOException
      */
-    public boolean startAndConnectTo(String serverIP, int port) throws IOException {
+    public boolean startAndConnectTo(String serverIP, int port) {
         System.out.println("Starting client and connecting to " + serverIP + " on port " + port);
         this.serverIP = serverIP;
         this.port = port;
-        socket = connectToServer(serverIP, port);
+        try {
+            socket = connectToServer(serverIP, port);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
         if (handler != null && handler.isClosed() == false) {
             handler.closeConnection();
         }
         if (socket != null) {
-            ObjectOutputStream objOutStream = new ObjectOutputStream(socket.getOutputStream());
-            ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
-            handler = new ConnectionHandler(socket, objInputStream, objOutStream);
+            ObjectOutputStream objOutStream = null;
+            try {
+                objOutStream = new ObjectOutputStream(socket.getOutputStream());
+                ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
+                handler = new ConnectionHandler(socket, objInputStream, objOutStream);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
             if (handler.getSocket().isConnected() == false) {
                 return false;
             }
-            receiveDataFromServer = new Thread(() -> {
-                while(true) {
-                    try {
-                        Object o = handler.receiveObject();
-                        onReceivedFromServer(o);
-                    } catch (IOException e) {
-                        if (handler != null && handler.isClosed() == false) {
-                            if (handler != null) {
-                                handler.closeConnection();
-                            }
-                            onLostConnection();
-                        }
-                        break;
-                    }
-                }
-            });
-            receiveDataFromServer.start();
+            receiveDataRunnable = new ReceiveDataThread();
+            receiveDataThread = new Thread(receiveDataRunnable);
+            receiveDataThread.start();
             onConnect(serverIP); //call abstract method
         } else {
             return false;
@@ -66,10 +64,41 @@ public abstract class AbstractClient {
         return true;
     }
 
+    private class ReceiveDataThread implements Runnable {
+        volatile boolean exit = false;
+        @Override
+        public void run() {
+            while(!exit) {
+                try {
+                    Object o = handler.receiveObject();
+                    onReceivedFromServer(o);
+                } catch (Exception e) {
+                    if (handler != null && handler.isClosed() == false) {
+                        if (handler != null) {
+                            handler.closeConnection();
+                        }
+                        onLostConnection();
+                    }
+                    break;
+                }
+            }
+        }
+        public void stop() {
+            exit = true;
+        }
+    }
+
     protected boolean sendToServer(Object o) {
         try {
             handler.sendObject(o);
         } catch (IOException e) {
+            if (handler != null) {
+                handler.closeConnection();
+            }
+            if (receiveDataThread != null) {
+                receiveDataRunnable.stop();
+                receiveDataThread.interrupt();
+            }
             return false;
         }
         return true;
@@ -79,8 +108,9 @@ public abstract class AbstractClient {
         if (handler != null) {
             handler.closeConnection();
         }
-        if (receiveDataFromServer != null) {
-            receiveDataFromServer.interrupt();
+        if (receiveDataThread != null) {
+            receiveDataRunnable.stop();
+            receiveDataThread.interrupt();
         }
         onDisconnect();
     }

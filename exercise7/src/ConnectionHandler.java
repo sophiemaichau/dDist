@@ -38,7 +38,7 @@ public class ConnectionHandler {
      * @throws IOException
      */
     @SuppressWarnings("unchecked")
-    public <E> E receiveObject() throws IOException {
+    public <E> E receiveObject() throws IOException, InterruptedException {
         E o;
         try {
             while ((o = (E) in.readObject()) != null) {
