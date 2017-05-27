@@ -48,8 +48,10 @@ public abstract class AbstractClient {
                         Object o = handler.receiveObject();
                         onReceivedFromServer(o);
                     } catch (IOException e) {
-                        System.err.println(e);
                         if (handler != null && handler.isClosed() == false) {
+                            if (handler != null) {
+                                handler.closeConnection();
+                            }
                             onLostConnection();
                         }
                         break;

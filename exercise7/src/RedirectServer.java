@@ -16,7 +16,7 @@ public class RedirectServer extends AbstractServer {
 
     @Override
     public void onNewConnection(int id, String ipAddress) {
-        System.out.println("redirecting client to: " + ipAddress + ": " + redirectPort);
+        //System.out.println("redirecting client to: " + ipAddress + ": " + redirectPort);
         RedirectEvent e = new RedirectEvent(serverIp, redirectPort);
         sendToClient(id, e);
     }

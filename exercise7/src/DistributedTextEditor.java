@@ -105,20 +105,24 @@ public class DistributedTextEditor extends JFrame {
 
 	public boolean failedConnect = true;
 
+	private Thread clientThread;
 	Action Connect = new AbstractAction("Connect") {
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent e) {
-            setTitle("Trying to connect to " + ipaddress.getText() + ":" +portNumberList.getSelectedItem().toString());
-			client = new ConcreteClient(dec, area, DistributedTextEditor.this);
 
-            try {
-                failedConnect = !client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumberList.getSelectedItem().toString()));
-			} catch (IOException e1) {
-				failedConnect = true;
-				e1.printStackTrace();
-				Disconnect.actionPerformed(null);
-			}
+            setTitle("Trying to connect to " + ipaddress.getText() + ":" +portNumberList.getSelectedItem().toString());
+			clientThread = new Thread(() -> {
+				try {
+					client = new ConcreteClient(dec, area, DistributedTextEditor.this);
+					failedConnect = !client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumberList.getSelectedItem().toString()));
+					dec.disabled = false;
+				} catch (IOException e1) {
+					e1.printStackTrace();
+					Disconnect.actionPerformed(null);
+				}
+			});
+			clientThread.start();
 		}
 	};
 
@@ -129,6 +133,11 @@ public class DistributedTextEditor extends JFrame {
 			setTitle("Disconnected");
 			if (client != null) {
 				client.disconnect();
+				client = null;
+				if (clientThread != null) {
+					clientThread.interrupt();
+				}
+
 			}
 			if (server != null) {
 				server.shutdown();
