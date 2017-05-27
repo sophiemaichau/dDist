@@ -80,9 +80,6 @@ public class DistributedTextEditor extends JFrame {
 				client = new ConcreteClient(dec, area, DistributedTextEditor.this);
 				client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumberList.getSelectedItem().toString()));
 				setTitle("Listening on incoming connections...");
-			} catch (IOException e1) {
-				setTitle("failed to connect to own server");
-				e1.printStackTrace();
 			} catch (InterruptedException e1) {
 				e1.printStackTrace();
 			}
@@ -109,12 +106,10 @@ public class DistributedTextEditor extends JFrame {
 
 			setTitle("Trying to connect to " + ipaddress.getText() + ":" +portNumberList.getSelectedItem().toString());
 			clientThread = new Thread(() -> {
-				try {
-					client = new ConcreteClient(dec, area, DistributedTextEditor.this);
-					failedConnect = !client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumberList.getSelectedItem().toString()));
-					dec.disabled = false;
-				} catch (IOException e1) {
-					e1.printStackTrace();
+				client = new ConcreteClient(dec, area, DistributedTextEditor.this);
+				failedConnect = !client.startAndConnectTo(ipaddress.getText(), Integer.parseInt(portNumberList.getSelectedItem().toString()));
+				dec.disabled = false;
+				if(failedConnect == true) {
 					Disconnect.actionPerformed(null);
 				}
 			});

@@ -4,6 +4,7 @@ import Utilities.Pair;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Array;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -45,6 +46,11 @@ public abstract class AbstractServer {
                     p.getFirst().sendObject(data);
                     return true;
                 } catch (IOException e) {
+                    Pair<InetAddress, Integer> viewPair = new Pair<>(p.getFirst().getSocket().getInetAddress(), clientID);
+                    onLostConnection(handler.getSocket().getInetAddress().toString());
+                    handler.closeConnection();
+                    connectionList.remove(p);
+                    view.remove(viewPair);
                     return false;
                 }
             }
@@ -56,15 +62,14 @@ public abstract class AbstractServer {
      * broadcast an object to all clients.
      */
     public synchronized boolean broadcast(Object o) {
-
         ArrayList<Pair<ConnectionHandler, Integer>> removeList = new ArrayList<>();
         synchronized (connectionList) {
             for(Pair<ConnectionHandler, Integer> p : connectionList){
                 try {
                     p.getFirst().sendObject(o);
                 } catch (IOException e) {
-                    System.err.println(e);
                     removeList.add(p);
+                    System.out.println("Removed " + p + " from connectionList");
                 }
             }
             //remove all clients from view for which the sendObject method failed
@@ -76,7 +81,6 @@ public abstract class AbstractServer {
                 onLostConnection(ip);
             }
         }
-
         return true;
     }
     public ArrayList<Pair<InetAddress, Integer>> getView() {
@@ -138,7 +142,7 @@ public abstract class AbstractServer {
                 view.remove(viewPair);
             } catch (IOException e) {
                 onLostConnection(handler.getSocket().getInetAddress().toString());
-                System.out.println("IOException!");
+                System.out.println("Trying to re-establish connection");
                 handler.closeConnection();
                 connectionList.remove(pair);
                 view.remove(viewPair);
@@ -168,6 +172,7 @@ public abstract class AbstractServer {
                 try {
                     Object textEventReceived = handler.receiveObject();
                     Object filteredEvent = incomingEventsFilter(textEventReceived);
+                    System.out.println("Received incoming event: " + filteredEvent);
                     eventQueue.add(filteredEvent);
                 } catch (Exception e) {
                     onLostConnection(handler.getSocket().getInetAddress().toString());

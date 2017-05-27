@@ -28,14 +28,16 @@ public class ConcreteServer extends AbstractServer {
         this.area = area;
         cServer = 0;
         broadcastViewThread = new Thread(() -> {
-            try {
                 while(true) {
-                    Thread.sleep(3000);
-                    UpdateViewEvent e = new UpdateViewEvent((ArrayList<Pair<InetAddress, Integer>>) getView().clone());
-                    broadcast(e);
+                    try {
+                        Thread.sleep(3000);
+                        UpdateViewEvent e = new UpdateViewEvent((ArrayList<Pair<InetAddress, Integer>>) getView().clone());
+                        broadcast(e);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        return;
+                    }
                 }
-            } catch (InterruptedException e) {
-            }
         });
         broadcastViewThread.start();
     }
@@ -76,7 +78,6 @@ public class ConcreteServer extends AbstractServer {
     public Object incomingEventsFilter(Object o) {
         if(o instanceof MyTextEvent){
             MyTextEvent b = (MyTextEvent) o;
-            //System.out.print("received conflicting event: " + b + ", offset: " + b.getOffset() +  ", count: " + b.getCount());
             int difference = 0; //offset difference to be added to b.
             //for every element in history with same count and <= offset, add length of event to difference
             for(MyTextEvent a : eventHistory){
@@ -99,7 +100,6 @@ public class ConcreteServer extends AbstractServer {
             b.setOffset(b.getOffset() + difference); //update offset
             cServer++;
             b.setCount(cServer);
-            //System.out.println(" and updated it to offset: " + b.getOffset() + ", count: " + b.getCount());
             return b;
         }
         return o;

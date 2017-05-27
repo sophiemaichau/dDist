@@ -111,20 +111,18 @@ public class ConcreteClient extends AbstractClient {
         frame.clientConnectedUpdateText();
         //listen for local text events and send to sequencer
         sendLocalEventsThread = new Thread(() -> {
-            System.out.println("started sending local event");
             while (true) {
                 MyTextEvent e;
                 try {
                     e = dec.take();
-                    System.out.println("saw local event: " + e);
                     e.setCount(count + 1);
+                    System.out.println("saw local event: " + e);
                     boolean result = sendToServer(e);
                     if (result == false) {
                         onLostConnection();
                         break;
                     }
                 } catch (InterruptedException e1) {
-                    System.out.println("broke out of sendLocalEventsThread!");
                     break;
                 }
             }
@@ -188,22 +186,6 @@ public class ConcreteClient extends AbstractClient {
             return;
 
         } else {
-            /*EventQueue.invokeLater(() -> {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                frame.Disconnect.actionPerformed(null);
-                frame.ipaddress.setText(String.valueOf(view.get(1).getFirst()).substring(1));
-                frame.Connect.actionPerformed(null);
-                if (frame.failedConnect == false) {
-                    System.out.println("successfully connected to new sequencer");
-                } else {
-                    System.out.println("failed to connect to new sequencer!");
-                }
-            });*/
-
                 new Thread(() -> {
                 frame.Disconnect.actionPerformed(null);
                 int triesLimit = view.size();
@@ -212,8 +194,6 @@ public class ConcreteClient extends AbstractClient {
                 //Loop through all elements in view and try to connect to them,
                 //unless I see myself, then start listening and become new sequencer
                 while (tries <= triesLimit) {
-                    System.out.println("at try: " + tries);
-                    System.out.println("my view: " + view);
                     //if my id equals view.get(i) then become sequencer
                     if (id == view.get(tries).getSecond()) {
                         try {
