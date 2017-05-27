@@ -73,16 +73,12 @@ public class ConcreteClient extends AbstractClient {
                 redirectThread = new Thread(() -> {
                     try {
                         int redirectPort = Integer.parseInt(frame.portNumberList.getSelectedItem().toString());
-                        Thread.sleep(300);
                         redirectServer = new RedirectServer(Integer.parseInt(frame.redirectPort.getText()), getServerIP(), redirectPort);
                         System.out.println("Started redirect server!");
                         redirectServer.startListening(false);
                     } catch (IOException e1) {
                         redirectServer.shutdown();
                         System.out.println("redirect server failed:");
-                        return;
-                    } catch (InterruptedException e) {
-                        redirectServer.shutdown();
                         return;
                     }
                 });
@@ -96,12 +92,12 @@ public class ConcreteClient extends AbstractClient {
         } else if (o instanceof RedirectEvent) {
             //if redirect event => disconnect and connect to the redirectIP + port
             RedirectEvent e = (RedirectEvent) o;
-            new Thread(() -> {
+            EventQueue.invokeLater(() -> {
                 frame.ipaddress.setText(e.getRedirectIp());
                 frame.portNumberList.setSelectedItem(e.getRedirectPort());
                 frame.Disconnect.actionPerformed(null);
                 frame.Connect.actionPerformed(null);
-            }).start();
+            });
 
         }
     }
@@ -176,31 +172,36 @@ public class ConcreteClient extends AbstractClient {
 
         //if I am to be new sequencer, start listening
         if (id == view.get(1).getSecond()) {
-            new Thread(() -> {
+            EventQueue.invokeLater(() -> {
+                try {
+                    Thread.sleep(300);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 frame.Disconnect.actionPerformed(null);
                 frame.ipaddress.setText(String.valueOf(view.get(1).getFirst()).substring(1));
                 frame.Listen.actionPerformed(null);
-            }).start();
+            });
             return;
 
         } else {
-            new Thread(() -> {
+            EventQueue.invokeLater(() -> {
                 try {
                     Thread.sleep(3000);
-                    frame.Disconnect.actionPerformed(null);
-                    frame.ipaddress.setText(String.valueOf(view.get(1).getFirst()).substring(1));
-                    frame.Connect.actionPerformed(null);
-                    if (frame.failedConnect == false) {
-                        System.out.println("successfully connected to new sequencer");
-                    } else {
-                        System.out.println("failed to connect to new sequencer!");
-                    }
                 } catch (InterruptedException e) {
-                    frame.Disconnect.actionPerformed(null);
+                    e.printStackTrace();
                 }
-            }).start();
+                frame.Disconnect.actionPerformed(null);
+                frame.ipaddress.setText(String.valueOf(view.get(1).getFirst()).substring(1));
+                frame.Connect.actionPerformed(null);
+                if (frame.failedConnect == false) {
+                    System.out.println("successfully connected to new sequencer");
+                } else {
+                    System.out.println("failed to connect to new sequencer!");
+                }
+            });
 
-            /*new Thread(() -> {
+                /*new Thread(() -> {
                 frame.Disconnect.actionPerformed(null);
                 int triesLimit = view.size();
                 int tries = 1;

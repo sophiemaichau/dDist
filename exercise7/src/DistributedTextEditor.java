@@ -19,17 +19,17 @@ public class DistributedTextEditor extends JFrame {
 	public JComboBox<Integer> portNumberList;
 
 	public DistributedTextEditor(int x, int y) {
-        try {
-            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
+		try {
+			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
 		try {
 			ipaddress = new JTextField(InetAddress.getLocalHost().getHostAddress());
 		} catch (UnknownHostException e) {
@@ -62,22 +62,18 @@ public class DistributedTextEditor extends JFrame {
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent e) {
-			try {
-				//start new server
-				server = new ConcreteServer(Integer.parseInt(portNumberList.getSelectedItem().toString()), area);
-				serverThread = new Thread(() -> {
-                    try {
-                        setTitle("Listening on incoming connections...");
-                        server.startListening(true);
-					} catch (IOException e1) {
-                        e1.printStackTrace();
-                        setTitle("An error occurred starting the server");
-                    }
-                });
-				serverThread.start();
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
+			//start new server
+			serverThread = new Thread(() -> {
+				try {
+					server = new ConcreteServer(Integer.parseInt(portNumberList.getSelectedItem().toString()), area);
+					setTitle("Listening on incoming connections...");
+					server.startListening(true);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+					setTitle("An error occurred starting the server");
+				}
+			});
+			serverThread.start();
 			try {
 				client = null;
 				Thread.sleep(500);
@@ -99,9 +95,9 @@ public class DistributedTextEditor extends JFrame {
 	}
 
 	public void clientDisconnectedUpdateText() {
-        setTitle("Disconnected");
+		setTitle("Disconnected");
 
-    }
+	}
 
 	public boolean failedConnect = true;
 
@@ -111,7 +107,7 @@ public class DistributedTextEditor extends JFrame {
 
 		public void actionPerformed(ActionEvent e) {
 
-            setTitle("Trying to connect to " + ipaddress.getText() + ":" +portNumberList.getSelectedItem().toString());
+			setTitle("Trying to connect to " + ipaddress.getText() + ":" +portNumberList.getSelectedItem().toString());
 			clientThread = new Thread(() -> {
 				try {
 					client = new ConcreteClient(dec, area, DistributedTextEditor.this);
@@ -141,7 +137,9 @@ public class DistributedTextEditor extends JFrame {
 			}
 			if (server != null) {
 				server.shutdown();
-				serverThread.interrupt();
+				if (serverThread != null) {
+					serverThread.interrupt();
+				}
 			}
 		}
 	};
